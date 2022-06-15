@@ -11,7 +11,3 @@ declare(strict_types=1);
  * @author   Web ex Machina <contact@webexmachina.fr>
  * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
-
-array_insert($GLOBALS['BE_MOD']['personal-data-manager'], 0, [
-    'undo' => $GLOBALS['BE_MOD']['system']['undo'],
-]);

@@ -5,8 +5,8 @@ The purpose of this project is to allow a better handling of personal data in Co
 
 Functionnalities
 -------------------
- * Store personal data encrypted
- * 
+ 
+ * To be filled
 
 System requirements
 -------------------
