@@ -1,1 +1,4 @@
 services:
+  wem.personal_data_manager.service.personal_data_manager:
+    class: WEM\PersonalDataManagerBundle\Service\PersonalDataManager
+    public: true
