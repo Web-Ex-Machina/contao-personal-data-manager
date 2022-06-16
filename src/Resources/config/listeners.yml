@@ -1,0 +1,4 @@
+services:
+	wem.personal_data_manager.event_listener.store_form_data:
+		class: WEM\PersonalDataManagerBundle\EventListener\StoreFormDataListener
+		public: true

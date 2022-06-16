@@ -15,5 +15,11 @@ composer update
 ./vendor/bin/contao-console contao:migrate --no-interaction --with-deletes --no-backup
 cd -
 echo "================== POST INIT START ===================="
+cp ./bundle/Resources/contao/dca/tl_form_data_1.php ../${PRJ_NAME}/vendor/webexmachina/${BUNDLE_NAME}/src/Resources/contao/dca/tl_form_data_1.php
+cp ./bundle/Resources/contao/dca/tl_form_data_2.php ../${PRJ_NAME}/vendor/webexmachina/${BUNDLE_NAME}/src/Resources/contao/dca/tl_form_data_2.php
 php contao-post-init.php # post init actions
+cd ${WORKDIR_CONTAO}
+composer update
+./vendor/bin/contao-console contao:migrate --no-interaction --with-deletes --no-backup
+cd -
 echo "================== POST INIT STOP ===================="
