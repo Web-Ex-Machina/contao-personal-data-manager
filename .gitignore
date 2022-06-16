@@ -2,3 +2,5 @@
 sftp-config.json
 *.sublime-*
 vendor
+src/Resources/contao/dca/tl_form_data_1.php
+src/Resources/contao/dca/tl_form_data_2.php

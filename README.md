@@ -6,7 +6,7 @@ The purpose of this project is to allow a better handling of personal data in Co
 Functionnalities
 -------------------
  
- * To be filled
+ * Mark a form field as holding personal data
 
 System requirements
 -------------------

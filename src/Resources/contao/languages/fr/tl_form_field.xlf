@@ -1,0 +1,15 @@
+<?xml version="1.0" ?><xliff version="1.1">
+  <file datatype="php" original="system/modules/wem-personal-data-manager/languages/en/tl_form_field.php" source-language="en" target-language="fr">
+    <body>
+      <trans-unit id="tl_form_field.containsPersonalData.0">
+        <source>Field will contain personal data</source>
+        <target>Le champ contient une donnée personnelle</target>
+      </trans-unit>
+      <trans-unit id="tl_form_field.containsPersonalData.1">
+        <source>Tick  if the field will contain personal data
+        </source>
+        <target>Cochez si le champ contiendra des données personnelles</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -20,7 +20,8 @@
     {
         "php": ">=7.4",
         "contao/core-bundle": "~4.13",
-        "webexmachina/contao-utils": "^0.3"
+        "webexmachina/contao-utils": "^0.3",
+        "plenta/contao-encryption": "^2.1"
     },
     "require-dev":
     {
