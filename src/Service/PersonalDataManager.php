@@ -45,16 +45,16 @@ class PersonalDataManager
         $this->validateObject($object);
         $personalDatas = $this->findForObject($object);
         if ($personalDatas) {
-            $object = $this->applyTo($object, $personalDatas);
+            $object = $this->applyPersonalDataTo($object, $personalDatas);
         }
 
         return $object;
     }
 
-    public function applyTo($object, $personalDatas)
+    public function applyPersonalDataTo($object, $personalDatas)
     {
-        while ($personalDatas) {
-            $object->{$personalDatas->fieldId} = $personalDatas->value; // We should unencrypt here
+        while ($personalDatas->next()) {
+            $object->{$personalDatas->field} = $personalDatas->value; // We should unencrypt here
         }
 
         return $object;

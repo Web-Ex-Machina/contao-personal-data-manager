@@ -12,6 +12,8 @@ declare(strict_types=1);
  * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
 
+namespace WEM\PersonalDataManagerBundle\Model\Traits;
+
 /*
  * Personal Data Manager for Contao Open Source CMS
  * Copyright (c) 2015-2022 Web ex Machina.
@@ -27,15 +29,7 @@ use Contao\Model;
 
 trait PersonalDataTrait
 {
-    public static $personalDataFieldsNames = [];
-    public static $personalDataFieldsValues = [];
-    public static $personalDataPidField = '';
-    public static $personalDataPtable = '';
-
-    public function getPersonalDataPtable()
-    {
-        return $this->personalDataPtable;
-    }
+    protected static $personalDataFieldsValues = [];
 
     /**
      * Delete the current record and return the number of affected rows.
@@ -44,15 +38,14 @@ trait PersonalDataTrait
      */
     public function delete(): int
     {
-        $nbRows = parent::delete();
         // delete associated personal data
         $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
         $manager->deleteForPidAndPtable(
-            $this->{self::$personalDataPidField},
-            $this->getPersonalDataPtable()
+            (string) $this->{self::$personalDataPidField},
+            self::$personalDataPtable
         );
 
-        return $nbRows;
+        return parent::delete();
     }
 
     /**
@@ -61,42 +54,81 @@ trait PersonalDataTrait
     public function refresh(): void
     {
         parent::refresh();
+        $this->findAndApplyPersonalData();
+    }
+
+    public function findAndApplyPersonalData(): void
+    {
         // re-find personal data
         $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
 
         $personalDatas = $manager->findForPidAndPtable(
-            $this->{self::$personalDataPidField},
-            $this->getPersonalDataPtable()
+            (string) $this->{self::$personalDataPidField},
+            self::$personalDataPtable
         );
 
         if ($personalDatas) {
-            while ($personalDatas) {
-                $this->{$personalDatas->fieldId} = $personalDatas->value; // We should unencrypt here
+            while ($personalDatas->next()) {
+                $this->{$personalDatas->field} = $personalDatas->value; // We should unencrypt here
             }
         }
     }
 
     /**
-     * Modify the database result before the model is created.
+     * Create a model from a database result.
      *
      * @param Result $objResult The database result object
      *
-     * @return Result The database result object
+     * @return static The model
      */
-    protected static function postFind(Result $objResult)
+    protected static function createModelFromDbResult(Result $objResult)
     {
-        $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-
-        $personalDatas = $manager->findForPidAndPtable(
-            $objResult->{self::$personalDataPidField},
-            self::$personalDataPtable
-        );
-
-        if ($personalDatas) {
-            $objResult = $manager->applyTo($objResult, $personalDatas);
+        $model = parent::createModelFromDbResult($objResult);
+        if ($model) {
+            $model->findAndApplyPersonalData();
         }
 
-        return $objResult;
+        return $model;
+    }
+
+    /**
+     * Create a Collection object.
+     *
+     * @param array  $arrModels An array of models
+     * @param string $strTable  The table name
+     *
+     * @return Collection The Collection object
+     */
+    protected static function createCollection(array $arrModels, $strTable)
+    {
+        $collection = parent::createCollection($arrModels, $strTable);
+        while ($collection->next()) {
+            $model = $collection->current();
+            $model->findAndApplyPersonalData();
+            $collection->setRow($model->row());
+        }
+
+        return $collection;
+    }
+
+    /**
+     * Create a new collection from a database result.
+     *
+     * @param Result $objResult The database result object
+     * @param string $strTable  The table name
+     *
+     * @return Collection The model collection
+     */
+    protected static function createCollectionFromDbResult(Result $objResult, $strTable)
+    {
+        $collection = parent::createCollectionFromDbResult($objResult, $strTable);
+        while ($collection->next()) {
+            $model = $collection->current();
+            $model->findAndApplyPersonalData();
+            $collection->setRow($model->row());
+        }
+
+        return $collection;
     }
 
     /**
@@ -111,7 +143,11 @@ trait PersonalDataTrait
         $arrSet = parent::preSave($arrSet);
         foreach (self::$personalDataFieldsNames as $personalDataFieldName) {
             self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
-            unset($arrSet[$personalDataFieldName]);
+            if (\array_key_exists($personalDataFieldName, self::$personalDataFieldsDefaultValues)) {
+                $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
+            } else {
+                unset($arrSet[$personalDataFieldName]);
+            }
         }
 
         return $arrSet;
@@ -124,14 +160,14 @@ trait PersonalDataTrait
      */
     protected function postSave($intType): void
     {
-        parent::postSave($intType);
         $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+
         $manager->insertOrUpdateForPidAndPtable(
-            $this->{self::$personalDataPidField},
-            $this->getPersonalDataPtable(),
+            (string) $this->{self::$personalDataPidField},
+            self::$personalDataPtable,
             self::$personalDataFieldsValues
         );
         self::$personalDataFieldsValues = [];
-        $this->refresh();
+        parent::postSave($intType);
     }
 }

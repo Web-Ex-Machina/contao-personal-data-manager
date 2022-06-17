@@ -11,3 +11,5 @@ declare(strict_types=1);
  * @author   Web ex Machina <contact@webexmachina.fr>
  * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
+
+$GLOBALS['TL_MODELS']['tl_personal_data'] = \WEM\PersonalDataManagerBundle\Model\PersonalData::class;

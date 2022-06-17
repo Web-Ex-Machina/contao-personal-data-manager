@@ -23,18 +23,41 @@ class PersonalData extends Model
      *
      * @var string
      */
-    protected static $strTable = 'tl_form_data';
+    protected static $strTable = 'tl_personal_data';
 
+    /**
+     * Find records by pid and ptable.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     *
+     * @return \Contao\Collection|null
+     */
     public static function findByPidAndPTable(string $pid, string $ptable)
     {
         return static::findItems(['pid' => $pid, 'ptable' => $ptable]);
     }
 
+    /**
+     * Find record by pid, ptable and field.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     * @param string $field  The field
+     *
+     * @return self|null
+     */
     public static function findOneByPidAndPTableAndField(string $pid, string $ptable, string $field)
     {
         return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'field' => $field], 1);
     }
 
+    /**
+     * Delete rows by pid and ptable.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     */
     public static function deleteByPidAndPTable(string $pid, string $ptable): void
     {
         $items = self::findByPidAndPTable($pid, $ptable);
