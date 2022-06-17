@@ -61,6 +61,7 @@ trait PersonalDataTrait
     {
         // re-find personal data
         $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
         $personalDatas = $manager->findForPidAndPtable(
             (string) $this->{self::$personalDataPidField},
@@ -69,7 +70,7 @@ trait PersonalDataTrait
 
         if ($personalDatas) {
             while ($personalDatas->next()) {
-                $this->{$personalDatas->field} = $personalDatas->value; // We should unencrypt here
+                $this->{$personalDatas->field} = $encryptionService->decrypt($personalDatas->value); // We should unencrypt here
             }
         }
     }

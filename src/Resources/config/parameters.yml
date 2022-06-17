@@ -1,0 +1,3 @@
+parameters:
+  plenta_contao_encryption:
+    encryption_key: 'CharactersNumbersSymbolsAround32CharactersLong'

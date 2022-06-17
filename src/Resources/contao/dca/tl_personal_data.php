@@ -51,6 +51,12 @@ $GLOBALS['TL_DCA']['tl_personal_data'] = [
         'value' => [
             'label' => ['value'],
             'sql' => "TEXT NOT NULL DEFAULT ''",
+            'load_callback' => [
+                ['plenta.encryption', 'decrypt'],
+            ],
+            'save_callback' => [
+                ['plenta.encryption', 'encrypt'],
+            ],
         ],
         'createdAt' => [
             'default' => time(),

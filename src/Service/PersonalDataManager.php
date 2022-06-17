@@ -53,8 +53,9 @@ class PersonalDataManager
 
     public function applyPersonalDataTo($object, $personalDatas)
     {
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
         while ($personalDatas->next()) {
-            $object->{$personalDatas->field} = $personalDatas->value; // We should unencrypt here
+            $object->{$personalDatas->field} = $encryptionService->decrypt($personalDatas->value); // We should unencrypt here
         }
 
         return $object;
@@ -62,12 +63,13 @@ class PersonalDataManager
 
     public function insertOrUpdateForPidAndPtable(string $pid, string $ptable, array $datas): void
     {
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
         foreach ($datas as $field => $value) {
             $pdm = PersonalDataModel::findOneByPidAndPTableAndField($pid, $ptable, $field) ?? new PersonalDataModel();
             $pdm->pid = $pid;
             $pdm->ptable = $ptable;
             $pdm->field = $field;
-            $pdm->value = $value; // we should crypt here
+            $pdm->value = $encryptionService->encrypt($value); // we should crypt here
             $pdm->createdAt = $pdm->createdAt ?? time();
             $pdm->tstamp = time();
             $pdm->save();
