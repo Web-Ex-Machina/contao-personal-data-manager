@@ -40,6 +40,16 @@ class PersonalDataManager
         return PersonalDataModel::deleteByPidAndPTable($pid, $ptable);
     }
 
+    public function findForEmail(string $email)
+    {
+        return PersonalDataModel::findByEmail($email);
+    }
+
+    public function deleteForEmail(string $email)
+    {
+        return PersonalDataModel::deleteByEmail($email);
+    }
+
     public function findAndApplyForObject(Model $object): Model
     {
         $this->validateObject($object);
@@ -61,13 +71,14 @@ class PersonalDataManager
         return $object;
     }
 
-    public function insertOrUpdateForPidAndPtable(string $pid, string $ptable, array $datas): void
+    public function insertOrUpdateForPidAndPtable(string $pid, string $ptable, string $email, array $datas): void
     {
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
         foreach ($datas as $field => $value) {
-            $pdm = PersonalDataModel::findOneByPidAndPTableAndField($pid, $ptable, $field) ?? new PersonalDataModel();
+            $pdm = PersonalDataModel::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field) ?? new PersonalDataModel();
             $pdm->pid = $pid;
             $pdm->ptable = $ptable;
+            $pdm->email = $email;
             $pdm->field = $field;
             $pdm->value = $encryptionService->encrypt($value); // we should crypt here
             $pdm->createdAt = $pdm->createdAt ?? time();

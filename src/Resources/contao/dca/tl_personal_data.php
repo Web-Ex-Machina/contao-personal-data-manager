@@ -44,6 +44,10 @@ $GLOBALS['TL_DCA']['tl_personal_data'] = [
             'label' => ['ptable'],
             'sql' => "varchar(255) NOT NULL DEFAULT ''",
         ],
+        'email' => [
+            'label' => ['email'],
+            'sql' => "varchar(255) NOT NULL DEFAULT ''",
+        ],
         'field' => [
             'label' => ['field'],
             'sql' => "varchar(255) NOT NULL DEFAULT ''",

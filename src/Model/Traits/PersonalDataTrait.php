@@ -163,9 +163,10 @@ trait PersonalDataTrait
     {
         $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
 
-        $manager->insertOrUpdateForPidAndPtable(
+        $manager->insertOrUpdateForPidAndPtableAndEmail(
             (string) $this->{self::$personalDataPidField},
             self::$personalDataPtable,
+            (string) $this->{self::$personalDataEmailField},
             self::$personalDataFieldsValues
         );
         self::$personalDataFieldsValues = [];
