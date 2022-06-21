@@ -55,6 +55,7 @@ $GLOBALS['TL_DCA']['tl_my_table'] = [
     'config'=>[
         // ...
         'dataContainer' => DC_Table_Custom::class,
+        'ondelete_callback' => [['wem.personal_data_manager.dca.config.callback.delete', '__invoke']],
     ],
     'list'=>[
         'label' => [

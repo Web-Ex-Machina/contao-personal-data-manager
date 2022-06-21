@@ -50,6 +50,11 @@ class PersonalDataManager
         return PersonalDataModel::deleteByEmail($email);
     }
 
+    public function deleteForPidAndPtableAndEmail(string $pid, string $ptable, string $email)
+    {
+        return PersonalDataModel::deleteByPidAndPTableAndEmail($pid, $ptable, $email);
+    }
+
     public function findOneByPidAndPTableAndEmailAndField(string $pid, string $ptable, string $email, string $field)
     {
         return PersonalDataModel::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field);

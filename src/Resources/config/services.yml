@@ -26,3 +26,9 @@ services:
     arguments:
       $personalDataManager: '@wem.personal_data_manager.service.personal_data_manager'
     public: true
+
+  wem.personal_data_manager.dca.config.callback.delete:
+    class: WEM\PersonalDataManagerBundle\Dca\Config\Callback\Delete
+    arguments:
+      $personalDataManager: '@wem.personal_data_manager.service.personal_data_manager'
+    public: true

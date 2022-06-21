@@ -108,7 +108,7 @@ class PersonalData extends Model
     {
         $items = self::findByPidAndPTable($pid, $ptable);
         if ($items) {
-            while ($items) {
+            while ($items->next()) {
                 $items->delete();
             }
         }
@@ -123,7 +123,24 @@ class PersonalData extends Model
     {
         $items = self::findByEmail($email);
         if ($items) {
-            while ($items) {
+            while ($items->next()) {
+                $items->delete();
+            }
+        }
+    }
+
+    /**
+     * Delete rows by pid, ptable and email.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     * @param string $email  The email
+     */
+    public static function deleteByPidAndPTableAndEmail(string $pid, string $ptable, string $email): void
+    {
+        $items = self::findByPidAndPTableAndEmail($pid, $ptable, $email);
+        if ($items) {
+            while ($items->next()) {
                 $items->delete();
             }
         }
