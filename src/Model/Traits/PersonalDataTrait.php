@@ -75,6 +75,41 @@ trait PersonalDataTrait
         }
     }
 
+    public function getPersonalDataFieldsDefaultValues()
+    {
+        return self::$personalDataFieldsDefaultValues;
+    }
+
+    public function getPersonalDataFieldsDefaultValueForField(string $field)
+    {
+        return self::$personalDataFieldsDefaultValues[$field];
+    }
+
+    public function getPersonalDataFieldsNames()
+    {
+        return self::$personalDataFieldsNames;
+    }
+
+    public function isFieldInPersonalDataFieldsNames(string $field)
+    {
+        return \in_array($field, self::$personalDataFieldsNames, true);
+    }
+
+    public function getPersonalDataPidField()
+    {
+        return self::$personalDataPidField;
+    }
+
+    public function getPersonalDataEmailField()
+    {
+        return self::$personalDataEmailField;
+    }
+
+    public function getPersonalDataPtable()
+    {
+        return self::$personalDataPtable;
+    }
+
     /**
      * Create a model from a database result.
      *

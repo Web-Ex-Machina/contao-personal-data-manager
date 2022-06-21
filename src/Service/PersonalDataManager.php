@@ -50,6 +50,22 @@ class PersonalDataManager
         return PersonalDataModel::deleteByEmail($email);
     }
 
+    public function findOneByPidAndPTableAndEmailAndField(string $pid, string $ptable, string $email, string $field)
+    {
+        return PersonalDataModel::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field);
+    }
+
+    public function getUnecryptedValueByPidAndPTableAndEmailAndField(string $pid, string $ptable, string $email, string $field)
+    {
+        $personalData = PersonalDataModel::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field);
+        if (!$personalData) {
+            return null;
+        }
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+
+        return $encryptionService->decrypt($personalData->value);
+    }
+
     public function findAndApplyForObject(Model $object): Model
     {
         $this->validateObject($object);
@@ -71,20 +87,30 @@ class PersonalDataManager
         return $object;
     }
 
-    public function insertOrUpdateForPidAndPtable(string $pid, string $ptable, string $email, array $datas): void
+    public function insertOrUpdateForPidAndPtableAndEmail(string $pid, string $ptable, string $email, array $datas): array
+    {
+        $pdms = [];
+        foreach ($datas as $field => $value) {
+            $pdms[] = $this->insertOrUpdateForPidAndPtableAndEmailAndField($pid, $ptable, $email, $field, $value);
+        }
+
+        return $pdms;
+    }
+
+    public function insertOrUpdateForPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field, $value): PersonalDataModel
     {
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
-        foreach ($datas as $field => $value) {
-            $pdm = PersonalDataModel::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field) ?? new PersonalDataModel();
-            $pdm->pid = $pid;
-            $pdm->ptable = $ptable;
-            $pdm->email = $email;
-            $pdm->field = $field;
-            $pdm->value = $encryptionService->encrypt($value); // we should crypt here
-            $pdm->createdAt = $pdm->createdAt ?? time();
-            $pdm->tstamp = time();
-            $pdm->save();
-        }
+        $pdm = PersonalDataModel::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field) ?? new PersonalDataModel();
+        $pdm->pid = $pid;
+        $pdm->ptable = $ptable;
+        $pdm->email = $email;
+        $pdm->field = $field;
+        $pdm->value = $encryptionService->encrypt($value); // we should crypt here
+        $pdm->createdAt = $pdm->createdAt ?? time();
+        $pdm->tstamp = time();
+        $pdm->save();
+
+        return $pdm;
     }
 
     public function validateObject($object): void

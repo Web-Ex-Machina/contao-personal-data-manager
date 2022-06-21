@@ -12,4 +12,4 @@ declare(strict_types=1);
  * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
 
-$GLOBALS['TL_MODELS']['tl_personal_data'] = \WEM\PersonalDataManagerBundle\Model\PersonalData::class;
+$GLOBALS['TL_MODELS'][\WEM\PersonalDataManagerBundle\Model\PersonalData::getTable()] = \WEM\PersonalDataManagerBundle\Model\PersonalData::class;
