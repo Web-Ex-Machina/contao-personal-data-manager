@@ -20,3 +20,9 @@ services:
     arguments:
       $personalDataManager: '@wem.personal_data_manager.service.personal_data_manager'
     public: true
+
+  wem.personal_data_manager.dca.listing.callback.list_label_group:
+    class: WEM\PersonalDataManagerBundle\Dca\Listing\Callback\ListLabelGroup
+    arguments:
+      $personalDataManager: '@wem.personal_data_manager.service.personal_data_manager'
+    public: true
