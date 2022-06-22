@@ -57,6 +57,9 @@ trait PersonalDataTrait
         $this->findAndApplyPersonalData();
     }
 
+    /**
+     * Retrieves personal data attached to the current object and apply them.
+     */
     public function findAndApplyPersonalData(): void
     {
         // re-find personal data
@@ -75,37 +78,37 @@ trait PersonalDataTrait
         }
     }
 
-    public function getPersonalDataFieldsDefaultValues()
+    public function getPersonalDataFieldsDefaultValues(): array
     {
         return self::$personalDataFieldsDefaultValues;
     }
 
-    public function getPersonalDataFieldsDefaultValueForField(string $field)
+    public function getPersonalDataFieldsDefaultValueForField(string $field): string
     {
         return self::$personalDataFieldsDefaultValues[$field];
     }
 
-    public function getPersonalDataFieldsNames()
+    public function getPersonalDataFieldsNames(): array
     {
         return self::$personalDataFieldsNames;
     }
 
-    public function isFieldInPersonalDataFieldsNames(string $field)
+    public function isFieldInPersonalDataFieldsNames(string $field): bool
     {
         return \in_array($field, self::$personalDataFieldsNames, true);
     }
 
-    public function getPersonalDataPidField()
+    public function getPersonalDataPidField(): string
     {
         return self::$personalDataPidField;
     }
 
-    public function getPersonalDataEmailField()
+    public function getPersonalDataEmailField(): string
     {
         return self::$personalDataEmailField;
     }
 
-    public function getPersonalDataPtable()
+    public function getPersonalDataPtable(): string
     {
         return self::$personalDataPtable;
     }

@@ -103,30 +103,42 @@ class PersonalData extends Model
      *
      * @param string $pid    The pid
      * @param string $ptable The ptable
+     *
+     * @return array The array of deleted ids
      */
-    public static function deleteByPidAndPTable(string $pid, string $ptable): void
+    public static function deleteByPidAndPTable(string $pid, string $ptable): array
     {
+        $ids = [];
         $items = self::findByPidAndPTable($pid, $ptable);
         if ($items) {
             while ($items->next()) {
+                $ids[] = $items->id;
                 $items->delete();
             }
         }
+
+        return $ids;
     }
 
     /**
      * Delete rows by email.
      *
      * @param string $email The email
+     *
+     * @return array The array of deleted ids
      */
-    public static function deleteByEmail(string $email): void
+    public static function deleteByEmail(string $email): array
     {
+        $ids = [];
         $items = self::findByEmail($email);
         if ($items) {
             while ($items->next()) {
+                $ids[] = $items->id;
                 $items->delete();
             }
         }
+
+        return $ids;
     }
 
     /**
@@ -135,14 +147,20 @@ class PersonalData extends Model
      * @param string $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
+     *
+     * @return array The array of deleted ids
      */
-    public static function deleteByPidAndPTableAndEmail(string $pid, string $ptable, string $email): void
+    public static function deleteByPidAndPTableAndEmail(string $pid, string $ptable, string $email): array
     {
+        $ids = [];
         $items = self::findByPidAndPTableAndEmail($pid, $ptable, $email);
         if ($items) {
             while ($items->next()) {
+                $ids[] = $items->id;
                 $items->delete();
             }
         }
+
+        return $ids;
     }
 }
