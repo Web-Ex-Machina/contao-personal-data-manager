@@ -1,5 +1,5 @@
 {
-    "name": "webexmachina/personal-data-manager",
+    "name": "webexmachina/contao-personal-data-manager",
     "description": "Personal Data Manager bundle for Contao Open Source CMS",
     "keywords": ["webexmachina", "bundle", "contao","personal","rgpd","gpdr"],
     "type": "contao-bundle",
@@ -13,8 +13,8 @@
     }],
     "support":
     {
-        "issues": "https://github.com/webexmachina/personal-data-manager/issues",
-        "source": "https://github.com/webexmachina/personal-data-manager"
+        "issues": "https://github.com/webexmachina/contao-personal-data-manager/issues",
+        "source": "https://github.com/webexmachina/contao-personal-data-manager"
     },
     "require":
     {
