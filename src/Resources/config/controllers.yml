@@ -1,0 +1,10 @@
+services:
+    # We must do it this way if we want to be able to use dependency injections.
+    # File your complaints to Symfony
+    WEM\PersonalDataManagerBundle\Controller\PersonalDataManagerController:
+        alias: 'wem.personal_data_manager.controller.personal_data_manager'
+        public: true
+
+    wem.personal_data_manager.controller.personal_data_manager:
+        class: WEM\PersonalDataManagerBundle\Controller\PersonalDataManagerController
+        public: true

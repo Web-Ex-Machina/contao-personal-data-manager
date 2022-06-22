@@ -47,7 +47,7 @@ class PersonalDataManager
      *
      * @return Collection|null The associated personal data
      */
-    public function findForPidAndPtable(string $pid, string $ptable): ?Collection
+    public function findByPidAndPtable(string $pid, string $ptable): ?Collection
     {
         return PersonalDataModel::findByPidAndPTable($pid, $ptable);
     }
@@ -60,7 +60,7 @@ class PersonalDataManager
      *
      * @return array The deleted ids
      */
-    public function deleteForPidAndPtable(string $pid, string $ptable): array
+    public function deleteByPidAndPtable(string $pid, string $ptable): array
     {
         return PersonalDataModel::deleteByPidAndPTable($pid, $ptable);
     }
@@ -72,7 +72,7 @@ class PersonalDataManager
      *
      * @return Collection|null The associated personal data
      */
-    public function findForEmail(string $email): ?Collection
+    public function findByEmail(string $email): ?Collection
     {
         return PersonalDataModel::findByEmail($email);
     }
@@ -84,7 +84,7 @@ class PersonalDataManager
      *
      * @return array The deleted ids
      */
-    public function deleteForEmail(string $email): array
+    public function deleteByEmail(string $email): array
     {
         return PersonalDataModel::deleteByEmail($email);
     }
@@ -98,7 +98,7 @@ class PersonalDataManager
      *
      * @return array The deleted ids
      */
-    public function deleteForPidAndPtableAndEmail(string $pid, string $ptable, string $email): array
+    public function deleteByPidAndPtableAndEmail(string $pid, string $ptable, string $email): array
     {
         return PersonalDataModel::deleteByPidAndPTableAndEmail($pid, $ptable, $email);
     }

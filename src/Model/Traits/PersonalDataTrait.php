@@ -40,7 +40,7 @@ trait PersonalDataTrait
     {
         // delete associated personal data
         $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $manager->deleteForPidAndPtable(
+        $manager->deleteByPidAndPtable(
             (string) $this->{self::$personalDataPidField},
             self::$personalDataPtable
         );
@@ -66,7 +66,7 @@ trait PersonalDataTrait
         $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
-        $personalDatas = $manager->findForPidAndPtable(
+        $personalDatas = $manager->findByPidAndPtable(
             (string) $this->{self::$personalDataPidField},
             self::$personalDataPtable
         );

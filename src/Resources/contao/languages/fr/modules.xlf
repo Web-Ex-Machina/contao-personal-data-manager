@@ -5,11 +5,11 @@
 	      <source>Personal Data</source>
 	      <target>Données personnelles</target>
 	    </trans-unit>
-		<trans-unit id="MOD.wem_pdm_dca.0">
+		<trans-unit id="MOD.wem-personal-data-manager.0">
 			<source>Personal Data (raw)</source>
 			<target>Données personnelles (brutes)</target>
 		</trans-unit>
-		<trans-unit id="MOD.wem_pdm_dca.1">
+		<trans-unit id="MOD.wem-personal-data-manager.1">
 			<source>Manage raw personal data</source>
 			<target>Gérer les données personnelles brutes</target>
 		</trans-unit>

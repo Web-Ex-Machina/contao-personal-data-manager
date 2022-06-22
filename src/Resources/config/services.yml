@@ -3,6 +3,12 @@ services:
     class: WEM\PersonalDataManagerBundle\Service\PersonalDataManager
     public: true
 
+  wem.personal_data_manager.service.personal_data_manager_ui:
+    class: WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi
+    arguments:
+      $manager: '@wem.personal_data_manager.service.personal_data_manager'
+    public: true
+
   wem.personal_data_manager.dca.field.callback.load:
     class: WEM\PersonalDataManagerBundle\Dca\Field\Callback\Load
     arguments:

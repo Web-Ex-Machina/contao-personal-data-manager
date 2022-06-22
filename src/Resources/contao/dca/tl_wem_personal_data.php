@@ -12,7 +12,6 @@ declare(strict_types=1);
  * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
 
-// THIS FILE EXISTS ONLY FOR THE DOCKER VERSION
 $GLOBALS['TL_DCA']['tl_wem_personal_data'] = [
     // Config
     'config' => [

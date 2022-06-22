@@ -38,5 +38,7 @@ class WEMPersonalDataManagerExtension extends Extension
 
         $loader->load('services.yml');
         $loader->load('parameters.yml');
+        $loader->load('controllers.yml');
+        $loader->load('routing.yml');
     }
 }

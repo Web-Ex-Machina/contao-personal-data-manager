@@ -13,8 +13,8 @@ declare(strict_types=1);
  */
 
 array_insert($GLOBALS['BE_MOD']['personal-data'], 0, [
-    'wem_pdm_dca' => [
-        'tables' => ['tl_wem_personal_data'],
+    'wem-personal-data-manager' => [
+        'callback' => \WEM\PersonalDataManagerBundle\Controller\PersonalDataManagerController::class,
     ],
 ]);
 

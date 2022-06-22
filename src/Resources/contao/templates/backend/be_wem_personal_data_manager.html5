@@ -1,0 +1,14 @@
+<div>
+	<form method="POST" action="<?php echo $this->request; ?>">
+		<label for="email">
+			EMAIL
+		</label>
+		<input type="text" name="email" value="<?php echo $this->email; ?>" class="tl_text"/>
+		<input name="FORM_SUBMIT" value="wem-personal-data-manager" type="hidden">
+		<input name="REQUEST_TOKEN" value="<?php echo $this->token ?>" type="hidden">
+		<input type="submit" name="valider" class="tl_button"/>
+	</form>
+</div>
+<div>
+	<?php echo $this->content; ?>
+</div>

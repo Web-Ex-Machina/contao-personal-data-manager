@@ -35,7 +35,7 @@ class Delete
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
 
-        $this->personalDataManager->deleteForPidAndPtableAndEmail(
+        $this->personalDataManager->deleteByPidAndPtableAndEmail(
             $dc->activeRecord->{$model->getPersonalDataPidField()},
             $model->getPersonalDataPtable(),
             $dc->activeRecord->{$model->getPersonalDataEmailField()}
