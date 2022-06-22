@@ -13,7 +13,7 @@ declare(strict_types=1);
  */
 
 // THIS FILE EXISTS ONLY FOR THE DOCKER VERSION
-$GLOBALS['TL_DCA']['tl_personal_data'] = [
+$GLOBALS['TL_DCA']['tl_wem_personal_data'] = [
     // Config
     'config' => [
         'dataContainer' => 'Table',

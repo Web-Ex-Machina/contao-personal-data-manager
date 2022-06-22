@@ -23,7 +23,7 @@ class PersonalData extends Model
      *
      * @var string
      */
-    protected static $strTable = 'tl_personal_data';
+    protected static $strTable = 'tl_wem_personal_data';
 
     /**
      * Find records by pid and ptable.
