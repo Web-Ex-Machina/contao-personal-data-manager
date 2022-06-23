@@ -1,0 +1,4 @@
+<div class="pdm_item__header" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>">
+	<?php echo $this->title; ?>
+	<?php echo $this->buttons; ?>
+</div>

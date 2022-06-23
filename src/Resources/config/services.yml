@@ -6,6 +6,7 @@ services:
   wem.personal_data_manager.service.personal_data_manager_ui:
     class: WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi
     arguments:
+      $translator: '@contao.translation.translator'
       $manager: '@wem.personal_data_manager.service.personal_data_manager'
     public: true
 

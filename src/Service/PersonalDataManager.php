@@ -119,6 +119,20 @@ class PersonalDataManager
     }
 
     /**
+     * Delete personal data linked to a pid, a ptable and an email.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     * @param string $email  The email
+     *
+     * @return array The deleted ids
+     */
+    public function deleteByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): array
+    {
+        return PersonalDataModel::deleteByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field);
+    }
+
+    /**
      * Retrieves a single personal data unecrypted value linked to a pid, a ptable, an email and a field.
      *
      * @param string $pid    The pid
@@ -136,7 +150,7 @@ class PersonalDataManager
         }
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
-        return $encryptionService->decrypt($personalData->value);
+        return PersonalDataModel::DELETED === $personalData->value ? $personalData->value : $encryptionService->decrypt($personalData->value);
     }
 
     /**
@@ -169,7 +183,7 @@ class PersonalDataManager
     {
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
         while ($personalDatas->next()) {
-            $object->{$personalDatas->field} = $encryptionService->decrypt($personalDatas->value);
+            $object->{$personalDatas->field} = PersonalDataModel::DELETED === $personalDatas->value ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
         }
 
         return $object;

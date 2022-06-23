@@ -1,5 +1,5 @@
 <div>
-	<form method="POST" action="<?php echo $this->request; ?>">
+	<form method="POST" action="<?php echo $this->request; ?>" class="pdm-form">
 		<label for="email">
 			EMAIL
 		</label>
@@ -9,6 +9,6 @@
 		<input type="submit" name="valider" class="tl_button"/>
 	</form>
 </div>
-<div>
+<div class="pdm-content">
 	<?php echo $this->content; ?>
 </div>

@@ -1,3 +1,157 @@
-<?php foreach($this->items as $item): ?>
-<?php echo $item; ?>
-<?php endforeach; ?>
+<div class="pdm-list">
+	<div class="pdm-list__header">
+		<div class="pdm-list__header__title">
+			<?php echo $this->trans('WEM.PEDAMA.LIST.title',[],'contao_default'); ?>
+		</div>
+		<div class="pdm-list__header__subtitle tl_help">
+			<?php echo $this->trans('WEM.PEDAMA.LIST.subtitle',[],'contao_default'); ?>
+		</div>
+		<div class="pdm-list__header__buttons">
+		</div>
+	</div>
+	<div class="pdm-items">
+		<?php foreach($this->items as $item): ?>
+		<?php echo $item; ?>
+		<?php endforeach; ?>
+	</div>
+</div>
+<script type="text/javascript">
+	(function() {
+		function applyEvents(){
+			document.querySelectorAll('.pdm_item__personal_data_single__button_delete').forEach(function(button){
+				button.addEventListener('click',function(e){
+					e.preventDefault();
+					if(!confirm(e.target.getAttribute('data-confirm'))){
+						return false;
+					}
+					
+					let pid = e.target.parentNode.getAttribute('data-pid');
+					let ptable = e.target.parentNode.getAttribute('data-ptable');
+					let field = e.target.parentNode.getAttribute('data-field');
+					deleteSinglePersonalData(pid, ptable, field);
+					return false;
+				});
+			});
+
+			document.querySelectorAll('.pdm_item__button_delete').forEach(function(button){
+				button.addEventListener('click',function(e){
+					e.preventDefault();
+					if(!confirm(e.target.getAttribute('data-confirm'))){
+						return false;
+					}
+					
+					let pid = e.target.parentNode.getAttribute('data-pid');
+					let ptable = e.target.parentNode.getAttribute('data-ptable');
+					deletePersonalDataItem(pid, ptable);
+					return false;
+				});
+			});
+		}
+
+		function deleteSinglePersonalData(pid, ptable, field){
+			let singleElement = document.querySelector('.pdm_item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
+			let email = document.querySelector('.pdm_item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]').getAttribute('data-email');
+			let singleElementFieldValue = singleElement.querySelector('.pdm_item__personal_data_single__value');
+			let singleElementFieldButtons = singleElement.querySelector('.pdm_item__personal_data_single__buttons');
+			displayLoader(singleElement);
+
+			postData({
+				'action':'delete_single_personal_data',
+				'pid':pid,
+				'ptable':ptable,
+				'email':email,
+				'field':field,
+			}).then(data =>{
+				if("success" == data.status){
+					singleElementFieldValue.innerHTML = data.value;
+					singleElementFieldButtons.innerHTML = '';
+				}else{
+					alert(data.msg);	
+				}
+				hideLoader(singleElement);
+			}).catch(function(e) {
+				alert("Une erreur est survenue");
+				console.log(e);
+			});
+		}
+
+		function deletePersonalDataItem(pid, ptable){
+			let item = document.querySelector('.pdm_item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+			let email = item.getAttribute('data-email');
+			let singleElementFieldValues = item.querySelectorAll('.pdm_item__personal_data_single__value');
+			let singleElementFieldButtonss = item.querySelectorAll('.pdm_item__personal_data_single__buttons');
+			let itemDeleteButton = item.querySelectorAll('.pdm_item__button_delete');
+			let itemExportButton = item.querySelectorAll('.pdm_item__button_export');
+			
+			displayLoader(item);
+
+			postData({
+				'action':'delete_personal_data_item',
+				'pid':pid,
+				'ptable':ptable,
+				'email':email
+			}).then(data =>{
+				if("success" == data.status){
+					singleElementFieldValues.forEach(function(singleElementFieldValue){
+						singleElementFieldValue.innerHTML = data.value;
+					});
+					singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
+						singleElementFieldButtons.innerHTML = '';
+					});
+					itemDeleteButton.innerHTML = '';
+					itemExportButton.innerHTML = '';
+				}else{
+					alert(data.msg);	
+				}
+				
+				hideLoader(item);
+			}).catch(function(e) {
+				alert("Une erreur est survenue");
+				console.log(e);
+			});
+		}
+
+
+		function displayLoader(element){
+			let loader = document.createElement('div');
+			loader.classList.add('pdm-loader');
+			element.appendChild(loader);
+		}
+
+		function hideLoader(element){
+			element.removeChild(element.querySelector('.pdm-loader'));
+		}
+
+		async function postData(data) {
+			var request = new FormData();
+
+			for(var i in data) {
+				request.append(i, data[i]);
+			}
+
+			return postDataCustom(request,{});
+		};
+
+		async function postDataCustom(request, additionnalOptions) {
+			request.append('TL_WEM_AJAX', 1);
+			request.append('REQUEST_TOKEN', '<?php echo $this->token ?>');
+			request.append('wem_module', 'be_pdm');
+
+			var options = {
+				method: 'POST',
+				mode: 'same-origin',
+				cache: 'no-cache',
+				body: request
+			};
+
+			options = Object.assign(options,additionnalOptions);
+
+			const response = await fetch("<?php echo $this->request ?>", options);
+
+			return response.json();
+		};
+
+
+		applyEvents();
+	})();
+</script>

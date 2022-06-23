@@ -1,0 +1,5 @@
+<div class="pdm-item__buttons" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>">
+	<?php echo $this->show; ?>
+	<?php echo $this->export; ?>
+	<?php echo $this->delete; ?>
+</div>

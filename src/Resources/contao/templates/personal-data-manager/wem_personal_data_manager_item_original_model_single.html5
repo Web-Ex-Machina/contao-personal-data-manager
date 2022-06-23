@@ -1,0 +1,8 @@
+<div class="pdm_item__original_model_single" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>" data-field="<?php echo $this->field; ?>">
+	<div class="pdm_item__original_model_single__field">
+		<?php echo $this->fieldLabel; ?>
+	</div>
+	<div class="pdm_item__original_model_single__value">
+		<?php echo $this->value; ?>
+	</div>
+</div>

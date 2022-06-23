@@ -1,0 +1,8 @@
+<div class="pdm_item__original_model" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>">
+	<div class="pdm_item__original_model__title">
+		<?php echo $this->trans('WEM.PEDAMA.ITEM.originalModelTitle',[],'contao_default'); ?>
+	</div>
+	<?php foreach($this->items as $item): ?>
+		<?php echo $item; ?>
+	<?php endforeach; ?>
+</div>

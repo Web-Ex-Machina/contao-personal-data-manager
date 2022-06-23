@@ -9,6 +9,51 @@
         <source>No personal data to show</source>
         <target>Aucune données personnelle à afficher</target>
       </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.title">
+        <source>Your personal data</source>
+        <target>Vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.subtitle">
+        <source>List of all items using your personal data</source>
+        <target>Liste des objets utilisant vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.originalModelTitle">
+        <source>Original model</source>
+        <target>Objet original</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.personalDataTitle">
+        <source>Personal data</source>
+        <target>Données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteTitle">
+        <source>Delete this personal data</source>
+        <target>Supprimer cette donnée personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonDelete">
+        <source>Delete</source>
+        <target>Supprimer</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteConfirm">
+        <source>Do you really want to delete this personal data ?</source>
+        <target>Voulez-vous vraiment supprimer cette donnée personnelle ?</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.valueDeleted">
+        <source>Deleted</source>
+        <target>Supprimée</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteAllTitle">
+        <source>Delete all personal data linked to this entity</source>
+        <target>Supprimer les données personnelles associées à cette entité</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteAll">
+        <source>Delete</source>
+        <target>Supprimer</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteAllConfirm">
+        <source>Do you really want to delete all personal data linked to this entity ?</source>
+        <target>Voulez-vous vraiment supprimer les données personnelles associées à cette entité ?</target>
+      </trans-unit>
+
     </body>
   </file>
 </xliff>

@@ -26,6 +26,7 @@ namespace WEM\PersonalDataManagerBundle\Model\Traits;
  */
 use Contao\Database\Result;
 use Contao\Model;
+use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
 
 trait PersonalDataTrait
 {
@@ -73,7 +74,7 @@ trait PersonalDataTrait
 
         if ($personalDatas) {
             while ($personalDatas->next()) {
-                $this->{$personalDatas->field} = $encryptionService->decrypt($personalDatas->value); // We should unencrypt here
+                $this->{$personalDatas->field} = PersonalDataModel::DELETED === $personalDatas->value ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
             }
         }
     }
