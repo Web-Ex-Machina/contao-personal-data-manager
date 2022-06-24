@@ -24,6 +24,7 @@ use Contao\RequestToken;
 use Contao\System;
 use Exception;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\Response;
 // use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Terminal42\ServiceAnnotationBundle\Annotation\ServiceTag;
@@ -64,16 +65,20 @@ class PersonalDataManagerController extends Controller
         if (Input::post('TL_WEM_AJAX') && 'be_pdm' === Input::post('wem_module')) {
             try {
                 switch (Input::post('action')) {
-                    case 'delete_single_personal_data':
+                    case 'anonymize_single_personal_data':
                         $arrResponse = $this->anonymizeSinglePersonalData();
                     break;
-                    case 'delete_personal_data_item':
+                    case 'anonymize_personal_data_item':
                         $arrResponse = $this->anonymizeSingleItem();
                     break;
-                    case 'delete_all_personal_data':
+                    case 'anonymize_all_personal_data':
                         $arrResponse = $this->anonymizeAllPersonalData();
                     break;
-                    case 'export':
+                    case 'export_single':
+                        $this->exportSingleItem();
+                    break;
+                    case 'export_all':
+                        $this->exportAllPersonalData();
                     break;
                     case 'show':
                     break;
@@ -195,10 +200,42 @@ class PersonalDataManagerController extends Controller
 
     protected function exportSingleItem(): void
     {
+        if (empty(Input::post('pid'))) {
+            throw new InvalidArgumentException('The pid is empty');
+        }
+
+        if (empty(Input::post('ptable'))) {
+            throw new InvalidArgumentException('The ptable is empty');
+        }
+
+        if (empty(Input::post('email'))) {
+            throw new InvalidArgumentException('The email is empty');
+        }
+
+        $this->checkAccess();
+
+        /** @var PersonalDataManager */
+        $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+        $csv = $pdm->exportByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
+
+        (new Response($csv, 200, ['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment', 'filename' => 'filename.csv']))->send();
+        exit();
     }
 
     protected function exportAllPersonalData(): void
     {
+        if (empty(Input::post('email'))) {
+            throw new InvalidArgumentException('The email is empty');
+        }
+
+        $this->checkAccess();
+
+        /** @var PersonalDataManager */
+        $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+        $csv = $pdm->exportByEmail(Input::post('email'));
+
+        (new Response($csv, 200, ['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment', 'filename' => 'filename.csv']))->send();
+        exit();
     }
 
     protected function checkAccess(): void

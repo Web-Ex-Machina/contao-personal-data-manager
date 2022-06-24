@@ -23,7 +23,7 @@
 <script type="text/javascript">
 	(function() {
 		function applyEvents(){
-			document.querySelectorAll('.pdm-item__personal_data_single__button_delete').forEach(function(button){
+			document.querySelectorAll('.pdm-item__personal_data_single__button_anonymize').forEach(function(button){
 				button.addEventListener('click',function(e){
 					e.preventDefault();
 					if(!confirm(e.target.getAttribute('data-confirm'))){
@@ -33,12 +33,12 @@
 					let pid = e.target.parentNode.getAttribute('data-pid');
 					let ptable = e.target.parentNode.getAttribute('data-ptable');
 					let field = e.target.parentNode.getAttribute('data-field');
-					deleteSinglePersonalData(pid, ptable, field);
+					anonymizeSinglePersonalData(pid, ptable, field);
 					return false;
 				});
 			});
 
-			document.querySelectorAll('.pdm-item__button_delete_all').forEach(function(button){
+			document.querySelectorAll('.pdm-item__button_anonymize_all').forEach(function(button){
 				button.addEventListener('click',function(e){
 					e.preventDefault();
 					if(!confirm(e.target.getAttribute('data-confirm'))){
@@ -47,12 +47,23 @@
 					
 					let pid = e.target.parentNode.getAttribute('data-pid');
 					let ptable = e.target.parentNode.getAttribute('data-ptable');
-					deletePersonalDataItem(pid, ptable);
+					anonymizePersonalDataItem(pid, ptable);
 					return false;
 				});
 			});
 
-			document.querySelectorAll('.pdm-list__button_delete').forEach(function(button){
+			document.querySelectorAll('.pdm-item__button_export').forEach(function(button){
+				button.addEventListener('click',function(e){
+					e.preventDefault();
+					
+					let pid = e.target.parentNode.getAttribute('data-pid');
+					let ptable = e.target.parentNode.getAttribute('data-ptable');
+					exportPersonalDataItem(pid, ptable);
+					return false;
+				});
+			});
+
+			document.querySelectorAll('.pdm-list__button_anonymize').forEach(function(button){
 				button.addEventListener('click',function(e){
 					e.preventDefault();
 					if(!confirm(e.target.getAttribute('data-confirm'))){
@@ -60,13 +71,23 @@
 					}
 					
 					let email = e.target.parentNode.getAttribute('data-email');
-					deleteAllPersonalData(email);
+					anonymizeAllPersonalData(email);
+					return false;
+				});
+			});
+
+			document.querySelectorAll('.pdm-list__button_export').forEach(function(button){
+				button.addEventListener('click',function(e){
+					e.preventDefault();
+					
+					let email = e.target.parentNode.getAttribute('data-email');
+					exportAllPersonalData(email);
 					return false;
 				});
 			});
 		};
 
-		function deleteSinglePersonalData(pid, ptable, field){
+		function anonymizeSinglePersonalData(pid, ptable, field){
 			let singleElement = document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
 			let email = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]').getAttribute('data-email');
 			let singleElementFieldValue = singleElement.querySelector('.pdm-item__personal_data_single__value');
@@ -74,12 +95,14 @@
 			displayLoader(singleElement);
 
 			postData({
-				'action':'delete_single_personal_data',
+				'action':'anonymize_single_personal_data',
 				'pid':pid,
 				'ptable':ptable,
 				'email':email,
 				'field':field,
-			}).then(data =>{
+			})
+			.then(data => data.json())
+			.then(data =>{
 				if("success" == data.status){
 					singleElementFieldValue.innerHTML = data.value;
 					singleElementFieldButtons.innerHTML = '';
@@ -93,22 +116,24 @@
 			});
 		};
 
-		function deletePersonalDataItem(pid, ptable){
+		function anonymizePersonalDataItem(pid, ptable){
 			let item = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
 			let email = item.getAttribute('data-email');
 			let singleElementFieldValues = item.querySelectorAll('.pdm-item__personal_data_single__value');
 			let singleElementFieldButtonss = item.querySelectorAll('.pdm-item__personal_data_single__buttons');
-			let itemDeleteButton = item.querySelectorAll('.pdm-button_delete');
+			let itemAnonymizeButton = item.querySelectorAll('.pdm-button_anonymize');
 			let itemExportButton = item.querySelectorAll('.pdm-button_export');
 			
 			displayLoader(item);
 
 			postData({
-				'action':'delete_personal_data_item',
+				'action':'anonymize_personal_data_item',
 				'pid':pid,
 				'ptable':ptable,
 				'email':email
-			}).then(data =>{
+			})
+			.then(data => data.json())
+			.then(data =>{
 				if("success" == data.status){
 					singleElementFieldValues.forEach(function(singleElementFieldValue){
 						singleElementFieldValue.innerHTML = data.value;
@@ -116,7 +141,7 @@
 					singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
 						singleElementFieldButtons.innerHTML = '';
 					});
-					itemDeleteButton.innerHTML = '';
+					itemAnonymizeButton.innerHTML = '';
 					itemExportButton.innerHTML = '';
 				}else{
 					alert(data.msg);	
@@ -129,19 +154,21 @@
 			});
 		};
 
-		function deleteAllPersonalData(email){
+		function anonymizeAllPersonalData(email){
 			let list = document.querySelector('.pdm-list');
 			let singleElementFieldValues = document.querySelectorAll('.pdm-item__personal_data_single__value');
 			let singleElementFieldButtonss = document.querySelectorAll('.pdm-item__personal_data_single__buttons');
-			let itemDeleteButtons = document.querySelectorAll('.pdm-button_delete');
+			let itemAnonymizeButtons = document.querySelectorAll('.pdm-button_anonymize');
 			let itemExportButtons = document.querySelectorAll('.pdm-button_export');
 			
 			displayLoader(list);
 
 			postData({
-				'action':'delete_all_personal_data',
+				'action':'anonymize_all_personal_data',
 				'email':email
-			}).then(data =>{
+			})
+			.then(data => data.json())
+			.then(data =>{
 				if("success" == data.status){
 					singleElementFieldValues.forEach(function(singleElementFieldValue){
 						singleElementFieldValue.innerHTML = data.value;
@@ -149,9 +176,9 @@
 					singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
 						singleElementFieldButtons.innerHTML = '';
 					});
-					itemDeleteButtons.forEach(function(itemDeleteButton){
-						itemDeleteButton.innerHTML = '';
-						itemDeleteButton.classList.add('hidden');
+					itemAnonymizeButtons.forEach(function(itemAnonymizeButton){
+						itemAnonymizeButton.innerHTML = '';
+						itemAnonymizeButton.classList.add('hidden');
 					});
 					itemExportButtons.forEach(function(itemExportButton){
 						itemExportButton.innerHTML = '';
@@ -168,6 +195,58 @@
 			});
 		};
 
+		function exportPersonalDataItem(pid, ptable){
+			let item = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+			let email = item.getAttribute('data-email');
+			
+			displayLoader(item);
+
+			postData({
+				'action':'export_single',
+				'pid':pid,
+				'ptable':ptable,
+				'email':email
+			})
+			.then(resp => resp.blob())
+			.then(blob => {
+				downloadBlobFile(blob,'all.csv');
+				hideLoader(item);
+			}).catch(function(e) {
+				alert("Une erreur est survenue");
+				console.log(e);
+			});
+		};
+
+		function exportAllPersonalData(email){
+			let list = document.querySelector('.pdm-list');
+			
+			displayLoader(list);
+
+			postData({
+				'action':'export_all',
+				'email':email
+			})
+			.then(resp => resp.blob())
+			.then(blob => {
+				downloadBlobFile(blob,'all.csv');
+				hideLoader(list);
+			}).catch(function(e) {
+				alert("Une erreur est survenue");
+				console.log(e);
+			});
+		};
+
+		function downloadBlobFile(blob, filename){
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.style.display = 'none';
+			a.href = url;
+			// the filename you want
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+		}
 
 		function displayLoader(element){
 			let loader = document.createElement('div');
@@ -205,7 +284,7 @@
 
 			const response = await fetch("<?php echo $this->request ?>", options);
 
-			return response.json();
+			return response;
 		};
 
 

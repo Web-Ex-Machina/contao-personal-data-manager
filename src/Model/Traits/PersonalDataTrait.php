@@ -78,6 +78,20 @@ trait PersonalDataTrait
         }
     }
 
+    /**
+     * Anonymize personal data attached to the current object and apply them.
+     */
+    public function anonymize(): void
+    {
+        // re-find personal data
+        $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+        $manager->anonymizeByPidAndPtableAndEmail(
+            (string) $this->{self::$personalDataPidField},
+            self::$personalDataPtable
+        );
+        $this->refresh();
+    }
+
     public function getPersonalDataFieldsDefaultValues(): array
     {
         return self::$personalDataFieldsDefaultValues;

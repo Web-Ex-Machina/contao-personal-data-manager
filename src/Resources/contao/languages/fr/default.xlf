@@ -21,15 +21,15 @@
         <source>No item to display</source>
         <target>Aucun élément à afficher</target>
       </trans-unit>
-      <trans-unit id="WEM.PEDAMA.LIST.buttonDeleteTitle">
+      <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymizeTitle">
         <source>Delete personal data</source>
         <target>Supprimer vos données personnelles</target>
       </trans-unit>
-      <trans-unit id="WEM.PEDAMA.LIST.buttonDeleteConfirm">
+      <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymizeConfirm">
         <source>Do you really want to delete yuor personal data ?</source>
         <target>Voulez-vous vraiment supprimer vos données personnelles ?</target>
       </trans-unit>
-      <trans-unit id="WEM.PEDAMA.LIST.buttonDelete">
+      <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymize">
         <source>Delete</source>
         <target>Supprimer</target>
       </trans-unit>
@@ -49,15 +49,15 @@
         <source>Personal data</source>
         <target>Données personnelles</target>
       </trans-unit>
-      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteTitle">
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeTitle">
         <source>Delete this personal data</source>
         <target>Supprimer cette donnée personnelles</target>
       </trans-unit>
-      <trans-unit id="WEM.PEDAMA.ITEM.buttonDelete">
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymize">
         <source>Delete</source>
         <target>Supprimer</target>
       </trans-unit>
-      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteConfirm">
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeConfirm">
         <source>Do you really want to delete this personal data ?</source>
         <target>Voulez-vous vraiment supprimer cette donnée personnelle ?</target>
       </trans-unit>
@@ -65,17 +65,25 @@
         <source>Deleted</source>
         <target>Supprimée</target>
       </trans-unit>
-      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteAllTitle">
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeAllTitle">
         <source>Delete all personal data linked to this entity</source>
         <target>Supprimer les données personnelles associées à cette entité</target>
       </trans-unit>
-      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteAll">
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeAll">
         <source>Delete</source>
         <target>Supprimer</target>
       </trans-unit>
-      <trans-unit id="WEM.PEDAMA.ITEM.buttonDeleteAllConfirm">
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeAllConfirm">
         <source>Do you really want to delete all personal data linked to this entity ?</source>
         <target>Voulez-vous vraiment supprimer les données personnelles associées à cette entité ?</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonExportTitle">
+        <source>Export all personal data linked to this entity</source>
+        <target>Exporter les données personnelles associées à cette entité</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonExport">
+        <source>Export</source>
+        <target>Exporter</target>
       </trans-unit>
 
     </body>

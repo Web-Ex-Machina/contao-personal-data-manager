@@ -60,7 +60,7 @@ class PersonalData extends Model
      * @param string $ptable The ptable
      * @param string $email  The email
      *
-     * @return \Contao\Collection|null
+     * @return \Contao\Model\Collection|null
      */
     public static function findByPidAndPTableAndEmail(string $pid, string $ptable, string $email)
     {

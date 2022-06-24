@@ -110,6 +110,25 @@ $GLOBALS['TL_DCA']['tl_my_table'] = [
 
 This way, editing your records in back-end will work with the same as with the model.
 
+Hooks
+-----
+
+Multiple hooks are available to customize the bundle
+
+Hook | Description
+--- | ---
+`renderListButtons` | *To be completed*
+`renderSingleItem` | *To be completed*
+`renderSingleItemHeader` | *To be completed*
+`renderSingleItemTitle` | *To be completed*
+`renderSingleItemButtons` | *To be completed*
+`renderSingleItemBody` | *To be completed*
+`renderSingleItemBodyOriginalModel` | *To be completed*
+`renderSingleItemBodyOriginalModelSingle` | *To be completed*
+`renderSingleItemBodyPersonalData` | *To be completed*
+`renderSingleItemBodyPersonalDataSingle` | *To be completed*
+`renderSingleItemBodyPersonalDataSingleButtons` | *To be completed*
+
 Documentation
 -------------
 

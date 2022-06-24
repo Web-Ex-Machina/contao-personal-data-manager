@@ -106,6 +106,18 @@ class PersonalDataManager
     }
 
     /**
+     * Export personal data linked to an email.
+     *
+     * @param string $email The email
+     */
+    public function exportByEmail(string $email): string
+    {
+        $pdms = PersonalDataModel::findByEmail($email);
+
+        return $this->formatPersonalDataForCsv($pdms);
+    }
+
+    /**
      * Delete personal data linked to a pid, a ptable and an email.
      *
      * @param string $pid    The pid
@@ -135,6 +147,20 @@ class PersonalDataManager
         while ($pdms->next()) {
             $this->anonymize($pdms->current());
         }
+    }
+
+    /**
+     * Export personal data linked to a pid, a ptable and an email.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     * @param string $email  The email
+     */
+    public function exportByPidAndPtableAndEmail(string $pid, string $ptable, string $email): string
+    {
+        $pdms = PersonalDataModel::findByPidAndPTableAndEmail($pid, $ptable, $email);
+
+        return $this->formatPersonalDataForCsv($pdms);
     }
 
     /**
@@ -233,7 +259,7 @@ class PersonalDataManager
     {
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
         while ($personalDatas->next()) {
-            $object->{$personalDatas->field} = PersonalDataModel::DELETED === $personalDatas->value ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
+            $object->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
         }
 
         return $object;
@@ -301,6 +327,28 @@ class PersonalDataManager
         $personalData->anonymized = true;
         $personalData->anonymizedAt = time();
         $personalData->save();
+    }
+
+    public function formatPersonalDataForCsv(?Collection $personalData): string
+    {
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+        $csv = [
+            'Entity;Mail;Field;Value',
+        ];
+        if ($personalData) {
+            while ($personalData->next()) {
+                $row = [
+                    $personalData->ptable,
+                    $personalData->email,
+                    $GLOBALS['TL_DCA'][$personalData->ptable]['fields'][$personalData->field]['label'] ?? $personalData->field,
+                    $encryptionService->decrypt($personalData->value),
+                ];
+
+                $csv[] = implode(';', $row);
+            }
+        }
+
+        return implode("\n", $csv);
     }
 
     /**

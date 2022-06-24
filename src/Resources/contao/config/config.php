@@ -19,3 +19,16 @@ array_insert($GLOBALS['BE_MOD']['personal-data'], 0, [
 ]);
 
 $GLOBALS['TL_MODELS'][\WEM\PersonalDataManagerBundle\Model\PersonalData::getTable()] = \WEM\PersonalDataManagerBundle\Model\PersonalData::class;
+
+$GLOBALS['WEM_HOOKS'] = $GLOBALS['WEM_HOOKS'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderListButtons'] = $GLOBALS['WEM_HOOKS']['renderListButtons'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItem'] = $GLOBALS['WEM_HOOKS']['renderSingleItem'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItemHeader'] = $GLOBALS['WEM_HOOKS']['renderSingleItemHeader'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItemTitle'] = $GLOBALS['WEM_HOOKS']['renderSingleItemTitle'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItemButtons'] = $GLOBALS['WEM_HOOKS']['renderSingleItemButtons'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItemBody'] = $GLOBALS['WEM_HOOKS']['renderSingleItemBody'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel'] = $GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle'] = $GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData'] = $GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle'] = $GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle'] ?? [];
+$GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons'] = $GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons'] ?? [];

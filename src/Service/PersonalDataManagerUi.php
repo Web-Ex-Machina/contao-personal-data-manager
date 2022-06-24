@@ -14,11 +14,13 @@ declare(strict_types=1);
 
 namespace WEM\PersonalDataManagerBundle\Service;
 
+use Contao\DcaLoader;
 use Contao\Environment;
 use Contao\FrontendTemplate;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\RequestToken;
+use Contao\System;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Model\PersonalData;
 
@@ -45,6 +47,9 @@ class PersonalDataManagerUi
         $data = $this->removeAlreadyAnonymisedElements($data);
 
         foreach ($data as $ptable => $arrPids) {
+            $dcaLoader = new DcaLoader($ptable);
+            $dcaLoader->load();
+            System::loadLanguageFile($ptable);
             foreach ($arrPids as $pid => $singleItemData) {
                 $renderedItems[] = $this->renderSingleItem((int) $pid, $ptable, $email, $singleItemData['personalDatas'], $singleItemData['originalModel']);
             }
@@ -111,26 +116,34 @@ class PersonalDataManagerUi
 
     protected function renderListButtons(string $email, int $nbRows): string
     {
+        $str = '';
         $tpl = new FrontendTemplate('wem_personal_data_manager_list_buttons');
         $tpl->email = $email;
-        $tpl->delete = 0 === $nbRows ? '' : $this->renderListButtonDelete($email);
+        $tpl->anonymize = 0 === $nbRows ? '' : $this->renderListButtonAnonymize($email);
         $tpl->export = 0 === $nbRows ? '' : $this->renderListButtonExport($email);
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderListButtons']) && \is_array($GLOBALS['WEM_HOOKS']['renderListButtons'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderListButtons'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($email, $nbRows, $str);
+            }
+        }
+
+        return $str;
     }
 
-    protected function renderListButtonDelete(string $email): string
+    protected function renderListButtonAnonymize(string $email): string
     {
-        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_delete pdm-list__button_delete">%s</a>',
-            $this->translator->trans('WEM.PEDAMA.LIST.buttonDeleteTitle', [], 'contao_default'),
-            $this->translator->trans('WEM.PEDAMA.LIST.buttonDeleteConfirm', [], 'contao_default'),
-            $this->translator->trans('WEM.PEDAMA.LIST.buttonDelete', [], 'contao_default')
+        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-list__button_anonymize">%s</a>',
+            $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeConfirm', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymize', [], 'contao_default')
         );
     }
 
     protected function renderListButtonExport(string $email): string
     {
-        return sprintf('<a href="#" title="%s" class="pdm-button pdm_list__button_export">%s</a>',
+        return sprintf('<a href="#" title="%s" class="pdm-button pdm-button_export pdm-list__button_export">%s</a>',
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExportTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExport', [], 'contao_default')
         );
@@ -144,8 +157,15 @@ class PersonalDataManagerUi
         $tpl->email = $email;
         $tpl->header = $this->renderSingleItemHeader($pid, $ptable, $personalDatas, $originalModel);
         $tpl->body = $this->renderSingleItemBody($pid, $ptable, $personalDatas, $originalModel);
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItem']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItem'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItem'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
     protected function renderSingleItemHeader(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
@@ -155,8 +175,15 @@ class PersonalDataManagerUi
         $tpl->ptable = $ptable;
         $tpl->title = $this->renderSingleItemTitle($pid, $ptable, $personalDatas, $originalModel);
         $tpl->buttons = $this->renderSingleItemButtons($pid, $ptable, $personalDatas, $originalModel);
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemHeader']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemHeader'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemHeader'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
     protected function renderSingleItemTitle(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
@@ -165,8 +192,15 @@ class PersonalDataManagerUi
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
         $tpl->data = $ptable.'('.$pid.')';
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemTitle']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemTitle'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemTitle'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
     protected function renderSingleItemButtons(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
@@ -174,25 +208,35 @@ class PersonalDataManagerUi
         $tpl = new FrontendTemplate('wem_personal_data_manager_item_buttons');
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
-        $tpl->delete = $this->renderSingleItemButtonDelete($pid, $ptable, $personalDatas, $originalModel);
+        $tpl->anonymize = $this->renderSingleItemButtonAnonymize($pid, $ptable, $personalDatas, $originalModel);
         $tpl->export = $this->renderSingleItemButtonExport($pid, $ptable, $personalDatas, $originalModel);
         $tpl->show = $this->renderSingleItemButtonShow($pid, $ptable, $personalDatas, $originalModel);
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemButtons']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemButtons'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemButtons'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
-    protected function renderSingleItemButtonDelete(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
+    protected function renderSingleItemButtonAnonymize(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_delete pdm-item__button_delete_all">%s</a>',
-            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteAllTitle', [], 'contao_default'),
-            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteAllConfirm', [], 'contao_default'),
-            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteAll', [], 'contao_default')
+        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__button_anonymize_all">%s</a>',
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllConfirm', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAll', [], 'contao_default')
         );
     }
 
     protected function renderSingleItemButtonExport(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return '[EXPORT]';
+        return sprintf('<a href="#" title="%s" class="pdm-button pdm-button_export pdm-item__button_export">%s</a>',
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonExportTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonExport', [], 'contao_default')
+        );
     }
 
     protected function renderSingleItemButtonShow(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
@@ -207,8 +251,15 @@ class PersonalDataManagerUi
         $tpl->ptable = $ptable;
         $tpl->originalModel = $this->renderSingleItemBodyOriginalModel($pid, $ptable, $personalDatas, $originalModel);
         $tpl->personalData = $this->renderSingleItemBodyPersonalData($pid, $ptable, $personalDatas, $originalModel);
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBody']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBody'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBody'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
     protected function renderSingleItemBodyOriginalModel(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
@@ -224,8 +275,15 @@ class PersonalDataManagerUi
             $items[] = $this->renderSingleItemBodyOriginalModelSingle($pid, $ptable, $field, $value, $personalDatas, $originalModel);
         }
         $tpl->items = $items;
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
     protected function renderSingleItemBodyOriginalModelSingle(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel): string
@@ -234,15 +292,21 @@ class PersonalDataManagerUi
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
         $tpl->field = $field;
-        $tpl->fieldLabel = $this->translator->trans(sprintf('%s.%s.0', $ptable, $field), [], 'contao_default');
+        $tpl->fieldLabel = $this->translator->trans(sprintf('%s.%s.0', $ptable, $field), [], 'contao_default') ?? $field;
         $tpl->value = $value;
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $field, $value, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
     protected function renderSingleItemBodyPersonalData(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        // return '[PERSONAL DATA]';
         $tpl = new FrontendTemplate('wem_personal_data_manager_item_personal_data');
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
@@ -252,8 +316,15 @@ class PersonalDataManagerUi
             $items[] = $this->renderSingleItemBodyPersonalDataSingle($pid, $ptable, $personalData, $personalDatas, $originalModel);
         }
         $tpl->items = $items;
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
     protected function renderSingleItemBodyPersonalDataSingle(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
@@ -262,11 +333,18 @@ class PersonalDataManagerUi
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
         $tpl->field = $personalData->field;
-        $tpl->fieldLabel = $this->translator->trans(sprintf('%s.%s.0', $ptable, $personalData->field), [], 'contao_default');
+        $tpl->fieldLabel = $this->translator->trans(sprintf('%s.%s.0', $ptable, $personalData->field), [], 'contao_default') ?? $personalData->field;
         $tpl->value = $personalData->anonymized ? $personalData->value : $this->unencrypt($personalData->value);
         $tpl->buttons = $this->renderSingleItemBodyPersonalDataSingleButtons($pid, $ptable, $personalData, $personalDatas, $originalModel);
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalData, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
     protected function renderSingleItemBodyPersonalDataSingleButtons(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
@@ -275,17 +353,24 @@ class PersonalDataManagerUi
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
         $tpl->field = $personalData->field;
-        $tpl->delete = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonDelete($pid, $ptable, $personalData, $personalDatas, $originalModel);
+        $tpl->anonymize = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonAnonymize($pid, $ptable, $personalData, $personalDatas, $originalModel);
+        $str = $tpl->parse();
 
-        return $tpl->parse();
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalData, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
     }
 
-    protected function renderSingleItemBodyPersonalDataSingleButtonDelete(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
+    protected function renderSingleItemBodyPersonalDataSingleButtonAnonymize(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_delete pdm-item__personal_data_single__button_delete">%s</a>',
-            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteTitle', [], 'contao_default'),
-            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteConfirm', [], 'contao_default'),
-            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDelete', [], 'contao_default')
+        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__personal_data_single__button_anonymize">%s</a>',
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeConfirm', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymize', [], 'contao_default')
         );
     }
 
