@@ -74,7 +74,7 @@ class PersonalDataManagerUi
                     'personalDatas' => [],
                 ];
             }
-            $sorted[$personalDatas->ptable][$personalDatas->pid]['personalDatas'][$personalDatas->field] = PersonalData::DELETED === $personalDatas->value ? $personalDatas->value : $this->unencrypt($personalDatas->value);
+            $sorted[$personalDatas->ptable][$personalDatas->pid]['personalDatas'][] = $personalDatas->current();
         }
         ksort($sorted);
         foreach ($sorted as $ptable => $pids) {
@@ -91,8 +91,8 @@ class PersonalDataManagerUi
             foreach ($arrPids as $pid => $singleItemData) {
                 $nbPersonalData = \count($singleItemData['personalDatas']);
                 $nbPersonalDataAnonymised = 0;
-                foreach ($singleItemData['personalDatas'] as $field => $value) {
-                    if (PersonalData::DELETED === $value) {
+                foreach ($singleItemData['personalDatas'] as $personalData) {
+                    if ($personalData->anonymized) {
                         ++$nbPersonalDataAnonymised;
                     }
                 }
@@ -248,39 +248,39 @@ class PersonalDataManagerUi
         $tpl->ptable = $ptable;
         $items = [];
 
-        foreach ($personalDatas as $field => $value) {
-            $items[] = $this->renderSingleItemBodyPersonalDataSingle($pid, $ptable, $field, $value, $personalDatas, $originalModel);
+        foreach ($personalDatas as $personalData) {
+            $items[] = $this->renderSingleItemBodyPersonalDataSingle($pid, $ptable, $personalData, $personalDatas, $originalModel);
         }
         $tpl->items = $items;
 
         return $tpl->parse();
     }
 
-    protected function renderSingleItemBodyPersonalDataSingle(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel): string
+    protected function renderSingleItemBodyPersonalDataSingle(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
         $tpl = new FrontendTemplate('wem_personal_data_manager_item_personal_data_single');
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
-        $tpl->field = $field;
-        $tpl->fieldLabel = $this->translator->trans(sprintf('%s.%s.0', $ptable, $field), [], 'contao_default');
-        $tpl->value = $value;
-        $tpl->buttons = $this->renderSingleItemBodyPersonalDataSingleButtons($pid, $ptable, $field, $value, $personalDatas, $originalModel);
+        $tpl->field = $personalData->field;
+        $tpl->fieldLabel = $this->translator->trans(sprintf('%s.%s.0', $ptable, $personalData->field), [], 'contao_default');
+        $tpl->value = $personalData->anonymized ? $personalData->value : $this->unencrypt($personalData->value);
+        $tpl->buttons = $this->renderSingleItemBodyPersonalDataSingleButtons($pid, $ptable, $personalData, $personalDatas, $originalModel);
 
         return $tpl->parse();
     }
 
-    protected function renderSingleItemBodyPersonalDataSingleButtons(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel): string
+    protected function renderSingleItemBodyPersonalDataSingleButtons(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
         $tpl = new FrontendTemplate('wem_personal_data_manager_item_personal_data_single_buttons');
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
-        $tpl->field = $field;
-        $tpl->delete = PersonalData::DELETED === $value ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonDelete($pid, $ptable, $field, $value, $personalDatas, $originalModel);
+        $tpl->field = $personalData->field;
+        $tpl->delete = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonDelete($pid, $ptable, $personalData, $personalDatas, $originalModel);
 
         return $tpl->parse();
     }
 
-    protected function renderSingleItemBodyPersonalDataSingleButtonDelete(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel): string
+    protected function renderSingleItemBodyPersonalDataSingleButtonDelete(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
         return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_delete pdm-item__personal_data_single__button_delete">%s</a>',
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteTitle', [], 'contao_default'),

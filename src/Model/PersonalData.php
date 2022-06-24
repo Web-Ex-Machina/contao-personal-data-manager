@@ -26,14 +26,6 @@ class PersonalData extends Model
      */
     protected static $strTable = 'tl_wem_personal_data';
 
-    public function delete()
-    {
-        $this->value = self::DELETED;
-        $this->save();
-
-        return 1; // number of rows affected
-    }
-
     /**
      * Find records by pid and ptable.
      *

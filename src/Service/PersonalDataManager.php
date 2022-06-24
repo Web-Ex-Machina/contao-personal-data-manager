@@ -90,6 +90,22 @@ class PersonalDataManager
     }
 
     /**
+     * Anonymize personal data linked to an email.
+     *
+     * @param string $email The email
+     */
+    public function anonymizeByEmail(string $email): void
+    {
+        $pdms = PersonalDataModel::findByEmail($email);
+        if (!$pdms) {
+            return;
+        }
+        while ($pdms->next()) {
+            $this->anonymize($pdms->current());
+        }
+    }
+
+    /**
      * Delete personal data linked to a pid, a ptable and an email.
      *
      * @param string $pid    The pid
@@ -101,6 +117,24 @@ class PersonalDataManager
     public function deleteByPidAndPtableAndEmail(string $pid, string $ptable, string $email): array
     {
         return PersonalDataModel::deleteByPidAndPTableAndEmail($pid, $ptable, $email);
+    }
+
+    /**
+     * Anonymize personal data linked to a pid, a ptable and an email.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     * @param string $email  The email
+     */
+    public function anonymizeByPidAndPtableAndEmail(string $pid, string $ptable, string $email): void
+    {
+        $pdms = PersonalDataModel::findByPidAndPTableAndEmail($pid, $ptable, $email);
+        if (!$pdms) {
+            return;
+        }
+        while ($pdms->next()) {
+            $this->anonymize($pdms->current());
+        }
     }
 
     /**
@@ -133,6 +167,22 @@ class PersonalDataManager
     }
 
     /**
+     * Anonymize personal data linked to a pid, a ptable and an email.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     * @param string $email  The email
+     */
+    public function anonymizeByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): void
+    {
+        $pdm = PersonalDataModel::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field);
+        if (!$pdm) {
+            return;
+        }
+        $this->anonymize($pdm->current());
+    }
+
+    /**
      * Retrieves a single personal data unecrypted value linked to a pid, a ptable, an email and a field.
      *
      * @param string $pid    The pid
@@ -150,7 +200,7 @@ class PersonalDataManager
         }
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
-        return PersonalDataModel::DELETED === $personalData->value ? $personalData->value : $encryptionService->decrypt($personalData->value);
+        return $personalData->anonymized ? $personalData->value : $encryptionService->decrypt($personalData->value);
     }
 
     /**
@@ -228,12 +278,29 @@ class PersonalDataManager
         $pdm->ptable = $ptable;
         $pdm->email = $email;
         $pdm->field = $field;
-        $pdm->value = $encryptionService->encrypt($value);
+        if ($pdm->anonymized && (string) $value === (string) $pdm->value) {
+            // if pdm anonymized and values are equals, do nothing
+        } else {
+            // else, save the value and de-anonymize data
+            $pdm->value = $encryptionService->encrypt($value);
+            $pdm->anonymized = '';
+            $pdm->anonymizedAt = '';
+        }
         $pdm->createdAt = $pdm->createdAt ?? time();
         $pdm->tstamp = time();
         $pdm->save();
 
         return $pdm;
+    }
+
+    public function anonymize(PersonalDataModel $personalData): void
+    {
+        $originalModel = Model::getClassFromTable($personalData->ptable);
+        $obj = new $originalModel();
+        $personalData->value = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
+        $personalData->anonymized = true;
+        $personalData->anonymizedAt = time();
+        $personalData->save();
     }
 
     /**

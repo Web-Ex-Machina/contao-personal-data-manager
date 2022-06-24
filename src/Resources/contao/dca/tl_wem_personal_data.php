@@ -66,5 +66,18 @@ $GLOBALS['TL_DCA']['tl_wem_personal_data'] = [
             'flag' => 8,
             'sql' => "varchar(10) NOT NULL default ''",
         ],
+        'anonymized' => [
+            'label' => ['anonymized'],
+            'exclude' => true,
+            'inputType' => 'checkbox',
+            'eval' => ['tl_class' => 'w50'],
+            'sql' => "char(1) NOT NULL default ''",
+        ],
+        'anonymizedAt' => [
+            'label' => ['anonymizedAt'],
+            'default' => '',
+            'flag' => 8,
+            'sql' => "varchar(10) NOT NULL default ''",
+        ],
     ],
 ];

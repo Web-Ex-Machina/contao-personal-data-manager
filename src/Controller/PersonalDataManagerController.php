@@ -65,13 +65,13 @@ class PersonalDataManagerController extends Controller
             try {
                 switch (Input::post('action')) {
                     case 'delete_single_personal_data':
-                        $arrResponse = $this->deleteSinglePersonalData();
+                        $arrResponse = $this->anonymizeSinglePersonalData();
                     break;
                     case 'delete_personal_data_item':
-                        $arrResponse = $this->deleteSingleItem();
+                        $arrResponse = $this->anonymizeSingleItem();
                     break;
                     case 'delete_all_personal_data':
-                        $arrResponse = $this->deleteAllPersonalData();
+                        $arrResponse = $this->anonymizeAllPersonalData();
                     break;
                     case 'export':
                     break;
@@ -114,7 +114,7 @@ class PersonalDataManagerController extends Controller
         return $tpl->parse();
     }
 
-    protected function deleteSinglePersonalData(): array
+    protected function anonymizeSinglePersonalData(): array
     {
         if (empty(Input::post('pid'))) {
             throw new InvalidArgumentException('The pid is empty');
@@ -135,7 +135,7 @@ class PersonalDataManagerController extends Controller
 
         /** @var PersonalDataManager */
         $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $pdm->deleteByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+        $pdm->anonymizeByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
         $arrResponse = [
             'status' => 'success',
             'msg' => '',
@@ -145,7 +145,7 @@ class PersonalDataManagerController extends Controller
         return $arrResponse;
     }
 
-    protected function deleteSingleItem(): array
+    protected function anonymizeSingleItem(): array
     {
         if (empty(Input::post('pid'))) {
             throw new InvalidArgumentException('The pid is empty');
@@ -163,7 +163,7 @@ class PersonalDataManagerController extends Controller
 
         /** @var PersonalDataManager */
         $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $pdm->deleteByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
+        $pdm->anonymizeByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
         $arrResponse = [
             'status' => 'success',
             'msg' => '',
@@ -173,7 +173,7 @@ class PersonalDataManagerController extends Controller
         return $arrResponse;
     }
 
-    protected function deleteAllPersonalData(): array
+    protected function anonymizeAllPersonalData(): array
     {
         if (empty(Input::post('email'))) {
             throw new InvalidArgumentException('The email is empty');
@@ -183,7 +183,7 @@ class PersonalDataManagerController extends Controller
 
         /** @var PersonalDataManager */
         $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $pdm->deleteByEmail(Input::post('email'));
+        $pdm->anonymizeByEmail(Input::post('email'));
         $arrResponse = [
             'status' => 'success',
             'msg' => '',

@@ -26,7 +26,6 @@ namespace WEM\PersonalDataManagerBundle\Model\Traits;
  */
 use Contao\Database\Result;
 use Contao\Model;
-use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
 
 trait PersonalDataTrait
 {
@@ -74,7 +73,7 @@ trait PersonalDataTrait
 
         if ($personalDatas) {
             while ($personalDatas->next()) {
-                $this->{$personalDatas->field} = PersonalDataModel::DELETED === $personalDatas->value ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
+                $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
             }
         }
     }
@@ -87,6 +86,16 @@ trait PersonalDataTrait
     public function getPersonalDataFieldsDefaultValueForField(string $field): string
     {
         return self::$personalDataFieldsDefaultValues[$field];
+    }
+
+    public function getPersonalDataFieldsAnonymizedValues(): array
+    {
+        return self::$personalDataFieldsAnonymizedValues;
+    }
+
+    public function getPersonalDataFieldsAnonymizedValueForField(string $field): string
+    {
+        return self::$personalDataFieldsAnonymizedValues[$field];
     }
 
     public function getPersonalDataFieldsNames(): array

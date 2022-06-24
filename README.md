@@ -43,6 +43,8 @@ class MyModel
     protected static $personalDataFieldsNames = ['myField'];
     /** @var array Default values for fields to be managed by the Personal Data Manager */
     protected static $personalDataFieldsDefaultValues = ['myField' => 'managed_by_pdm'];
+    /** @var array Values for fields to be managed by the Personal Data Manager when anonymized */
+    protected static $personalDataFieldsAnonymizedValues = ['myField' => 'Anonymized'];
     /** @var string Field to be used as pid by the Personal Data Manager */
     protected static $personalDataPidField = 'id';
     /** @var string Field to be used as email by the Personal Data Manager */
