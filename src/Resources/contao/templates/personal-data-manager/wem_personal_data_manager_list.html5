@@ -6,19 +6,24 @@
 		<div class="pdm-list__header__subtitle tl_help">
 			<?php echo $this->trans('WEM.PEDAMA.LIST.subtitle',[],'contao_default'); ?>
 		</div>
-		<div class="pdm-list__header__buttons">
-		</div>
+		<?php echo $this->buttons; ?>
 	</div>
 	<div class="pdm-items">
-		<?php foreach($this->items as $item): ?>
-		<?php echo $item; ?>
-		<?php endforeach; ?>
+		<?php if(empty($this->items)): ?>
+		<div class="tl_info">
+			<?php echo $this->trans('WEM.PEDAMA.LIST.noItems',[],'contao_default'); ?>
+		</div>
+		<?php else: ?>
+			<?php foreach($this->items as $item): ?>
+				<?php echo $item; ?>
+			<?php endforeach; ?>
+		<?php endif; ?>
 	</div>
 </div>
 <script type="text/javascript">
 	(function() {
 		function applyEvents(){
-			document.querySelectorAll('.pdm_item__personal_data_single__button_delete').forEach(function(button){
+			document.querySelectorAll('.pdm-item__personal_data_single__button_delete').forEach(function(button){
 				button.addEventListener('click',function(e){
 					e.preventDefault();
 					if(!confirm(e.target.getAttribute('data-confirm'))){
@@ -33,7 +38,7 @@
 				});
 			});
 
-			document.querySelectorAll('.pdm_item__button_delete').forEach(function(button){
+			document.querySelectorAll('.pdm-item__button_delete_all').forEach(function(button){
 				button.addEventListener('click',function(e){
 					e.preventDefault();
 					if(!confirm(e.target.getAttribute('data-confirm'))){
@@ -46,13 +51,26 @@
 					return false;
 				});
 			});
-		}
+
+			document.querySelectorAll('.pdm-list__button_delete').forEach(function(button){
+				button.addEventListener('click',function(e){
+					e.preventDefault();
+					if(!confirm(e.target.getAttribute('data-confirm'))){
+						return false;
+					}
+					
+					let email = e.target.parentNode.getAttribute('data-email');
+					deleteAllPersonalData(email);
+					return false;
+				});
+			});
+		};
 
 		function deleteSinglePersonalData(pid, ptable, field){
-			let singleElement = document.querySelector('.pdm_item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
-			let email = document.querySelector('.pdm_item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]').getAttribute('data-email');
-			let singleElementFieldValue = singleElement.querySelector('.pdm_item__personal_data_single__value');
-			let singleElementFieldButtons = singleElement.querySelector('.pdm_item__personal_data_single__buttons');
+			let singleElement = document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
+			let email = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]').getAttribute('data-email');
+			let singleElementFieldValue = singleElement.querySelector('.pdm-item__personal_data_single__value');
+			let singleElementFieldButtons = singleElement.querySelector('.pdm-item__personal_data_single__buttons');
 			displayLoader(singleElement);
 
 			postData({
@@ -73,15 +91,15 @@
 				alert("Une erreur est survenue");
 				console.log(e);
 			});
-		}
+		};
 
 		function deletePersonalDataItem(pid, ptable){
-			let item = document.querySelector('.pdm_item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+			let item = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
 			let email = item.getAttribute('data-email');
-			let singleElementFieldValues = item.querySelectorAll('.pdm_item__personal_data_single__value');
-			let singleElementFieldButtonss = item.querySelectorAll('.pdm_item__personal_data_single__buttons');
-			let itemDeleteButton = item.querySelectorAll('.pdm_item__button_delete');
-			let itemExportButton = item.querySelectorAll('.pdm_item__button_export');
+			let singleElementFieldValues = item.querySelectorAll('.pdm-item__personal_data_single__value');
+			let singleElementFieldButtonss = item.querySelectorAll('.pdm-item__personal_data_single__buttons');
+			let itemDeleteButton = item.querySelectorAll('.pdm-button_delete');
+			let itemExportButton = item.querySelectorAll('.pdm-button_export');
 			
 			displayLoader(item);
 
@@ -109,18 +127,57 @@
 				alert("Une erreur est survenue");
 				console.log(e);
 			});
-		}
+		};
+
+		function deleteAllPersonalData(email){
+			let list = document.querySelector('.pdm-list');
+			let singleElementFieldValues = document.querySelectorAll('.pdm-item__personal_data_single__value');
+			let singleElementFieldButtonss = document.querySelectorAll('.pdm-item__personal_data_single__buttons');
+			let itemDeleteButtons = document.querySelectorAll('.pdm-button_delete');
+			let itemExportButtons = document.querySelectorAll('.pdm-button_export');
+			
+			displayLoader(list);
+
+			postData({
+				'action':'delete_all_personal_data',
+				'email':email
+			}).then(data =>{
+				if("success" == data.status){
+					singleElementFieldValues.forEach(function(singleElementFieldValue){
+						singleElementFieldValue.innerHTML = data.value;
+					});
+					singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
+						singleElementFieldButtons.innerHTML = '';
+					});
+					itemDeleteButtons.forEach(function(itemDeleteButton){
+						itemDeleteButton.innerHTML = '';
+						itemDeleteButton.classList.add('hidden');
+					});
+					itemExportButtons.forEach(function(itemExportButton){
+						itemExportButton.innerHTML = '';
+						itemExportButton.classList.add('hidden');
+					});
+				}else{
+					alert(data.msg);	
+				}
+				
+				hideLoader(list);
+			}).catch(function(e) {
+				alert("Une erreur est survenue");
+				console.log(e);
+			});
+		};
 
 
 		function displayLoader(element){
 			let loader = document.createElement('div');
 			loader.classList.add('pdm-loader');
 			element.appendChild(loader);
-		}
+		};
 
 		function hideLoader(element){
 			element.removeChild(element.querySelector('.pdm-loader'));
-		}
+		};
 
 		async function postData(data) {
 			var request = new FormData();

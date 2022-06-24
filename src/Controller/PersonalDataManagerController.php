@@ -70,6 +70,9 @@ class PersonalDataManagerController extends Controller
                     case 'delete_personal_data_item':
                         $arrResponse = $this->deleteSingleItem();
                     break;
+                    case 'delete_all_personal_data':
+                        $arrResponse = $this->deleteAllPersonalData();
+                    break;
                     case 'export':
                     break;
                     case 'show':

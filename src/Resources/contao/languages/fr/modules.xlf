@@ -6,12 +6,12 @@
 	      <target>Données personnelles</target>
 	    </trans-unit>
 		<trans-unit id="MOD.wem-personal-data-manager.0">
-			<source>Personal Data (raw)</source>
-			<target>Données personnelles (brutes)</target>
+			<source>Personal Data</source>
+			<target>Données personnelles</target>
 		</trans-unit>
 		<trans-unit id="MOD.wem-personal-data-manager.1">
-			<source>Manage raw personal data</source>
-			<target>Gérer les données personnelles brutes</target>
+			<source>Manage personal data</source>
+			<target>Gérer les données personnelles</target>
 		</trans-unit>
     </body>
   </file>

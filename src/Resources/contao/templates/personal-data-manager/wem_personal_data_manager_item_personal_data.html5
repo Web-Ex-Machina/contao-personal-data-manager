@@ -1,5 +1,5 @@
-<div class="pdm_item__personal_data" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>">
-	<div class="pdm_item__personal_data__title">
+<div class="pdm-item__personal_data" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>">
+	<div class="pdm-item__personal_data__title">
 		<?php echo $this->trans('WEM.PEDAMA.ITEM.personalDataTitle',[],'contao_default'); ?>
 	</div>
 	<?php foreach($this->items as $item): ?>

@@ -15,79 +15,75 @@
 	font-size: 1.5em;
 }
 
-.pdm_item{
+.pdm-item{
 	margin: 1px;
 	margin-bottom: 5px;
 	border:  1px solid black;
 }
 
-.pdm_item__header{
+.pdm-item__header{
 	background-color: lightgrey;
 	display: grid;
 	padding: 5px;
 	grid-template-columns: repeat(2, 1fr);
 }
 
-.pdm_item__body{
+.pdm-item__body{
 	padding: 5px;
 	position: relative;
 }
 
-.pdm_item__original_model{
+.pdm-item__original_model{
 	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 }
-.pdm_item__original_model__title{
+.pdm-item__original_model__title{
 	grid-column:  1 / 3;
 	font-weight: bold;
 	font-size: 1.25em;
 }
-.pdm_item__original_model_single{
+.pdm-item__original_model_single{
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	padding: 2px;
 }
 
-.pdm_item__original_model_single__field{
+.pdm-item__original_model_single__field{
 	font-weight: bold;
 }
 
-.pdm_item__personal_data{
+.pdm-item__personal_data{
 	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 }
 
-.pdm_item__personal_data__title{
+.pdm-item__personal_data__title{
 	grid-column:  1 / 3;
 	font-weight: bold;
 	font-size: 1.25em;
 }
 
-.pdm_item__personal_data_single{
+.pdm-item__personal_data_single{
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	padding: 2px;
 	position: relative;
 }
 
-.pdm_item__personal_data_single__field{
+.pdm-item__personal_data_single__field{
 	font-weight: bold;
 }
 
-.pdm_item__button{
+.pdm-button{
 	background-position: left center;
 	background-repeat: no-repeat;
 	margin-left: 15px;
 	padding: 3px 0 3px 21px;
 }
 
-.pdm_item__personal_data_single__button_delete{
-	background-image:  url(../../../system/themes/flexible/icons/delete.svg);
-}
-
-.pdm_item__button_delete{
+.pdm-button_delete{
 	background-image:  url(../../../system/themes/flexible/icons/delete.svg);
 }
 

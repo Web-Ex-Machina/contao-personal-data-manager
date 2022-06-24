@@ -15,7 +15,31 @@
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.subtitle">
         <source>List of all items using your personal data</source>
-        <target>Liste des objets utilisant vos données personnelles</target>
+        <target>Liste des éléments utilisant vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.noItems">
+        <source>No item to display</source>
+        <target>Aucun élément à afficher</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonDeleteTitle">
+        <source>Delete personal data</source>
+        <target>Supprimer vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonDeleteConfirm">
+        <source>Do you really want to delete yuor personal data ?</source>
+        <target>Voulez-vous vraiment supprimer vos données personnelles ?</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonDelete">
+        <source>Delete</source>
+        <target>Supprimer</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonExportTitle">
+        <source>Export your personal data</source>
+        <target>Exporter vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonExport">
+        <source>Export</source>
+        <target>Exporter</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.ITEM.originalModelTitle">
         <source>Original model</source>

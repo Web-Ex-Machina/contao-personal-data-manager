@@ -42,6 +42,7 @@ class PersonalDataManagerUi
         $tpl = new FrontendTemplate('wem_personal_data_manager_list');
         $renderedItems = [];
         $data = $this->sortData($this->manager->findByEmail($email));
+        $data = $this->removeAlreadyAnonymisedElements($data);
 
         foreach ($data as $ptable => $arrPids) {
             foreach ($arrPids as $pid => $singleItemData) {
@@ -51,6 +52,7 @@ class PersonalDataManagerUi
         $tpl->items = $renderedItems;
         $tpl->request = Environment::get('request');
         $tpl->token = RequestToken::get();
+        $tpl->buttons = $this->renderListButtons($email, \count($data));
 
         return $tpl->parse();
     }
@@ -81,6 +83,57 @@ class PersonalDataManagerUi
         }
 
         return $sorted;
+    }
+
+    protected function removeAlreadyAnonymisedElements(array $data): array
+    {
+        foreach ($data as $ptable => $arrPids) {
+            foreach ($arrPids as $pid => $singleItemData) {
+                $nbPersonalData = \count($singleItemData['personalDatas']);
+                $nbPersonalDataAnonymised = 0;
+                foreach ($singleItemData['personalDatas'] as $field => $value) {
+                    if (PersonalData::DELETED === $value) {
+                        ++$nbPersonalDataAnonymised;
+                    }
+                }
+
+                if ($nbPersonalData === $nbPersonalDataAnonymised) {
+                    unset($data[$ptable][$pid]);
+                }
+            }
+            if (0 === \count($data[$ptable])) {
+                unset($data[$ptable]);
+            }
+        }
+
+        return $data;
+    }
+
+    protected function renderListButtons(string $email, int $nbRows): string
+    {
+        $tpl = new FrontendTemplate('wem_personal_data_manager_list_buttons');
+        $tpl->email = $email;
+        $tpl->delete = 0 === $nbRows ? '' : $this->renderListButtonDelete($email);
+        $tpl->export = 0 === $nbRows ? '' : $this->renderListButtonExport($email);
+
+        return $tpl->parse();
+    }
+
+    protected function renderListButtonDelete(string $email): string
+    {
+        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_delete pdm-list__button_delete">%s</a>',
+            $this->translator->trans('WEM.PEDAMA.LIST.buttonDeleteTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.LIST.buttonDeleteConfirm', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.LIST.buttonDelete', [], 'contao_default')
+        );
+    }
+
+    protected function renderListButtonExport(string $email): string
+    {
+        return sprintf('<a href="#" title="%s" class="pdm-button pdm_list__button_export">%s</a>',
+            $this->translator->trans('WEM.PEDAMA.LIST.buttonExportTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.LIST.buttonExport', [], 'contao_default')
+        );
     }
 
     protected function renderSingleItem(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): string
@@ -130,7 +183,7 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemButtonDelete(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm_item__button pdm_item__button_delete">%s</a>',
+        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_delete pdm-item__button_delete_all">%s</a>',
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteAllTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteAllConfirm', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteAll', [], 'contao_default')
@@ -229,7 +282,7 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemBodyPersonalDataSingleButtonDelete(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm_item__button pdm_item__personal_data_single__button_delete">%s</a>',
+        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_delete pdm-item__personal_data_single__button_delete">%s</a>',
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonDeleteConfirm', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonDelete', [], 'contao_default')

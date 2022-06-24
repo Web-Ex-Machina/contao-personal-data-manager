@@ -1,8 +1,8 @@
-<div class="pdm_item__personal_data_single" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>"  data-field="<?php echo $this->field; ?>">
-	<div class="pdm_item__personal_data_single__field">
+<div class="pdm-item__personal_data_single" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>"  data-field="<?php echo $this->field; ?>">
+	<div class="pdm-item__personal_data_single__field">
 		<?php echo $this->fieldLabel; ?>
 	</div>
-	<div class="pdm_item__personal_data_single__value">
+	<div class="pdm-item__personal_data_single__value">
 		<?php echo $this->value; ?>
 	</div>
 	<?php echo $this->buttons; ?>
