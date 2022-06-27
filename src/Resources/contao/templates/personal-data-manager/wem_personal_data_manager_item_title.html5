@@ -1,0 +1,3 @@
+<div class="pdm-item__title">
+	<?php echo $this->data; ?>
+</div>

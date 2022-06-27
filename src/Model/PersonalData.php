@@ -18,12 +18,13 @@ use WEM\UtilsBundle\Model\Model;
 
 class PersonalData extends Model
 {
+    public const DELETED = 'deleted';
     /**
      * Table name.
      *
      * @var string
      */
-    protected static $strTable = 'tl_personal_data';
+    protected static $strTable = 'tl_wem_personal_data';
 
     /**
      * Find records by pid and ptable.
@@ -59,7 +60,7 @@ class PersonalData extends Model
      * @param string $ptable The ptable
      * @param string $email  The email
      *
-     * @return \Contao\Collection|null
+     * @return \Contao\Model\Collection|null
      */
     public static function findByPidAndPTableAndEmail(string $pid, string $ptable, string $email)
     {
@@ -159,6 +160,28 @@ class PersonalData extends Model
                 $ids[] = $items->id;
                 $items->delete();
             }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Delete rows by pid, ptable and email.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     * @param string $email  The email
+     * @param string $field  The field
+     *
+     * @return array The array of deleted ids
+     */
+    public static function deleteByPidAndPTableAndEmailAndField(string $pid, string $ptable, string $email, string $field): array
+    {
+        $ids = [];
+        $item = self::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field);
+        if ($item) {
+            $ids[] = $item->id;
+            $item->delete();
         }
 
         return $ids;

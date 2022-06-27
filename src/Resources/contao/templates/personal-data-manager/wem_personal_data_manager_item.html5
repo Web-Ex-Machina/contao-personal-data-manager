@@ -1,0 +1,4 @@
+<div class="pdm-item" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>" data-email="<?php echo $this->email; ?>">
+	<?php echo $this->header; ?>
+	<?php echo $this->body; ?>
+</div>

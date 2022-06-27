@@ -1,6 +1,98 @@
 <?xml version="1.0" ?><xliff version="1.1">
   <file datatype="php" original="system/modules/wem-personal-data-manager/languages/en/default.php" source-language="en" target-language="fr">
     <body>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.PleaseFillEmail">
+        <source>Please fill an email address</source>
+        <target>Veuillez renseinger un email</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.NoPersonalDataToDisplay">
+        <source>No personal data to show</source>
+        <target>Aucune données personnelle à afficher</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.title">
+        <source>Your personal data</source>
+        <target>Vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.subtitle">
+        <source>List of all items using your personal data</source>
+        <target>Liste des éléments utilisant vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.noItems">
+        <source>No item to display</source>
+        <target>Aucun élément à afficher</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymizeTitle">
+        <source>Delete personal data</source>
+        <target>Supprimer vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymizeConfirm">
+        <source>Do you really want to delete yuor personal data ?</source>
+        <target>Voulez-vous vraiment supprimer vos données personnelles ?</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymize">
+        <source>Delete</source>
+        <target>Supprimer</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonExportTitle">
+        <source>Export your personal data</source>
+        <target>Exporter vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.buttonExport">
+        <source>Export</source>
+        <target>Exporter</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.originalModelTitle">
+        <source>Original model</source>
+        <target>Objet original</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.personalDataTitle">
+        <source>Personal data</source>
+        <target>Données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeTitle">
+        <source>Delete this personal data</source>
+        <target>Supprimer cette donnée personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymize">
+        <source>Delete</source>
+        <target>Supprimer</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeConfirm">
+        <source>Do you really want to delete this personal data ?</source>
+        <target>Voulez-vous vraiment supprimer cette donnée personnelle ?</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.valueDeleted">
+        <source>Deleted</source>
+        <target>Supprimée</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeAllTitle">
+        <source>Delete all personal data linked to this entity</source>
+        <target>Supprimer les données personnelles associées à cette entité</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeAll">
+        <source>Delete</source>
+        <target>Supprimer</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonAnonymizeAllConfirm">
+        <source>Do you really want to delete all personal data linked to this entity ?</source>
+        <target>Voulez-vous vraiment supprimer les données personnelles associées à cette entité ?</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonExportTitle">
+        <source>Export all personal data linked to this entity</source>
+        <target>Exporter les données personnelles associées à cette entité</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonExport">
+        <source>Export</source>
+        <target>Exporter</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonShowTitle">
+        <source>Show this entity</source>
+        <target>Afficher cette entité</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonShow">
+        <source>Show</source>
+        <target>Voir</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

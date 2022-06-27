@@ -12,8 +12,7 @@ declare(strict_types=1);
  * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
 
-// THIS FILE EXISTS ONLY FOR THE DOCKER VERSION
-$GLOBALS['TL_DCA']['tl_personal_data'] = [
+$GLOBALS['TL_DCA']['tl_wem_personal_data'] = [
     // Config
     'config' => [
         'dataContainer' => 'Table',
@@ -64,6 +63,19 @@ $GLOBALS['TL_DCA']['tl_personal_data'] = [
         ],
         'createdAt' => [
             'default' => time(),
+            'flag' => 8,
+            'sql' => "varchar(10) NOT NULL default ''",
+        ],
+        'anonymized' => [
+            'label' => ['anonymized'],
+            'exclude' => true,
+            'inputType' => 'checkbox',
+            'eval' => ['tl_class' => 'w50'],
+            'sql' => "char(1) NOT NULL default ''",
+        ],
+        'anonymizedAt' => [
+            'label' => ['anonymizedAt'],
+            'default' => '',
             'flag' => 8,
             'sql' => "varchar(10) NOT NULL default ''",
         ],

@@ -40,7 +40,7 @@ trait PersonalDataTrait
     {
         // delete associated personal data
         $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $manager->deleteForPidAndPtable(
+        $manager->deleteByPidAndPtable(
             (string) $this->{self::$personalDataPidField},
             self::$personalDataPtable
         );
@@ -66,16 +66,30 @@ trait PersonalDataTrait
         $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
-        $personalDatas = $manager->findForPidAndPtable(
+        $personalDatas = $manager->findByPidAndPtable(
             (string) $this->{self::$personalDataPidField},
             self::$personalDataPtable
         );
 
         if ($personalDatas) {
             while ($personalDatas->next()) {
-                $this->{$personalDatas->field} = $encryptionService->decrypt($personalDatas->value); // We should unencrypt here
+                $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
             }
         }
+    }
+
+    /**
+     * Anonymize personal data attached to the current object and apply them.
+     */
+    public function anonymize(): void
+    {
+        // re-find personal data
+        $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+        $manager->anonymizeByPidAndPtableAndEmail(
+            (string) $this->{self::$personalDataPidField},
+            self::$personalDataPtable
+        );
+        $this->refresh();
     }
 
     public function getPersonalDataFieldsDefaultValues(): array
@@ -86,6 +100,16 @@ trait PersonalDataTrait
     public function getPersonalDataFieldsDefaultValueForField(string $field): string
     {
         return self::$personalDataFieldsDefaultValues[$field];
+    }
+
+    public function getPersonalDataFieldsAnonymizedValues(): array
+    {
+        return self::$personalDataFieldsAnonymizedValues;
+    }
+
+    public function getPersonalDataFieldsAnonymizedValueForField(string $field): string
+    {
+        return self::$personalDataFieldsAnonymizedValues[$field];
     }
 
     public function getPersonalDataFieldsNames(): array

@@ -43,6 +43,8 @@ class MyModel
     protected static $personalDataFieldsNames = ['myField'];
     /** @var array Default values for fields to be managed by the Personal Data Manager */
     protected static $personalDataFieldsDefaultValues = ['myField' => 'managed_by_pdm'];
+    /** @var array Values for fields to be managed by the Personal Data Manager when anonymized */
+    protected static $personalDataFieldsAnonymizedValues = ['myField' => 'Anonymized'];
     /** @var string Field to be used as pid by the Personal Data Manager */
     protected static $personalDataPidField = 'id';
     /** @var string Field to be used as email by the Personal Data Manager */
@@ -107,6 +109,39 @@ $GLOBALS['TL_DCA']['tl_my_table'] = [
 ```
 
 This way, editing your records in back-end will work with the same as with the model.
+
+Hooks
+-----
+
+Multiple hooks are available to customize the bundle
+
+### Personal Data List
+
+Hook | Return Value | Description
+--- | --- | ---
+`renderListButtons` | `string` | *To be completed*
+`renderSingleItem` | `string` | *To be completed*
+`renderSingleItemHeader` | `string` | *To be completed*
+`renderSingleItemTitle` | `string` | *To be completed*
+`renderSingleItemButtons` | `string` | *To be completed*
+`renderSingleItemBody` | `string` | *To be completed*
+`renderSingleItemBodyOriginalModel` | `string` | *To be completed*
+`renderSingleItemBodyOriginalModelSingle` | `string` | *To be completed*
+`renderSingleItemBodyOriginalModelSingleFieldLabel` | `string` | *To be completed*
+`renderSingleItemBodyOriginalModelSingleFieldValue` | `string` | *To be completed*
+`renderSingleItemBodyPersonalData` | `string` | *To be completed*
+`renderSingleItemBodyPersonalDataSingle` | `string` | *To be completed*
+`renderSingleItemBodyPersonalDataSingleFieldLabel` | `string` | *To be completed*
+`renderSingleItemBodyPersonalDataSingleFieldValue` | `string` | *To be completed*
+`renderSingleItemBodyPersonalDataSingleButtons` | `string` | *To be completed*
+`getHrefByPidAndPtableAndEmail` | `string` | URL to show the current item
+
+### CSV Exporter
+
+Hook | Return value | Description
+--- | --- | ---
+`formatHeaderForCsvExport` | `array` | Header for CSV exports
+`formatSinglePersonalDataForCsvExport` | `array` | Data for each single Personal Data item
 
 Documentation
 -------------
