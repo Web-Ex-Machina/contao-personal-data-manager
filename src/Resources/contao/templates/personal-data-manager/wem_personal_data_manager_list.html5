@@ -99,9 +99,8 @@
 		};
 
 		function anonymizeSinglePersonalData(pid, ptable, field){
-			let singleElement = document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
-			let email = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]').getAttribute('data-email');
-			let singleElementFieldValue = singleElement.querySelector('.pdm-item__personal_data_single__value');
+			let singleElement = getSinglePersonalValueContainer(pid, ptable, field);
+			let email = getSingleItem(pid, ptable).getAttribute('data-email');
 			let singleElementFieldButtons = singleElement.querySelector('.pdm-item__personal_data_single__buttons');
 			displayLoader(singleElement);
 
@@ -115,7 +114,6 @@
 			.then(data => data.json())
 			.then(data =>{
 				if("success" == data.status){
-					// singleElementFieldValue.innerHTML = data.value;
 					singleElementFieldButtons.innerHTML = '';
 					replaceByAnonymizedValue(pid, ptable, field, data.value);
 				}else{
@@ -129,9 +127,8 @@
 		};
 
 		function anonymizePersonalDataItem(pid, ptable){
-			let item = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+			let item = getSingleItem(pid, ptable);
 			let email = item.getAttribute('data-email');
-			let singleElementFieldValues = item.querySelectorAll('.pdm-item__personal_data_single__value');
 			let singleElementFieldButtonss = item.querySelectorAll('.pdm-item__personal_data_single__buttons');
 			let itemAnonymizeButton = item.querySelectorAll('.pdm-button_anonymize');
 			let itemExportButton = item.querySelectorAll('.pdm-button_export');
@@ -147,9 +144,6 @@
 			.then(data => data.json())
 			.then(data =>{
 				if("success" == data.status){
-					// singleElementFieldValues.forEach(function(singleElementFieldValue){
-					// 	singleElementFieldValue.innerHTML = data.value;
-					// });
 					for(var ptable in data.values){
 						for(var pid in data.values[ptable]){
 							for(var field in data.values[ptable][pid]){
@@ -190,10 +184,6 @@
 			.then(data => data.json())
 			.then(data =>{
 				if("success" == data.status){
-					// singleElementFieldValues.forEach(function(singleElementFieldValue){
-					// 	singleElementFieldValue.innerHTML = data.value;
-					// });
-					
 					for(var ptable in data.values){
 						for(var pid in data.values[ptable]){
 							for(var field in data.values[ptable][pid]){
@@ -202,7 +192,7 @@
 							}
 						}
 					}
-					
+
 					singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
 						singleElementFieldButtons.innerHTML = '';
 					});
@@ -226,7 +216,7 @@
 		};
 
 		function exportPersonalDataItem(pid, ptable){
-			let item = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+			let item = getSingleItem(pid, ptable);
 			let email = item.getAttribute('data-email');
 			
 			displayLoader(item);
@@ -274,7 +264,7 @@
 		};
 
 		function showPersonalDataItem(pid, ptable){
-			let item = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+			let item = getSingleItem(pid, ptable);
 			let email = item.getAttribute('data-email');
 			
 			displayLoader(item);
@@ -305,13 +295,25 @@
 		};
 
 		function replaceByAnonymizedValue(pid, ptable, field, value){
-			let singleOriginal = document.querySelector('.pdm-item__original_model_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
-			let singlePersonal = document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
+			let singleOriginal = getSingleOriginalValueContainer(pid, ptable, field);
+			let singlePersonal = getSinglePersonalValueContainer(pid, ptable, field);
 			let singleoriginalValueContainer = singleOriginal.querySelector('.pdm-item__original_model_single__value');
 			let singlePersonalValueContainer = singlePersonal.querySelector('.pdm-item__personal_data_single__value');
 
 			singleoriginalValueContainer.innerHTML = value;
 			singlePersonalValueContainer.innerHTML = value;
+		}
+
+		function getSingleOriginalValueContainer(pid, ptable, field){
+			return document.querySelector('.pdm-item__original_model_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
+		}
+
+		function getSinglePersonalValueContainer(pid, ptable, field){
+			return document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
+		}
+
+		function getSingleItem(pid, ptable){
+			return document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
 		}
 
 		function downloadBlobFile(blob, filename){

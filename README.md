@@ -115,24 +115,33 @@ Hooks
 
 Multiple hooks are available to customize the bundle
 
-Hook | Description
---- | ---
-`renderListButtons` | *To be completed*
-`renderSingleItem` | *To be completed*
-`renderSingleItemHeader` | *To be completed*
-`renderSingleItemTitle` | *To be completed*
-`renderSingleItemButtons` | *To be completed*
-`renderSingleItemBody` | *To be completed*
-`renderSingleItemBodyOriginalModel` | *To be completed*
-`renderSingleItemBodyOriginalModelSingle` | *To be completed*
-`renderSingleItemBodyOriginalModelSingleFieldLabel` | *To be completed*
-`renderSingleItemBodyOriginalModelSingleFieldValue` | *To be completed*
-`renderSingleItemBodyPersonalData` | *To be completed*
-`renderSingleItemBodyPersonalDataSingle` | *To be completed*
-`renderSingleItemBodyPersonalDataSingleFieldLabel` | *To be completed*
-`renderSingleItemBodyPersonalDataSingleFieldValue` | *To be completed*
-`renderSingleItemBodyPersonalDataSingleButtons` | *To be completed*
-`getHrefByPidAndPtableAndEmail` | *To be completed*
+### Personal Data List
+
+Hook | Return Value | Description
+--- | --- | ---
+`renderListButtons` | `string` | *To be completed*
+`renderSingleItem` | `string` | *To be completed*
+`renderSingleItemHeader` | `string` | *To be completed*
+`renderSingleItemTitle` | `string` | *To be completed*
+`renderSingleItemButtons` | `string` | *To be completed*
+`renderSingleItemBody` | `string` | *To be completed*
+`renderSingleItemBodyOriginalModel` | `string` | *To be completed*
+`renderSingleItemBodyOriginalModelSingle` | `string` | *To be completed*
+`renderSingleItemBodyOriginalModelSingleFieldLabel` | `string` | *To be completed*
+`renderSingleItemBodyOriginalModelSingleFieldValue` | `string` | *To be completed*
+`renderSingleItemBodyPersonalData` | `string` | *To be completed*
+`renderSingleItemBodyPersonalDataSingle` | `string` | *To be completed*
+`renderSingleItemBodyPersonalDataSingleFieldLabel` | `string` | *To be completed*
+`renderSingleItemBodyPersonalDataSingleFieldValue` | `string` | *To be completed*
+`renderSingleItemBodyPersonalDataSingleButtons` | `string` | *To be completed*
+`getHrefByPidAndPtableAndEmail` | `string` | URL to show the current item
+
+### CSV Exporter
+
+Hook | Return value | Description
+--- | --- | ---
+`formatHeaderForCsvExport` | `array` | Header for CSV exports
+`formatSinglePersonalDataForCsvExport` | `array` | Data for each single Personal Data item
 
 Documentation
 -------------

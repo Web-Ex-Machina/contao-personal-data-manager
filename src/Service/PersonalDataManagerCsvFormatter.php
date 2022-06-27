@@ -31,7 +31,7 @@ class PersonalDataManagerCsvFormatter
     protected function formatHeader(): array
     {
         $row = [
-            'Entity;Mail;Field;Value',
+            'Entity', 'Mail', 'Field', 'Value',
         ];
 
         if (isset($GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport']) && \is_array($GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport'])) {
@@ -40,7 +40,7 @@ class PersonalDataManagerCsvFormatter
             }
         }
 
-        return $row;
+        return [implode(';', $row)];
     }
 
     protected function formatAll(?Collection $personalData, array $header): array
