@@ -87,6 +87,14 @@
 	background-image:  url(../../../system/themes/flexible/icons/delete.svg);
 }
 
+.pdm-button_export{
+	background-image:  url(../../../system/themes/flexible/icons/store.svg);
+}
+
+.pdm-button_show{
+	background-image:  url(../../../system/themes/flexible/icons/show.svg);
+}
+
 .pdm-loader{
 	width: 100%;
 	height: 100%;

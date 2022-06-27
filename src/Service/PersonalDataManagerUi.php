@@ -241,7 +241,10 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemButtonShow(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return '[SHOW]';
+        return sprintf('<a href="#" title="%s" class="pdm-button pdm-button_show pdm-item__button_show">%s</a>',
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonShowTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonShow', [], 'contao_default')
+        );
     }
 
     protected function renderSingleItemBody(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
@@ -292,12 +295,38 @@ class PersonalDataManagerUi
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
         $tpl->field = $field;
-        $tpl->fieldLabel = $this->translator->trans(sprintf('%s.%s.0', $ptable, $field), [], 'contao_default') ?? $field;
-        $tpl->value = $value;
+        $tpl->fieldLabel = $this->renderSingleItemBodyOriginalModelSingleFieldLabel($pid, $ptable, $field, $value, $personalDatas, $originalModel);
+        $tpl->value = $this->renderSingleItemBodyOriginalModelSingleFieldValue($pid, $ptable, $field, $value, $personalDatas, $originalModel);
         $str = $tpl->parse();
 
         if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $field, $value, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
+    }
+
+    protected function renderSingleItemBodyOriginalModelSingleFieldLabel(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel): string
+    {
+        $str = $this->translator->trans(sprintf('%s.%s.0', $ptable, $field), [], 'contao_default') ?? $field;
+
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $field, $value, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
+    }
+
+    protected function renderSingleItemBodyOriginalModelSingleFieldValue(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel): string
+    {
+        $str = $value;
+
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $field, $value, $personalDatas, $originalModel, $str);
             }
         }
@@ -333,13 +362,38 @@ class PersonalDataManagerUi
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
         $tpl->field = $personalData->field;
-        $tpl->fieldLabel = $this->translator->trans(sprintf('%s.%s.0', $ptable, $personalData->field), [], 'contao_default') ?? $personalData->field;
-        $tpl->value = $personalData->anonymized ? $personalData->value : $this->unencrypt($personalData->value);
+        $tpl->fieldLabel = $this->renderSingleItemBodyPersonalDataSingleFieldLabel($pid, $ptable, $personalData, $personalDatas, $originalModel);
+        $tpl->value = $this->renderSingleItemBodyPersonalDataSingleFieldValue($pid, $ptable, $personalData, $personalDatas, $originalModel);
         $tpl->buttons = $this->renderSingleItemBodyPersonalDataSingleButtons($pid, $ptable, $personalData, $personalDatas, $originalModel);
         $str = $tpl->parse();
 
         if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalData, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
+    }
+
+    protected function renderSingleItemBodyPersonalDataSingleFieldLabel(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
+    {
+        $str = $this->translator->trans(sprintf('%s.%s.0', $ptable, $personalData->field), [], 'contao_default') ?? $personalData->field;
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel'] as $callback) {
+                $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalData, $personalDatas, $originalModel, $str);
+            }
+        }
+
+        return $str;
+    }
+
+    protected function renderSingleItemBodyPersonalDataSingleFieldValue(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
+    {
+        $str = $personalData->anonymized ? $personalData->value : $this->unencrypt($personalData->value);
+
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalData, $personalDatas, $originalModel, $str);
             }
         }

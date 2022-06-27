@@ -16,12 +16,22 @@ namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\Model;
 use Contao\Model\Collection;
+use Contao\System;
 use InvalidArgumentException;
 use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
 use WEM\PersonalDataManagerBundle\Model\Traits\PersonalDataTrait;
 
 class PersonalDataManager
 {
+    /** @var PersonalDataManagerCsvFormatter */
+    private $csvFormatter;
+
+    public function __construct(
+        PersonalDataManagerCsvFormatter $csvFormatter
+    ) {
+        $this->csvFormatter = $csvFormatter;
+    }
+
     /**
      * Retrieves personal data linked to the object.
      *
@@ -94,15 +104,26 @@ class PersonalDataManager
      *
      * @param string $email The email
      */
-    public function anonymizeByEmail(string $email): void
+    public function anonymizeByEmail(string $email): ?array
     {
+        $anonymized = [];
         $pdms = PersonalDataModel::findByEmail($email);
         if (!$pdms) {
-            return;
+            return null;
         }
         while ($pdms->next()) {
-            $this->anonymize($pdms->current());
+            if (!\array_key_exists($pdms->ptable, $anonymized)) {
+                $anonymized[$pdms->ptable] = [];
+            }
+
+            if (!\array_key_exists($pdms->pid, $anonymized[$pdms->ptable])) {
+                $anonymized[$pdms->ptable][$pdms->pid] = [];
+            }
+
+            $anonymized[$pdms->ptable][$pdms->pid][$pdms->field] = $this->anonymize($pdms->current());
         }
+
+        return $anonymized;
     }
 
     /**
@@ -114,7 +135,7 @@ class PersonalDataManager
     {
         $pdms = PersonalDataModel::findByEmail($email);
 
-        return $this->formatPersonalDataForCsv($pdms);
+        return $this->csvFormatter->formatPersonalDataForCsv($pdms);
     }
 
     /**
@@ -138,15 +159,26 @@ class PersonalDataManager
      * @param string $ptable The ptable
      * @param string $email  The email
      */
-    public function anonymizeByPidAndPtableAndEmail(string $pid, string $ptable, string $email): void
+    public function anonymizeByPidAndPtableAndEmail(string $pid, string $ptable, string $email): ?array
     {
+        $anonymized = [];
         $pdms = PersonalDataModel::findByPidAndPTableAndEmail($pid, $ptable, $email);
         if (!$pdms) {
-            return;
+            return null;
         }
         while ($pdms->next()) {
-            $this->anonymize($pdms->current());
+            if (!\array_key_exists($pdms->ptable, $anonymized)) {
+                $anonymized[$pdms->ptable] = [];
+            }
+
+            if (!\array_key_exists($pdms->pid, $anonymized[$pdms->ptable])) {
+                $anonymized[$pdms->ptable][$pdms->pid] = [];
+            }
+
+            $anonymized[$pdms->ptable][$pdms->pid][$pdms->field] = $this->anonymize($pdms->current());
         }
+
+        return $anonymized;
     }
 
     /**
@@ -160,7 +192,7 @@ class PersonalDataManager
     {
         $pdms = PersonalDataModel::findByPidAndPTableAndEmail($pid, $ptable, $email);
 
-        return $this->formatPersonalDataForCsv($pdms);
+        return $this->csvFormatter->formatPersonalDataForCsv($pdms);
     }
 
     /**
@@ -199,13 +231,14 @@ class PersonalDataManager
      * @param string $ptable The ptable
      * @param string $email  The email
      */
-    public function anonymizeByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): void
+    public function anonymizeByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): ?string
     {
         $pdm = PersonalDataModel::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field);
         if (!$pdm) {
-            return;
+            return null;
         }
-        $this->anonymize($pdm->current());
+
+        return $this->anonymize($pdm->current());
     }
 
     /**
@@ -319,36 +352,30 @@ class PersonalDataManager
         return $pdm;
     }
 
-    public function anonymize(PersonalDataModel $personalData): void
+    public function anonymize(PersonalDataModel $personalData): ?string
     {
         $originalModel = Model::getClassFromTable($personalData->ptable);
         $obj = new $originalModel();
-        $personalData->value = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
+        $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
+        $personalData->value = $anonymizedValue;
         $personalData->anonymized = true;
         $personalData->anonymizedAt = time();
         $personalData->save();
+
+        return $anonymizedValue;
     }
 
-    public function formatPersonalDataForCsv(?Collection $personalData): string
+    public function getHrefByPidAndPtableAndEmail(string $pid, string $ptable, string $email)
     {
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
-        $csv = [
-            'Entity;Mail;Field;Value',
-        ];
-        if ($personalData) {
-            while ($personalData->next()) {
-                $row = [
-                    $personalData->ptable,
-                    $personalData->email,
-                    $GLOBALS['TL_DCA'][$personalData->ptable]['fields'][$personalData->field]['label'] ?? $personalData->field,
-                    $encryptionService->decrypt($personalData->value),
-                ];
+        $href = '';
 
-                $csv[] = implode(';', $row);
+        if (isset($GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail']) && \is_array($GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail'] as $callback) {
+                $href = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $href);
             }
         }
 
-        return implode("\n", $csv);
+        return $href;
     }
 
     /**

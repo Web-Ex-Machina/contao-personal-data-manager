@@ -125,9 +125,14 @@ Hook | Description
 `renderSingleItemBody` | *To be completed*
 `renderSingleItemBodyOriginalModel` | *To be completed*
 `renderSingleItemBodyOriginalModelSingle` | *To be completed*
+`renderSingleItemBodyOriginalModelSingleFieldLabel` | *To be completed*
+`renderSingleItemBodyOriginalModelSingleFieldValue` | *To be completed*
 `renderSingleItemBodyPersonalData` | *To be completed*
 `renderSingleItemBodyPersonalDataSingle` | *To be completed*
+`renderSingleItemBodyPersonalDataSingleFieldLabel` | *To be completed*
+`renderSingleItemBodyPersonalDataSingleFieldValue` | *To be completed*
 `renderSingleItemBodyPersonalDataSingleButtons` | *To be completed*
+`getHrefByPidAndPtableAndEmail` | *To be completed*
 
 Documentation
 -------------

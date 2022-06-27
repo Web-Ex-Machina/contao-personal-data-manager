@@ -85,7 +85,14 @@
         <source>Export</source>
         <target>Exporter</target>
       </trans-unit>
-
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonShowTitle">
+        <source>Show this entity</source>
+        <target>Afficher cette entité</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.ITEM.buttonShow">
+        <source>Show</source>
+        <target>Voir</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -28,6 +28,7 @@ use Symfony\Component\HttpFoundation\Response;
 // use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Terminal42\ServiceAnnotationBundle\Annotation\ServiceTag;
+use WEM\PersonalDataManagerBundle\Exception\AccessDeniedException;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi;
 
@@ -80,18 +81,23 @@ class PersonalDataManagerController extends Controller
                     case 'export_all':
                         $this->exportAllPersonalData();
                     break;
-                    case 'show':
+                    case 'show_personal_data_item':
+                        $arrResponse = $this->showSingleItem();
                     break;
                     default:
                         throw new Exception('Unknown route');
                 }
+            } catch (AccessDeniedException $e) {
+                $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
             } catch (Exception $e) {
                 $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
             }
 
             // Add Request Token to JSON answer and return
             $arrResponse['rt'] = RequestToken::get();
-            echo json_encode($arrResponse);
+            $response = new Response(json_encode($arrResponse), 'error' === $arrResponse['status'] ? 401 : 200);
+            $response->send();
+
             exit;
         }
     }
@@ -140,14 +146,13 @@ class PersonalDataManagerController extends Controller
 
         /** @var PersonalDataManager */
         $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $pdm->anonymizeByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
-        $arrResponse = [
+        $anonymizeValue = $pdm->anonymizeByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+
+        return [
             'status' => 'success',
             'msg' => '',
-            'value' => $GLOBALS['TL_LANG']['WEM']['PEDAMA']['ITEM']['valueDeleted'],
+            'value' => $anonymizeValue,
         ];
-
-        return $arrResponse;
     }
 
     protected function anonymizeSingleItem(): array
@@ -168,14 +173,13 @@ class PersonalDataManagerController extends Controller
 
         /** @var PersonalDataManager */
         $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $pdm->anonymizeByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
-        $arrResponse = [
+        $anonymizeValues = $pdm->anonymizeByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
+
+        return [
             'status' => 'success',
             'msg' => '',
-            'value' => $GLOBALS['TL_LANG']['WEM']['PEDAMA']['ITEM']['valueDeleted'],
+            'values' => $anonymizeValues,
         ];
-
-        return $arrResponse;
     }
 
     protected function anonymizeAllPersonalData(): array
@@ -188,14 +192,13 @@ class PersonalDataManagerController extends Controller
 
         /** @var PersonalDataManager */
         $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $pdm->anonymizeByEmail(Input::post('email'));
-        $arrResponse = [
+        $anonymizeValues = $pdm->anonymizeByEmail(Input::post('email'));
+
+        return [
             'status' => 'success',
             'msg' => '',
-            'value' => $GLOBALS['TL_LANG']['WEM']['PEDAMA']['ITEM']['valueDeleted'],
+            'values' => $anonymizeValues,
         ];
-
-        return $arrResponse;
     }
 
     protected function exportSingleItem(): void
@@ -238,6 +241,33 @@ class PersonalDataManagerController extends Controller
         exit();
     }
 
+    protected function showSingleItem(): array
+    {
+        if (empty(Input::post('pid'))) {
+            throw new InvalidArgumentException('The pid is empty');
+        }
+
+        if (empty(Input::post('ptable'))) {
+            throw new InvalidArgumentException('The ptable is empty');
+        }
+
+        if (empty(Input::post('email'))) {
+            throw new InvalidArgumentException('The email is empty');
+        }
+
+        $this->checkAccess();
+
+        /** @var PersonalDataManager */
+        $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+        $href = $pdm->getHrefByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
+
+        return [
+            'status' => 'success',
+            'msg' => '',
+            'href' => $href,
+        ];
+    }
+
     protected function checkAccess(): void
     {
         $this->user = \Contao\BackendUser::getInstance();
@@ -248,7 +278,7 @@ class PersonalDataManagerController extends Controller
 
         $this->user = \Contao\FrontendUser::getInstance();
         if (!$this->user->id) {
-            throw new Exception('You should be logged in in order to access this component');
+            throw new AccessDeniedException('You should be logged in in order to access this component');
         }
         // if BE user, just check the role
         // if FE user, check the key/token corresponds to the email in POST (todo)

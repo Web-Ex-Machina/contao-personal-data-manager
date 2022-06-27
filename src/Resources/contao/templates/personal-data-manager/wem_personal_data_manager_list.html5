@@ -85,6 +85,17 @@
 					return false;
 				});
 			});
+
+			document.querySelectorAll('.pdm-item__button_show').forEach(function(button){
+				button.addEventListener('click',function(e){
+					e.preventDefault();
+					
+					let pid = e.target.parentNode.getAttribute('data-pid');
+					let ptable = e.target.parentNode.getAttribute('data-ptable');
+					showPersonalDataItem(pid, ptable);
+					return false;
+				});
+			});
 		};
 
 		function anonymizeSinglePersonalData(pid, ptable, field){
@@ -104,8 +115,9 @@
 			.then(data => data.json())
 			.then(data =>{
 				if("success" == data.status){
-					singleElementFieldValue.innerHTML = data.value;
+					// singleElementFieldValue.innerHTML = data.value;
 					singleElementFieldButtons.innerHTML = '';
+					replaceByAnonymizedValue(pid, ptable, field, data.value);
 				}else{
 					alert(data.msg);	
 				}
@@ -135,9 +147,17 @@
 			.then(data => data.json())
 			.then(data =>{
 				if("success" == data.status){
-					singleElementFieldValues.forEach(function(singleElementFieldValue){
-						singleElementFieldValue.innerHTML = data.value;
-					});
+					// singleElementFieldValues.forEach(function(singleElementFieldValue){
+					// 	singleElementFieldValue.innerHTML = data.value;
+					// });
+					for(var ptable in data.values){
+						for(var pid in data.values[ptable]){
+							for(var field in data.values[ptable][pid]){
+								var value = data.values[ptable][pid][field];
+								replaceByAnonymizedValue(pid, ptable, field, value);
+							}
+						}
+					}
 					singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
 						singleElementFieldButtons.innerHTML = '';
 					});
@@ -170,9 +190,19 @@
 			.then(data => data.json())
 			.then(data =>{
 				if("success" == data.status){
-					singleElementFieldValues.forEach(function(singleElementFieldValue){
-						singleElementFieldValue.innerHTML = data.value;
-					});
+					// singleElementFieldValues.forEach(function(singleElementFieldValue){
+					// 	singleElementFieldValue.innerHTML = data.value;
+					// });
+					
+					for(var ptable in data.values){
+						for(var pid in data.values[ptable]){
+							for(var field in data.values[ptable][pid]){
+								var value = data.values[ptable][pid][field];
+								replaceByAnonymizedValue(pid, ptable, field, value);
+							}
+						}
+					}
+					
 					singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
 						singleElementFieldButtons.innerHTML = '';
 					});
@@ -207,9 +237,16 @@
 				'ptable':ptable,
 				'email':email
 			})
-			.then(resp => resp.blob())
-			.then(blob => {
-				downloadBlobFile(blob,'all.csv');
+			.then(response => {
+				if(response.ok) {
+					response.blob().then(function(blob) {
+						downloadBlobFile(blob,'all.csv');
+					});
+				} else {
+					response.json().then(function(json){
+						alert(json.msg);
+					});
+				}
 				hideLoader(item);
 			}).catch(function(e) {
 				alert("Une erreur est survenue");
@@ -235,6 +272,47 @@
 				console.log(e);
 			});
 		};
+
+		function showPersonalDataItem(pid, ptable){
+			let item = document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+			let email = item.getAttribute('data-email');
+			
+			displayLoader(item);
+
+			postData({
+				'action':'show_personal_data_item',
+				'pid':pid,
+				'ptable':ptable,
+				'email':email
+			})
+			.then(data => data.json())
+			.then(data =>{
+				if("success" == data.status){
+					Object.assign(document.createElement('a'), {
+						target: '_blank',
+						rel: 'noopener noreferrer',
+						href: data.href,
+					}).click();
+				}else{
+					alert(data.msg);	
+				}
+				
+				hideLoader(item);
+			}).catch(function(e) {
+				alert("Une erreur est survenue");
+				console.log(e);
+			});
+		};
+
+		function replaceByAnonymizedValue(pid, ptable, field, value){
+			let singleOriginal = document.querySelector('.pdm-item__original_model_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
+			let singlePersonal = document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
+			let singleoriginalValueContainer = singleOriginal.querySelector('.pdm-item__original_model_single__value');
+			let singlePersonalValueContainer = singlePersonal.querySelector('.pdm-item__personal_data_single__value');
+
+			singleoriginalValueContainer.innerHTML = value;
+			singlePersonalValueContainer.innerHTML = value;
+		}
 
 		function downloadBlobFile(blob, filename){
 			const url = window.URL.createObjectURL(blob);
