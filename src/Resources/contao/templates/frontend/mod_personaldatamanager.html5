@@ -1,0 +1,9 @@
+<?php $this->extend('block_unsearchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<!-- Display messages -->
+	<?php echo Contao\Message::generate(); ?>
+	<?php $this->insert($this->subtemplate, $this->getData()); ?>
+
+<?php $this->endblock(); ?>

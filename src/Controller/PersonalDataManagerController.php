@@ -128,19 +128,19 @@ class PersonalDataManagerController extends Controller
     protected function anonymizeSinglePersonalData(): array
     {
         if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException('The pid is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['PleaseFillEmail']);
         }
 
         if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException('The ptable is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['ptableEmpty']);
         }
 
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException('The email is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
         }
 
         if (empty(Input::post('field'))) {
-            throw new InvalidArgumentException('The field is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['fieldEmpty']);
         }
         $this->checkAccess();
 
@@ -158,15 +158,15 @@ class PersonalDataManagerController extends Controller
     protected function anonymizeSingleItem(): array
     {
         if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException('The pid is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['PleaseFillEmail']);
         }
 
         if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException('The ptable is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['ptableEmpty']);
         }
 
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException('The email is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
         }
 
         $this->checkAccess();
@@ -185,7 +185,7 @@ class PersonalDataManagerController extends Controller
     protected function anonymizeAllPersonalData(): array
     {
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException('The email is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
         }
 
         $this->checkAccess();
@@ -204,15 +204,15 @@ class PersonalDataManagerController extends Controller
     protected function exportSingleItem(): void
     {
         if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException('The pid is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['PleaseFillEmail']);
         }
 
         if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException('The ptable is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['ptableEmpty']);
         }
 
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException('The email is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
         }
 
         $this->checkAccess();
@@ -228,7 +228,7 @@ class PersonalDataManagerController extends Controller
     protected function exportAllPersonalData(): void
     {
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException('The email is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
         }
 
         $this->checkAccess();
@@ -244,15 +244,15 @@ class PersonalDataManagerController extends Controller
     protected function showSingleItem(): array
     {
         if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException('The pid is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['pidEmpty']);
         }
 
         if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException('The ptable is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['ptableEmpty']);
         }
 
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException('The email is empty');
+            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
         }
 
         $this->checkAccess();
@@ -262,8 +262,8 @@ class PersonalDataManagerController extends Controller
         $href = $pdm->getHrefByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
 
         return [
-            'status' => 'success',
-            'msg' => '',
+            'status' => empty($href) ? 'error' : 'success',
+            'msg' => empty($href) ? $GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['noUrlProvided'] : '',
             'href' => $href,
         ];
     }
@@ -278,7 +278,7 @@ class PersonalDataManagerController extends Controller
 
         $this->user = \Contao\FrontendUser::getInstance();
         if (!$this->user->id) {
-            throw new AccessDeniedException('You should be logged in in order to access this component');
+            throw new AccessDeniedException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['accessDenied']);
         }
         // if BE user, just check the role
         // if FE user, check the key/token corresponds to the email in POST (todo)

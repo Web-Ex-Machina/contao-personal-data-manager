@@ -30,6 +30,8 @@ class PersonalDataManagerUi
     private $translator;
     /** @var PersonalDataManager */
     private $manager;
+    /** @var string */
+    private $href;
 
     public function __construct(
         TranslatorInterface $translator,
@@ -37,6 +39,7 @@ class PersonalDataManagerUi
     ) {
         $this->translator = $translator;
         $this->manager = $manager;
+        $this->href = System::getContainer()->getParameter('contao.backend.route_prefix').'?do=wem-personal-data-manager';
     }
 
     public function listForEmail(string $email): string
@@ -134,7 +137,8 @@ class PersonalDataManagerUi
 
     protected function renderListButtonAnonymize(string $email): string
     {
-        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-list__button_anonymize">%s</a>',
+        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-list__button_anonymize">%s</a>',
+            $this->href,
             $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeConfirm', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymize', [], 'contao_default')
@@ -143,7 +147,8 @@ class PersonalDataManagerUi
 
     protected function renderListButtonExport(string $email): string
     {
-        return sprintf('<a href="#" title="%s" class="pdm-button pdm-button_export pdm-list__button_export">%s</a>',
+        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-list__button_export">%s</a>',
+            $this->href,
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExportTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExport', [], 'contao_default')
         );
@@ -224,7 +229,8 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemButtonAnonymize(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__button_anonymize_all">%s</a>',
+        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__button_anonymize_all">%s</a>',
+            $this->href,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllConfirm', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAll', [], 'contao_default')
@@ -233,7 +239,8 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemButtonExport(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="#" title="%s" class="pdm-button pdm-button_export pdm-item__button_export">%s</a>',
+        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-item__button_export">%s</a>',
+            $this->href,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonExportTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonExport', [], 'contao_default')
         );
@@ -241,7 +248,8 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemButtonShow(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="#" title="%s" class="pdm-button pdm-button_show pdm-item__button_show">%s</a>',
+        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_show pdm-item__button_show">%s</a>',
+            $this->href,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonShowTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonShow', [], 'contao_default')
         );
@@ -421,7 +429,8 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemBodyPersonalDataSingleButtonAnonymize(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="#" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__personal_data_single__button_anonymize">%s</a>',
+        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__personal_data_single__button_anonymize">%s</a>',
+            $this->href,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeConfirm', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymize', [], 'contao_default')

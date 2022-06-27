@@ -9,6 +9,30 @@
         <source>No personal data to show</source>
         <target>Aucune données personnelle à afficher</target>
       </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.pidEmpty">
+        <source>The "pid" parameter is empty</source>
+        <target>Le paramètre "pid" n'a pas été fourni</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.ptableEmpty">
+        <source>The "ptable" parameter is empty</source>
+        <target>Le paramètre "ptable" n'a pas été fourni</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.emailEmpty">
+        <source>The "email" parameter is empty</source>
+        <target>Le paramètre "email" n'a pas été fourni</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.fieldEmpty">
+        <source>The "field" parameter is empty</source>
+        <target>Le paramètre "field" n'a pas été fourni</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.noUrlProvided">
+        <source>No URL provided to show this item.</source>
+        <target>Aucune URL n'a pas fournie pour afficher cet élément</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.accessDenied">
+        <source>You can't access this component.</source>
+        <target>Vous n'êtes pas autorisé à accéder à ce composant.</target>
+      </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.title">
         <source>Your personal data</source>
         <target>Vos données personnelles</target>
@@ -92,6 +116,14 @@
       <trans-unit id="WEM.PEDAMA.ITEM.buttonShow">
         <source>Show</source>
         <target>Voir</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.EMAILFORM.mailLabel">
+        <source>Your e-mail</source>
+        <target>Votre e-mail</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.EMAILFORM.submit">
+        <source>Submit</source>
+        <target>Envoyer</target>
       </trans-unit>
     </body>
   </file>

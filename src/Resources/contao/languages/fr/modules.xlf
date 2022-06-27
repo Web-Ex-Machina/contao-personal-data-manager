@@ -13,6 +13,18 @@
 			<source>Manage personal data</source>
 			<target>Gérer les données personnelles</target>
 		</trans-unit>
+		<trans-unit id="FMD.wem-personal-data-manager">
+			<source>Personal Data Manager</source>
+			<target>Gestionnaire Données Personnelles</target>
+		</trans-unit>
+		<trans-unit id="FMD.wem_personaldatamanager.0">
+			<source>Personal Data Manager</source>
+			<target>Gestionnaire Données Personnelles</target>
+		</trans-unit>
+		<trans-unit id="FMD.wem_personaldatamanager.1">
+			<source>Manage personal data</source>
+			<target>Gérer les données personnelles</target>
+		</trans-unit>
     </body>
   </file>
 </xliff>

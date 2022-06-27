@@ -20,6 +20,15 @@ array_insert($GLOBALS['BE_MOD']['personal-data'], 0, [
 
 $GLOBALS['TL_MODELS'][\WEM\PersonalDataManagerBundle\Model\PersonalData::getTable()] = \WEM\PersonalDataManagerBundle\Model\PersonalData::class;
 
+/*
+ * Frontend modules
+ */
+array_insert($GLOBALS['FE_MOD'], 2, [
+    'wem-personal-data-manager' => [
+        'wem_personaldatamanager' => \WEM\PersonalDataManagerBundle\Module\PersonalDataManager::class,
+    ],
+]);
+
 $GLOBALS['WEM_HOOKS'] = $GLOBALS['WEM_HOOKS'] ?? [];
 $GLOBALS['WEM_HOOKS']['renderListButtons'] = $GLOBALS['WEM_HOOKS']['renderListButtons'] ?? [];
 $GLOBALS['WEM_HOOKS']['renderSingleItem'] = $GLOBALS['WEM_HOOKS']['renderSingleItem'] ?? [];
