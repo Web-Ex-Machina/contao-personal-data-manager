@@ -125,6 +125,20 @@
         <source>Submit</source>
         <target>Envoyer</target>
       </trans-unit>
+      <trans-unit id="WEM.PEDAMA.MODFE.emailSent">
+        <source>An email containing a link to access your personal data has been set.</source>
+        <target>Un email contenant un lien pour accéder à vos données personnelles vous a été envoyé.</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.MODFE.emailNotSent">
+        <source>An error occurend when trying to senf you an email containing a link to access your personal data.</source>
+        <target>Une erreur est survenue lors de l'envoi d'un email contenant un lien pour accéder à vos données personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.EMAIL.subject">
+        <source>Access to your personal data.</source>
+        <target>Votre accès à vos données personnelles.</target>
+      </trans-unit>
+
+
     </body>
   </file>
 </xliff>

@@ -62,22 +62,32 @@ class PersonalDataManager extends Module
      */
     protected function compile(): void
     {
+        $session = System::getContainer()->get('session'); // Init session
+
         if (Input::get('pdm_token')) {
             $this->Template->subtemplate = 'mod_personaldatamanager_manager';
             $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/pdm.css';
             // check the token is connected to an email and is valid and equals to the email in session
             // if so, display PDMUI/** @var PersonalDataManagerUi */
             $pdmUi = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager_ui');
-            $this->Template->content = $pdmUi->listForEmail('aa@aa.fr');
+            $this->Template->content = $pdmUi->listForEmail($session->get('wem_pdm_email'));
         // if not, error message and display form
         } else {
             $this->Template->subtemplate = 'mod_personaldatamanager_emailform';
             if ('wem-personal-data-manager' === Input::post('FORM_SUBMIT')) {
                 // create token
                 // put email in session
+                $session->set('wem_pdm_email', Input::post('email'));
                 // send email
-                // display confirmation message
-                Message::addConfirmation('ouiiiii');
+                $email = new \Contao\Email();
+                $email->subject = $GLOBALS['TL_LANG']['WEM']['PEDAMA']['EMAIL']['subject'];
+                $email->html = file_get_contents('bundles/wempersonaldatamanager/email/fr/email.html5');
+                if ($email->sendTo(Input::post('email'))) {
+                    // display confirmation message
+                    Message::addConfirmation($GLOBALS['TL_LANG']['WEM']['PEDAMA']['MODFE']['emailSent']);
+                } else {
+                    Message::addError($GLOBALS['TL_LANG']['WEM']['PEDAMA']['MODFE']['emailNotSent']);
+                }
             }
             // display form
             $this->Template->email = Input::post('email') ?? '';
