@@ -64,6 +64,13 @@ class PersonalDataManager extends Module
      */
     protected function compile(): void
     {
+        // Handle ajax request
+        if (Input::post('TL_WEM_AJAX')) {
+            /** @var PersonalDataManagerUi */
+            $pdmAction = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager_action');
+            $pdmAction->processAjaxRequest();
+        }
+
         /* @var PageModel */
         global $objPage;
         $session = System::getContainer()->get('session'); // Init session
@@ -74,6 +81,8 @@ class PersonalDataManager extends Module
             $obj = $pdm->insertForEmail(Input::post('email'));
             // put email in session
             $session->set('wem_pdm_email', Input::post('email'));
+            // remove old token
+            $pdm->clearTokenInSession();
             // send email
             $html = file_get_contents('bundles/wempersonaldatamanager/email/'.($objPage->language ?? 'fr').'/email.html5');
             $html = str_replace('[[pageId]]', $objPage->id, $html);
@@ -101,6 +110,8 @@ class PersonalDataManager extends Module
                 && null !== Input::get('pdm_token')
                 && $pdm->isEmailTokenCoupleValid($session->get('wem_pdm_email'), Input::get('pdm_token'))
             ) {
+                // remove old token
+                $pdm->putTokenInSession(Input::get('pdm_token'));
                 $pdm->updateTokenExpiration(Input::get('pdm_token'));
                 $this->displayPersonalDataManagerUi($session->get('wem_pdm_email'));
             } else {
@@ -125,6 +136,7 @@ class PersonalDataManager extends Module
     protected function displayPersonalDataManagerUi(string $email): void
     {
         $pdmUi = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager_ui');
+        $pdmUi->setUrl(Environment::get('request'));
         $this->Template->content = $pdmUi->listForEmail($email);
     }
 }

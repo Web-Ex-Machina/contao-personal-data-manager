@@ -431,6 +431,25 @@ class PersonalDataManager
         return $obj;
     }
 
+    public function putTokenInSession(string $token): void
+    {
+        $session = System::getContainer()->get('session'); // Init session
+        $session->set('wem_pdm_token', $token);
+    }
+
+    public function clearTokenInSession(): void
+    {
+        $session = System::getContainer()->get('session'); // Init session
+        $session->set('wem_pdm_token', '');
+    }
+
+    public function getTokenInSession(): ?string
+    {
+        $session = System::getContainer()->get('session'); // Init session
+
+        return $session->get('wem_pdm_token');
+    }
+
     /**
      * Validate that an object can be manipulated by this service.
      *
