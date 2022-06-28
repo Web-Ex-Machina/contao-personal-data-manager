@@ -85,8 +85,7 @@ class PersonalDataManager extends Module
             $pdm->clearTokenInSession();
             // send email
             $html = file_get_contents('bundles/wempersonaldatamanager/email/'.($objPage->language ?? 'fr').'/email.html5');
-            $html = str_replace('[[pageId]]', $objPage->id, $html);
-            $html = str_replace('[[urlParams]]', '?pdm_token='.$obj->token, $html);
+            $html = str_replace('[[url]]', $objPage->getAbsoluteUrl().'?pdm_token='.$obj->token, $html);
             $email = new \Contao\Email();
             $email->subject = $GLOBALS['TL_LANG']['WEM']['PEDAMA']['EMAIL']['subject'];
             $email->html = $html;
@@ -98,7 +97,6 @@ class PersonalDataManager extends Module
                 }
             } catch (Exception $e) {
                 Message::addError($GLOBALS['TL_LANG']['WEM']['PEDAMA']['MODFE']['emailNotSent']);
-                Message::addError($html);
             }
         }
 

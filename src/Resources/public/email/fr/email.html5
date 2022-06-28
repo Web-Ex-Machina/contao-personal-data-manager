@@ -3,7 +3,7 @@
 Vous avez demandé un accès à vos données personnelles sur notre site. 
 <br/>
 Pour y accéder, veuillez utiliser le lien suivant :
-<a href="{{link::[[pageId]]::absolute::blank}}[[urlParams]]">{{link::[[pageId]]::absolute}}[[urlParams]]</a>
+<a href="[[url]]">[[url]]</a>
 <br />
 </p>
 <p>
