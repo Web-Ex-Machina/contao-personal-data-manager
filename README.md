@@ -110,6 +110,23 @@ $GLOBALS['TL_DCA']['tl_my_table'] = [
 
 This way, editing your records in back-end will work with the same as with the model.
 
+Usage
+-----
+
+Both a back-end entry and a front-end module are provided to allow admin and users to show, export or anonymize their personal data.
+
+### Back-end
+
+The user can enter an email address and all associated personal data are displayed. From there, the user can show, export or anonymize them.
+
+### Front-end
+
+The front-end module needs to be registered in your theme.
+
+The user has to enter an email address in the displayed form. An email containing a link to the current page with a token will be sent to the email address filled in the form. The token is valid for 5 minutes upon its creation. By clicking on the link provided in the email, the user will be redirected to the page where the front-end module lies, with the token as a GET parameter. From there, the user can show, export or anonymize their personal data.
+
+Each action from the user make its token valid for 5 more minutes.
+
 Hooks
 -----
 

@@ -141,6 +141,42 @@
         <source>Access to your personal data.</source>
         <target>Votre accès à vos données personnelles.</target>
       </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.filenameSingleItem">
+        <source>your_personal_data</source>
+        <target>vos_donnees_personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.filenameAll">
+        <source>your_personal_data</source>
+        <target>vos_donnees_personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnEntity">
+        <source>Entity</source>
+        <target>Entité</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnMail">
+        <source>Mail</source>
+        <target>Email</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnField">
+        <source>Field</source>
+        <target>Champ</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnValue">
+        <source>Value</source>
+        <target>Valeur</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnAnonymized">
+        <source>Anonymized data</source>
+        <target>Donnée anonymisée</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnAnonymizedValueYes">
+        <source>Yes</source>
+        <target>Oui</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnAnonymizedValueNo">
+        <source>No</source>
+        <target>Non</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

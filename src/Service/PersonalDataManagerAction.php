@@ -45,6 +45,7 @@ class PersonalDataManagerAction
      */
     public function processAjaxRequest()
     {
+        $returnHttpCode = 200;
         // Catch AJAX Requests
         if (Input::post('TL_WEM_AJAX') && 'be_pdm' === Input::post('wem_module')) {
             try {
@@ -71,14 +72,16 @@ class PersonalDataManagerAction
                         throw new Exception('Unknown route');
                 }
             } catch (AccessDeniedException $e) {
+                $returnHttpCode = 401;
                 $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
             } catch (Exception $e) {
+                $returnHttpCode = 400;
                 $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
             }
 
             // Add Request Token to JSON answer and return
             $arrResponse['rt'] = RequestToken::get();
-            $response = new Response(json_encode($arrResponse), 'error' === $arrResponse['status'] ? 401 : 200);
+            $response = new Response(json_encode($arrResponse), $returnHttpCode);
             $response->send();
 
             exit;
@@ -88,19 +91,19 @@ class PersonalDataManagerAction
     protected function anonymizeSinglePersonalData(): array
     {
         if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['PleaseFillEmail']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.PleaseFillEmail', [], 'contao_default'));
         }
 
         if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['ptableEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
         }
 
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
         }
 
         if (empty(Input::post('field'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['fieldEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.fieldEmpty', [], 'contao_default'));
         }
         $this->checkAccess();
 
@@ -116,15 +119,15 @@ class PersonalDataManagerAction
     protected function anonymizeSingleItem(): array
     {
         if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['PleaseFillEmail']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.PleaseFillEmail', [], 'contao_default'));
         }
 
         if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['ptableEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
         }
 
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
         }
 
         $this->checkAccess();
@@ -141,7 +144,7 @@ class PersonalDataManagerAction
     protected function anonymizeAllPersonalData(): array
     {
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
         }
 
         $this->checkAccess();
@@ -158,60 +161,72 @@ class PersonalDataManagerAction
     protected function exportSingleItem(): void
     {
         if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['PleaseFillEmail']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.PleaseFillEmail', [], 'contao_default'));
         }
 
         if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['ptableEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
         }
 
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
         }
 
         $this->checkAccess();
 
         $csv = $this->manager->exportByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
 
-        (new Response($csv, 200, ['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment', 'filename' => 'filename.csv']))->send();
+        (new Response($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment',
+            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.csv',
+        ]))->send();
         exit();
     }
 
     protected function exportAllPersonalData(): void
     {
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
         }
 
         $this->checkAccess();
 
         $csv = $this->manager->exportByEmail(Input::post('email'));
 
-        (new Response($csv, 200, ['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment', 'filename' => 'filename.csv']))->send();
+        (new Response($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment',
+            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.csv',
+        ]))->send();
         exit();
     }
 
     protected function showSingleItem(): array
     {
         if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['pidEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.pidEmpty', [], 'contao_default'));
         }
 
         if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['ptableEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
         }
 
         if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['emailEmpty']);
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
         }
 
         $this->checkAccess();
 
         $href = $this->manager->getHrefByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
 
+        if (empty($href)) {
+            throw new Exception($this->translator->trans('WEM.PEDAMA.DEFAULT.noUrlProvided', [], 'contao_default'));
+        }
+
         return [
-            'status' => empty($href) ? 'error' : 'success',
-            'msg' => empty($href) ? $GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['noUrlProvided'] : '',
+            'status' => 'success',
+            'msg' => '',
             'href' => $href,
         ];
     }
@@ -226,11 +241,11 @@ class PersonalDataManagerAction
 
         $this->user = \Contao\FrontendUser::getInstance();
         // if (!$this->user->id) {
-        //     throw new AccessDeniedException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['accessDenied']);
+        //     throw new AccessDeniedException($this->translator->trans('WEM.PEDAMA.DEFAULT.accessDenied',[],'contao_default'));
         // }
         if (!$this->manager->isEmailTokenCoupleValid(Input::post('email'), $this->manager->getTokenInSession())) {
             $this->manager->clearTokenInSession();
-            throw new AccessDeniedException($GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['accessDenied']);
+            throw new AccessDeniedException($this->translator->trans('WEM.PEDAMA.DEFAULT.accessDenied', [], 'contao_default'));
         }
         $this->manager->updateTokenExpiration($this->manager->getTokenInSession());
     }

@@ -236,7 +236,7 @@
 			.then(response => {
 				if(response.ok) {
 					response.blob().then(function(blob) {
-						downloadBlobFile(blob,'all.csv');
+						downloadBlobFile(blob,response.headers.get('filename'));
 					});
 				} else {
 					response.json().then(function(json){
@@ -259,10 +259,17 @@
 				'action':'export_all',
 				'email':email
 			})
-			.then(resp => resp.blob())
-			.then(blob => {
-				downloadBlobFile(blob,'all.csv');
-				hideLoader(list);
+			.then(response => {
+				if(response.ok) {
+					response.blob().then(function(blob) {
+						downloadBlobFile(blob,response.headers.get('filename'));
+					});
+				} else {
+					response.json().then(function(json){
+						alert(json.msg);
+					});
+				}
+				hideLoader(item);
 			}).catch(function(e) {
 				alert("Une erreur est survenue");
 				console.log(e);
