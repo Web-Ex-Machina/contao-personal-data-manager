@@ -19,6 +19,7 @@ array_insert($GLOBALS['BE_MOD']['personal-data'], 0, [
 ]);
 
 $GLOBALS['TL_MODELS'][\WEM\PersonalDataManagerBundle\Model\PersonalData::getTable()] = \WEM\PersonalDataManagerBundle\Model\PersonalData::class;
+$GLOBALS['TL_MODELS'][\WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken::getTable()] = \WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken::class;
 
 /*
  * Frontend modules

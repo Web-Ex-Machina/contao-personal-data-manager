@@ -130,15 +130,17 @@
         <target>Un email contenant un lien pour accéder à vos données personnelles vous a été envoyé.</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.MODFE.emailNotSent">
-        <source>An error occurend when trying to senf you an email containing a link to access your personal data.</source>
-        <target>Une erreur est survenue lors de l'envoi d'un email contenant un lien pour accéder à vos données personnelles</target>
+        <source>An error occurend when trying to send you an email containing a link to access your personal data.</source>
+        <target>Une erreur est survenue lors de l'envoi d'un email contenant un lien pour accéder à vos données personnelles.</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.MODFE.emailTokenCoupleNotValid">
+        <source>The token provided is not valid.</source>
+        <target>Le token fourni n'est pas ou plus valide.</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.EMAIL.subject">
         <source>Access to your personal data.</source>
         <target>Votre accès à vos données personnelles.</target>
       </trans-unit>
-
-
     </body>
   </file>
 </xliff>
