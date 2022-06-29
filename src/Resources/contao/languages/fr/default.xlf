@@ -41,29 +41,37 @@
         <source>List of all items using your personal data</source>
         <target>Liste des éléments utilisant vos données personnelles</target>
       </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.nbItemsOne">
+        <source>%s item use your personal data.</source>
+        <target>%s élément utilise vos données personnelles.</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.nbItemsMultiple">
+        <source>%s items use your personal data.</source>
+        <target>%s éléments utilisent vos données personnelles.</target>
+      </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.noItems">
         <source>No item to display</source>
         <target>Aucun élément à afficher</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymizeTitle">
-        <source>Delete personal data</source>
-        <target>Supprimer vos données personnelles</target>
+        <source>Delete all your personal data</source>
+        <target>Supprimer toutes vos données personnelles</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymizeConfirm">
-        <source>Do you really want to delete yuor personal data ?</source>
-        <target>Voulez-vous vraiment supprimer vos données personnelles ?</target>
+        <source>Do you really want to delete all your personal data ?</source>
+        <target>Voulez-vous vraiment supprimer toutse vos données personnelles ?</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymize">
-        <source>Delete</source>
-        <target>Supprimer</target>
+        <source>Delete all your personal data</source>
+        <target>Supprimer toutes vos données personnelles</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonExportTitle">
-        <source>Export your personal data</source>
-        <target>Exporter vos données personnelles</target>
+        <source>Export all your personal data</source>
+        <target>Exporter toutes vos données personnelles</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonExport">
-        <source>Export</source>
-        <target>Exporter</target>
+        <source>Export all your personal data</source>
+        <target>Exporter toutes vos données personnelles</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.ITEM.originalModelTitle">
         <source>Original model</source>

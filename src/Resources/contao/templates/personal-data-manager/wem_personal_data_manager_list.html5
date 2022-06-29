@@ -14,6 +14,9 @@
 			<?php echo $this->trans('WEM.PEDAMA.LIST.noItems',[],'contao_default'); ?>
 		</div>
 		<?php else: ?>
+			<div class="pdm-items__title__number_items">
+				<?php echo $this->trans(count($this->items) > 1 ? 'WEM.PEDAMA.LIST.nbItemsMultiple' : 'WEM.PEDAMA.LIST.nbItemsOne',[count($this->items)],'contao_default'); ?>
+			</div>
 			<?php foreach($this->items as $item): ?>
 				<?php echo $item; ?>
 			<?php endforeach; ?>
@@ -269,7 +272,7 @@
 						alert(json.msg);
 					});
 				}
-				hideLoader(item);
+				hideLoader(list);
 			}).catch(function(e) {
 				alert("Une erreur est survenue");
 				console.log(e);

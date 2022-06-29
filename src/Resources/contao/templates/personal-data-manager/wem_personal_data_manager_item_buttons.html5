@@ -1,4 +1,4 @@
-<div class="pdm-buttons" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>">
+<div class="pdm-item__header__buttons pdm-buttons" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>">
 	<?php echo $this->show; ?>
 	<?php echo $this->export; ?>
 	<?php echo $this->anonymize; ?>
