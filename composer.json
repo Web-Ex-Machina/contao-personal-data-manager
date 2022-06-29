@@ -3,8 +3,8 @@
     "description": "Personal Data Manager bundle for Contao Open Source CMS",
     "keywords": ["webexmachina", "bundle", "contao","personal","rgpd","gpdr"],
     "type": "contao-bundle",
-    "license": "LGPL-3.0+",
-    "website": "https://www.webexmachina.fr/",
+    "license": "LGPL-3.0-or-later",
+    "homepage": "https://www.webexmachina.fr/",
     "authors": [
     {
         "name": "Web ex Machina",
