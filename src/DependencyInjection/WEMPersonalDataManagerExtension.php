@@ -40,12 +40,14 @@ class WEMPersonalDataManagerExtension extends Extension
         $loader->load('controllers.yml');
         $loader->load('routing.yml');
 
-        $projectDir = $container->getParameter('kernel.project_dir');
-        if (file_exists($projectDir.'/system/config/localconfig.php')) {
-            include $projectDir.'/system/config/localconfig.php';
-        }
-        if (null !== \Contao\Config::get('wem_pdm_encryption_key')) {
-            $container->setParameter('plenta_contao_encryption.encryption_key', \Contao\Config::get('wem_pdm_encryption_key'));
+        if (null === $container->getParameter('plenta_contao_encryption.encryption_key')) {
+            $projectDir = $container->getParameter('kernel.project_dir');
+            if (file_exists($projectDir.'/system/config/localconfig.php')) {
+                include $projectDir.'/system/config/localconfig.php';
+            }
+            if (null !== \Contao\Config::get('wem_pdm_encryption_key')) {
+                $container->setParameter('plenta_contao_encryption.encryption_key', \Contao\Config::get('wem_pdm_encryption_key'));
+            }
         }
     }
 }

@@ -23,7 +23,14 @@ Clone the extension from Packagist (Contao Manager)
 Configuration
 -------------
 
-Models (and their associated DCA) need to be adjusted.
+First, you will need to define an encryption key.
+Then, models (and their associated DCA) need to be adjusted.
+
+### Encryption key
+
+As this bundle uses [`plenta/contao-encryption`][4], an encryption key needs to be set. When the bundle is loaded, it checks wether the encryption key `plenta_contao_encryption.encryption_key` is set or not.
+
+If not, it will look for ours, named `wem_pdm_encryption_key`, in the `/system/config/localconfig.php` file. And apply it to the `plenta_contao_encryption.encryption_key` container parameter.
 
 ### Model
 
@@ -187,3 +194,4 @@ You can get the extension with this repository URL : [Github][2]
 [1]: CHANGELOG.md
 [2]: https://github.com/webexmachina/personal-data-manager
 [3]: https://www.webexmachina.fr/
+[4]: https://github.com/plenta/contao-encryption
