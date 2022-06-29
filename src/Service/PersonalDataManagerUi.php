@@ -330,7 +330,7 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemBodyOriginalModelSingleFieldLabel(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel): string
     {
-        $str = $this->translator->trans(sprintf('%s.%s.0', $ptable, $field), [], 'contao_default') ?? $field;
+        $str = $this->getFieldLabelTranslated($ptable, $field);
 
         if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel'] as $callback) {
@@ -343,7 +343,7 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemBodyOriginalModelSingleFieldValue(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel): string
     {
-        $str = $value;
+        $str = $value ?? '';
 
         if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue'] as $callback) {
@@ -398,7 +398,7 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemBodyPersonalDataSingleFieldLabel(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
-        $str = $this->translator->trans(sprintf('%s.%s.0', $ptable, $personalData->field), [], 'contao_default') ?? $personalData->field;
+        $str = $this->getFieldLabelTranslated($ptable, $personalData->field);
         if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $personalData, $personalDatas, $originalModel, $str);
@@ -410,7 +410,7 @@ class PersonalDataManagerUi
 
     protected function renderSingleItemBodyPersonalDataSingleFieldValue(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
-        $str = $personalData->anonymized ? $personalData->value : $this->unencrypt($personalData->value);
+        $str = $personalData->anonymized ? ($personalData->value ?? '') : $this->unencrypt($personalData->value);
 
         if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue'] as $callback) {
@@ -454,6 +454,19 @@ class PersonalDataManagerUi
         $modelClassName = Model::getClassFromTable($ptable);
 
         return $modelClassName::findOneById($pid);
+    }
+
+    protected function getFieldLabelTranslated(string $ptable, string $field): string
+    {
+        if (\array_key_exists($field, $GLOBALS['TL_LANG'][$ptable])) {
+            if (\is_array($GLOBALS['TL_LANG'][$ptable][$field])) {
+                return $this->translator->trans(sprintf('%s.%s', $ptable, $field).'.0', [], 'contao_default') ?? $field;
+            }
+
+            return $this->translator->trans(sprintf('%s.%s', $ptable, $field), [], 'contao_default') ?? $field;
+        }
+
+        return sprintf('%s.%s', $ptable, $field).'.0';
     }
 
     protected function unencrypt($value)
