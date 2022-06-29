@@ -7,10 +7,19 @@ services:
 
   wem.personal_data_manager.service.personal_data_manager_csv_formatter:
     class: WEM\PersonalDataManagerBundle\Service\PersonalDataManagerCsvFormatter
+    arguments:
+      $translator: '@contao.translation.translator'
     public: true
 
   wem.personal_data_manager.service.personal_data_manager_ui:
     class: WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi
+    arguments:
+      $translator: '@contao.translation.translator'
+      $manager: '@wem.personal_data_manager.service.personal_data_manager'
+    public: true
+
+  wem.personal_data_manager.service.personal_data_manager_action:
+    class: WEM\PersonalDataManagerBundle\Service\PersonalDataManagerAction
     arguments:
       $translator: '@contao.translation.translator'
       $manager: '@wem.personal_data_manager.service.personal_data_manager'

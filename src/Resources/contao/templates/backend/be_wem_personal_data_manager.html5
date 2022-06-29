@@ -1,13 +1,5 @@
 <div>
-	<form method="POST" action="<?php echo $this->request; ?>" class="pdm-form">
-		<label for="email">
-			EMAIL
-		</label>
-		<input type="text" name="email" value="<?php echo $this->email; ?>" class="tl_text"/>
-		<input name="FORM_SUBMIT" value="wem-personal-data-manager" type="hidden">
-		<input name="REQUEST_TOKEN" value="<?php echo $this->token ?>" type="hidden">
-		<input type="submit" name="valider" class="tl_button"/>
-	</form>
+	<?php $this->insert('mod_personaldatamanager_emailform', $this->getData()); ?>
 </div>
 <div class="pdm-content">
 	<?php echo $this->content; ?>

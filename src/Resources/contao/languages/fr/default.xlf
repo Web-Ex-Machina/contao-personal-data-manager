@@ -9,6 +9,30 @@
         <source>No personal data to show</source>
         <target>Aucune données personnelle à afficher</target>
       </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.pidEmpty">
+        <source>The "pid" parameter is empty</source>
+        <target>Le paramètre "pid" n'a pas été fourni</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.ptableEmpty">
+        <source>The "ptable" parameter is empty</source>
+        <target>Le paramètre "ptable" n'a pas été fourni</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.emailEmpty">
+        <source>The "email" parameter is empty</source>
+        <target>Le paramètre "email" n'a pas été fourni</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.fieldEmpty">
+        <source>The "field" parameter is empty</source>
+        <target>Le paramètre "field" n'a pas été fourni</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.noUrlProvided">
+        <source>No URL provided to show this item.</source>
+        <target>Aucune URL n'a pas fournie pour afficher cet élément</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.DEFAULT.accessDenied">
+        <source>You can't access this component.</source>
+        <target>Vous n'êtes pas autorisé à accéder à ce composant.</target>
+      </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.title">
         <source>Your personal data</source>
         <target>Vos données personnelles</target>
@@ -17,29 +41,37 @@
         <source>List of all items using your personal data</source>
         <target>Liste des éléments utilisant vos données personnelles</target>
       </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.nbItemsOne">
+        <source>%s item use your personal data.</source>
+        <target>%s élément utilise vos données personnelles.</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.LIST.nbItemsMultiple">
+        <source>%s items use your personal data.</source>
+        <target>%s éléments utilisent vos données personnelles.</target>
+      </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.noItems">
         <source>No item to display</source>
         <target>Aucun élément à afficher</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymizeTitle">
-        <source>Delete personal data</source>
-        <target>Supprimer vos données personnelles</target>
+        <source>Delete all your personal data</source>
+        <target>Supprimer toutes vos données personnelles</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymizeConfirm">
-        <source>Do you really want to delete yuor personal data ?</source>
-        <target>Voulez-vous vraiment supprimer vos données personnelles ?</target>
+        <source>Do you really want to delete all your personal data ?</source>
+        <target>Voulez-vous vraiment supprimer toutse vos données personnelles ?</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonAnonymize">
-        <source>Delete</source>
-        <target>Supprimer</target>
+        <source>Delete all your personal data</source>
+        <target>Supprimer toutes vos données personnelles</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonExportTitle">
-        <source>Export your personal data</source>
-        <target>Exporter vos données personnelles</target>
+        <source>Export all your personal data</source>
+        <target>Exporter toutes vos données personnelles</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.LIST.buttonExport">
-        <source>Export</source>
-        <target>Exporter</target>
+        <source>Export all your personal data</source>
+        <target>Exporter toutes vos données personnelles</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.ITEM.originalModelTitle">
         <source>Original model</source>
@@ -92,6 +124,66 @@
       <trans-unit id="WEM.PEDAMA.ITEM.buttonShow">
         <source>Show</source>
         <target>Voir</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.EMAILFORM.mailLabel">
+        <source>Your e-mail</source>
+        <target>Votre e-mail</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.EMAILFORM.submit">
+        <source>Submit</source>
+        <target>Envoyer</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.MODFE.emailSent">
+        <source>An email containing a link to access your personal data has been set.</source>
+        <target>Un email contenant un lien pour accéder à vos données personnelles vous a été envoyé.</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.MODFE.emailNotSent">
+        <source>An error occurend when trying to send you an email containing a link to access your personal data.</source>
+        <target>Une erreur est survenue lors de l'envoi d'un email contenant un lien pour accéder à vos données personnelles.</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.MODFE.emailTokenCoupleNotValid">
+        <source>The token provided is not valid.</source>
+        <target>Le token fourni n'est pas ou plus valide.</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.EMAIL.subject">
+        <source>Access to your personal data.</source>
+        <target>Votre accès à vos données personnelles.</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.filenameSingleItem">
+        <source>your_personal_data</source>
+        <target>vos_donnees_personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.filenameAll">
+        <source>your_personal_data</source>
+        <target>vos_donnees_personnelles</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnEntity">
+        <source>Entity</source>
+        <target>Entité</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnMail">
+        <source>Mail</source>
+        <target>Email</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnField">
+        <source>Field</source>
+        <target>Champ</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnValue">
+        <source>Value</source>
+        <target>Valeur</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnAnonymized">
+        <source>Anonymized data</source>
+        <target>Donnée anonymisée</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnAnonymizedValueYes">
+        <source>Yes</source>
+        <target>Oui</target>
+      </trans-unit>
+      <trans-unit id="WEM.PEDAMA.CSV.columnAnonymizedValueNo">
+        <source>No</source>
+        <target>Non</target>
       </trans-unit>
     </body>
   </file>

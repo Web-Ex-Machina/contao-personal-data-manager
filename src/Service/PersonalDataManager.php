@@ -17,8 +17,10 @@ namespace WEM\PersonalDataManagerBundle\Service;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\System;
+use Exception;
 use InvalidArgumentException;
 use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
+use WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken as PersonalDataAccessTokenModel;
 use WEM\PersonalDataManagerBundle\Model\Traits\PersonalDataTrait;
 
 class PersonalDataManager
@@ -376,6 +378,76 @@ class PersonalDataManager
         }
 
         return $href;
+    }
+
+    /**
+     * Check if an email + token couple is valid.
+     *
+     * @param string $email The email
+     * @param string $token The token
+     *
+     * @return bool True if valid
+     */
+    public function isEmailTokenCoupleValid(string $email, string $token): bool
+    {
+        return PersonalDataAccessTokenModel::isEmailTokenCoupleValid($email, $token);
+    }
+
+    /**
+     * Inserts a row for an email.
+     *
+     * @param string $email The email
+     */
+    public function insertForEmail(string $email): PersonalDataAccessTokenModel
+    {
+        $pdmats = PersonalDataAccessTokenModel::findBy('email', $email);
+
+        if ($pdmats) {
+            while ($pdmats->next()) {
+                $pdmat = $pdmats->current();
+                if ($pdmat->isValid()) {
+                    $pdmat->expiresAt = time();
+                    $pdmat->save();
+                }
+            }
+        }
+
+        return PersonalDataAccessTokenModel::insertForEmail($email);
+    }
+
+    /**
+     * update expiration date for an existing token.
+     */
+    public function updateTokenExpiration(string $token): PersonalDataAccessTokenModel
+    {
+        $obj = PersonalDataAccessTokenModel::findOneBy('token', $token);
+        if (!$obj
+        || !$obj->isValid()
+        ) {
+            throw new Exception('The token is invalid');
+        }
+        $obj->updateExpiration();
+
+        return $obj;
+    }
+
+    public function putTokenInSession(string $token): void
+    {
+        $session = System::getContainer()->get('session'); // Init session
+        $session->set('wem_pdm_token', $token);
+    }
+
+    public function clearTokenInSession(): void
+    {
+        $session = System::getContainer()->get('session'); // Init session
+        $session->set('wem_pdm_token', '');
+    }
+
+    public function getTokenInSession(): ?string
+    {
+        $session = System::getContainer()->get('session'); // Init session
+
+        return $session->get('wem_pdm_token');
     }
 
     /**

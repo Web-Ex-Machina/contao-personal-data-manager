@@ -1,0 +1,11 @@
+<div>
+	<form method="POST" action="<?php echo $this->request; ?>" class="pdm-form">
+		<label for="email">
+			<?php echo $this->trans('WEM.PEDAMA.EMAILFORM.mailLabel',[],'contao_default'); ?>
+		</label>
+		<input type="text" name="email" value="<?php echo $this->email; ?>" class="tl_text"/>
+		<input name="FORM_SUBMIT" value="wem-personal-data-manager" type="hidden">
+		<input name="REQUEST_TOKEN" value="<?php echo $this->token ?>" type="hidden">
+		<input type="submit" name="<?php echo $this->trans('WEM.PEDAMA.EMAILFORM.submit',[],'contao_default'); ?>" class="tl_button"/>
+	</form>
+</div>

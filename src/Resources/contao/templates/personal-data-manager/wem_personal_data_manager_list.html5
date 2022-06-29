@@ -14,6 +14,9 @@
 			<?php echo $this->trans('WEM.PEDAMA.LIST.noItems',[],'contao_default'); ?>
 		</div>
 		<?php else: ?>
+			<div class="pdm-items__title__number_items">
+				<?php echo $this->trans(count($this->items) > 1 ? 'WEM.PEDAMA.LIST.nbItemsMultiple' : 'WEM.PEDAMA.LIST.nbItemsOne',[count($this->items)],'contao_default'); ?>
+			</div>
 			<?php foreach($this->items as $item): ?>
 				<?php echo $item; ?>
 			<?php endforeach; ?>
@@ -33,7 +36,8 @@
 					let pid = e.target.parentNode.getAttribute('data-pid');
 					let ptable = e.target.parentNode.getAttribute('data-ptable');
 					let field = e.target.parentNode.getAttribute('data-field');
-					anonymizeSinglePersonalData(pid, ptable, field);
+					let url = e.target.getAttribute('href');
+					anonymizeSinglePersonalData(url, pid, ptable, field);
 					return false;
 				});
 			});
@@ -47,7 +51,8 @@
 					
 					let pid = e.target.parentNode.getAttribute('data-pid');
 					let ptable = e.target.parentNode.getAttribute('data-ptable');
-					anonymizePersonalDataItem(pid, ptable);
+					let url = e.target.getAttribute('href');
+					anonymizePersonalDataItem(url, pid, ptable);
 					return false;
 				});
 			});
@@ -58,7 +63,8 @@
 					
 					let pid = e.target.parentNode.getAttribute('data-pid');
 					let ptable = e.target.parentNode.getAttribute('data-ptable');
-					exportPersonalDataItem(pid, ptable);
+					let url = e.target.getAttribute('href');
+					exportPersonalDataItem(url, pid, ptable);
 					return false;
 				});
 			});
@@ -71,7 +77,8 @@
 					}
 					
 					let email = e.target.parentNode.getAttribute('data-email');
-					anonymizeAllPersonalData(email);
+					let url = e.target.getAttribute('href');
+					anonymizeAllPersonalData(url, email);
 					return false;
 				});
 			});
@@ -81,7 +88,8 @@
 					e.preventDefault();
 					
 					let email = e.target.parentNode.getAttribute('data-email');
-					exportAllPersonalData(email);
+					let url = e.target.getAttribute('href');
+					exportAllPersonalData(url, email);
 					return false;
 				});
 			});
@@ -92,19 +100,20 @@
 					
 					let pid = e.target.parentNode.getAttribute('data-pid');
 					let ptable = e.target.parentNode.getAttribute('data-ptable');
-					showPersonalDataItem(pid, ptable);
+					let url = e.target.getAttribute('href');
+					showPersonalDataItem(url, pid, ptable);
 					return false;
 				});
 			});
 		};
 
-		function anonymizeSinglePersonalData(pid, ptable, field){
+		function anonymizeSinglePersonalData(url, pid, ptable, field){
 			let singleElement = getSinglePersonalValueContainer(pid, ptable, field);
 			let email = getSingleItem(pid, ptable).getAttribute('data-email');
 			let singleElementFieldButtons = singleElement.querySelector('.pdm-item__personal_data_single__buttons');
 			displayLoader(singleElement);
 
-			postData({
+			postData(url,{
 				'action':'anonymize_single_personal_data',
 				'pid':pid,
 				'ptable':ptable,
@@ -126,7 +135,7 @@
 			});
 		};
 
-		function anonymizePersonalDataItem(pid, ptable){
+		function anonymizePersonalDataItem(url, pid, ptable){
 			let item = getSingleItem(pid, ptable);
 			let email = item.getAttribute('data-email');
 			let singleElementFieldButtonss = item.querySelectorAll('.pdm-item__personal_data_single__buttons');
@@ -135,7 +144,7 @@
 			
 			displayLoader(item);
 
-			postData({
+			postData(url,{
 				'action':'anonymize_personal_data_item',
 				'pid':pid,
 				'ptable':ptable,
@@ -168,7 +177,7 @@
 			});
 		};
 
-		function anonymizeAllPersonalData(email){
+		function anonymizeAllPersonalData(url, email){
 			let list = document.querySelector('.pdm-list');
 			let singleElementFieldValues = document.querySelectorAll('.pdm-item__personal_data_single__value');
 			let singleElementFieldButtonss = document.querySelectorAll('.pdm-item__personal_data_single__buttons');
@@ -177,7 +186,7 @@
 			
 			displayLoader(list);
 
-			postData({
+			postData(url,{
 				'action':'anonymize_all_personal_data',
 				'email':email
 			})
@@ -215,13 +224,13 @@
 			});
 		};
 
-		function exportPersonalDataItem(pid, ptable){
+		function exportPersonalDataItem(url, pid, ptable){
 			let item = getSingleItem(pid, ptable);
 			let email = item.getAttribute('data-email');
 			
 			displayLoader(item);
 
-			postData({
+			postData(url,{
 				'action':'export_single',
 				'pid':pid,
 				'ptable':ptable,
@@ -230,7 +239,7 @@
 			.then(response => {
 				if(response.ok) {
 					response.blob().then(function(blob) {
-						downloadBlobFile(blob,'all.csv');
+						downloadBlobFile(blob,response.headers.get('filename'));
 					});
 				} else {
 					response.json().then(function(json){
@@ -244,18 +253,25 @@
 			});
 		};
 
-		function exportAllPersonalData(email){
+		function exportAllPersonalData(url, email){
 			let list = document.querySelector('.pdm-list');
 			
 			displayLoader(list);
 
-			postData({
+			postData(url,{
 				'action':'export_all',
 				'email':email
 			})
-			.then(resp => resp.blob())
-			.then(blob => {
-				downloadBlobFile(blob,'all.csv');
+			.then(response => {
+				if(response.ok) {
+					response.blob().then(function(blob) {
+						downloadBlobFile(blob,response.headers.get('filename'));
+					});
+				} else {
+					response.json().then(function(json){
+						alert(json.msg);
+					});
+				}
 				hideLoader(list);
 			}).catch(function(e) {
 				alert("Une erreur est survenue");
@@ -263,13 +279,13 @@
 			});
 		};
 
-		function showPersonalDataItem(pid, ptable){
+		function showPersonalDataItem(url, pid, ptable){
 			let item = getSingleItem(pid, ptable);
 			let email = item.getAttribute('data-email');
 			
 			displayLoader(item);
 
-			postData({
+			postData(url,{
 				'action':'show_personal_data_item',
 				'pid':pid,
 				'ptable':ptable,
@@ -284,7 +300,7 @@
 						href: data.href,
 					}).click();
 				}else{
-					alert(data.msg);	
+					alert(data.msg);
 				}
 				
 				hideLoader(item);
@@ -338,17 +354,17 @@
 			element.removeChild(element.querySelector('.pdm-loader'));
 		};
 
-		async function postData(data) {
+		async function postData(url,data) {
 			var request = new FormData();
 
 			for(var i in data) {
 				request.append(i, data[i]);
 			}
 
-			return postDataCustom(request,{});
+			return postDataCustom(url,request,{});
 		};
 
-		async function postDataCustom(request, additionnalOptions) {
+		async function postDataCustom(url,request, additionnalOptions) {
 			request.append('TL_WEM_AJAX', 1);
 			request.append('REQUEST_TOKEN', '<?php echo $this->token ?>');
 			request.append('wem_module', 'be_pdm');
@@ -362,7 +378,8 @@
 
 			options = Object.assign(options,additionnalOptions);
 
-			const response = await fetch("<?php echo $this->request ?>", options);
+			const response = await fetch(url, options);
+			// const response = await fetch("<?php echo $this->request ?>", options);
 
 			return response;
 		};

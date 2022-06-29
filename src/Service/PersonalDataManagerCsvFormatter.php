@@ -16,14 +16,24 @@ namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\Model\Collection;
 use Contao\System;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
 
 class PersonalDataManagerCsvFormatter
 {
+    /** @var TranslatorInterface */
+    private $translator;
+
+    public function __construct(
+        TranslatorInterface $translator
+    ) {
+        $this->translator = $translator;
+    }
+
     public function formatPersonalDataForCsv(?Collection $personalData): string
     {
         $csv = $this->formatHeader();
-        $csv = $csv + $this->formatAll($personalData, $csv);
+        $csv = array_merge($csv, $this->formatAll($personalData, $csv));
 
         return implode("\n", $csv);
     }
@@ -31,7 +41,11 @@ class PersonalDataManagerCsvFormatter
     protected function formatHeader(): array
     {
         $row = [
-            'Entity', 'Mail', 'Field', 'Value',
+            $this->translator->trans('WEM.PEDAMA.CSV.columnEntity', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.CSV.columnMail', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.CSV.columnField', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.CSV.columnValue', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymized', [], 'contao_default'),
         ];
 
         if (isset($GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport']) && \is_array($GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport'])) {
@@ -63,9 +77,9 @@ class PersonalDataManagerCsvFormatter
             $personalData->ptable,
             $personalData->email,
             $GLOBALS['TL_DCA'][$personalData->ptable]['fields'][$personalData->field]['label'] ?? $personalData->field,
-            $encryptionService->decrypt($personalData->value),
+            $personalData->anonymized ? $personalData->value : $encryptionService->decrypt($personalData->value),
+            $personalData->anonymized ? $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymizedValueYes', [], 'contao_default') : $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymizedValueNo', [], 'contao_default'),
         ];
-
         if (isset($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport']) && \is_array($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'])) {
             foreach ($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'] as $callback) {
                 $row = System::importStatic($callback[0])->{$callback[1]}($personalData, $header, $row);
