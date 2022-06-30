@@ -40,7 +40,9 @@ class Save
 
     public function __invoke()
     {
-        if (1 === \func_num_args()) {
+        if (1 === \func_num_args()
+        || (2 === \func_num_args() && null === func_get_arg(1))
+        ) {
             return $this->invokeFrontendRegistration(...\func_get_args());
         }
         if (2 === \func_num_args()) {
