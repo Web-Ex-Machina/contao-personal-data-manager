@@ -125,7 +125,7 @@ This way, editing your records in back-end will work with the same as with the m
 
 declare(strict_types=1);
 
-namespace Your\Namespace;
+namespace Your\Namespace\Dca\Field\Callback;
 
 use WEM\PersonalDataManagerBundle\Dca\Field\Callback\Load as PdmCallback; // or Save
 
@@ -161,7 +161,7 @@ class Load
 ```yaml
 services:
     your.bundle.dca.field.callback.load.tl_my_table.my_field:
-        class: WEM\SmartgearBundle\Classes\Dca\Field\Callback\Load
+        class: Your\Namespace\Dca\Field\Callback\Load
         arguments:
             $pdmCallback: '@wem.personal_data_manager.dca.field.callback.load'
             $frontendField: 'myField'
