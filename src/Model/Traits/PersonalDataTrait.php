@@ -138,6 +138,74 @@ trait PersonalDataTrait
     }
 
     /**
+     * Find a single record by its primary key.
+     *
+     * @param mixed $varValue   The property value
+     * @param array $arrOptions An optional options array
+     *
+     * @return static The model or null if the result is empty
+     */
+    public static function findByPk($varValue, array $arrOptions = [])
+    {
+        $obj = parent::findByPk($varValue, $arrOptions);
+        if (!is_a($obj, self::class)) {
+            $obj->detach(false);
+
+            return static::findByPk($varValue, $arrOptions);
+        }
+
+        return $obj;
+    }
+
+    /**
+     * Find a single record by its ID or alias.
+     *
+     * @param mixed $varId      The ID or alias
+     * @param array $arrOptions An optional options array
+     *
+     * @return static The model or null if the result is empty
+     */
+    public static function findByIdOrAlias($varId, array $arrOptions = [])
+    {
+        $obj = parent::findByIdOrAlias($varId, $arrOptions);
+        if (!is_a($obj, self::class)) {
+            $obj->detach(false);
+
+            return static::findByIdOrAlias($varId, $arrOptions);
+        }
+
+        return $obj;
+    }
+
+    /**
+     * Find multiple records by their IDs.
+     *
+     * @param array $arrIds     An array of IDs
+     * @param array $arrOptions An optional options array
+     *
+     * @return Collection|null The model collection or null if there are no records
+     */
+    public static function findMultipleByIds($arrIds, array $arrOptions = [])
+    {
+        $obj = parent::findMultipleByIds($arrIds, $arrOptions);
+        if ($obj) {
+            $detached = false;
+            while ($obj->next()) {
+                if (!is_a($obj->current(), self::class)) {
+                    $obj->current()->detach(false);
+                    $detached = true;
+                }
+            }
+
+            if ($detached) {
+                return static::findMultipleByIds($arrIds, $arrOptions);
+            }
+        }
+
+        return $obj;
+    }
+
+    /**
      * Create a model from a database result.
      *
      * @param Result $objResult The database result object
@@ -233,5 +301,46 @@ trait PersonalDataTrait
         );
         self::$personalDataFieldsValues = [];
         parent::postSave($intType);
+    }
+
+    /**
+     * Find records and return the model or model collection.
+     *
+     * Supported options:
+     *
+     * * column: the field name
+     * * value:  the field value
+     * * limit:  the maximum number of rows
+     * * offset: the number of rows to skip
+     * * order:  the sorting order
+     * * eager:  load all related records eagerly
+     *
+     * @param array $arrOptions The options array
+     *
+     * @return Model|Model[]|Collection|null A model, model collection or null if the result is empty
+     */
+    protected static function find(array $arrOptions)
+    {
+        $obj = parent::find($arrOptions);
+
+        if (!is_a($obj, self::class)) {
+            $obj->detach(false);
+
+            return static::find($arrOptions);
+        }
+        if (is_a($obj, \Contao\Model\Collection::class)) {
+            $detached = false;
+            while ($obj->next()) {
+                if (!is_a($obj->current(), self::class)) {
+                    $obj->current()->detach(false);
+                    $detached = true;
+                }
+            }
+            if ($detached) {
+                return static::find($arrOptions);
+            }
+        }
+
+        return $obj;
     }
 }
