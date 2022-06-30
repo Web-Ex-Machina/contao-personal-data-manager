@@ -29,12 +29,16 @@ services:
     class: WEM\PersonalDataManagerBundle\Dca\Field\Callback\Load
     arguments:
       $personalDataManager: '@wem.personal_data_manager.service.personal_data_manager'
+      $frontendField: ''
+      $table: ''
     public: true
 
   wem.personal_data_manager.dca.field.callback.save:
     class: WEM\PersonalDataManagerBundle\Dca\Field\Callback\Save
     arguments:
       $personalDataManager: '@wem.personal_data_manager.service.personal_data_manager'
+      $frontendField: ''
+      $table: ''
     public: true
 
   wem.personal_data_manager.dca.listing.callback.list_label_label_for_list:

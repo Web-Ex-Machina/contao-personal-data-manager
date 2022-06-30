@@ -16,18 +16,38 @@ namespace WEM\PersonalDataManagerBundle\Dca\Field\Callback;
 
 use Contao\DataContainer;
 use Contao\Model;
+use Exception;
+use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
 
 class Load
 {
+    /** @var PersonalDataManager */
     protected $personalDataManager;
+    /** @var string */
+    protected $frontendField;
+    /** @var string */
+    protected $table;
 
     public function __construct(
-        \WEM\PersonalDataManagerBundle\Service\PersonalDataManager $personalDataManager
+        PersonalDataManager $personalDataManager,
+        string $frontendField,
+        string $table
     ) {
         $this->personalDataManager = $personalDataManager;
+        $this->frontendField = $frontendField;
+        $this->table = $table;
     }
 
-    public function __invoke($value, DataContainer $dc)
+    public function __invoke()
+    {
+        if (2 === \func_num_args()) {
+            return $this->invokeBackend(...\func_get_args());
+        }
+
+        return $this->invokeFrontend(...\func_get_args());
+    }
+
+    public function invokeBackend($value, DataContainer $dc)
     {
         if (!$dc->id) {
             return $value;
@@ -42,5 +62,49 @@ class Load
             $dc->activeRecord->{$model->getPersonalDataEmailField()},
             $dc->inputName
         ) ?? $value;
+    }
+
+    public function invokeFrontend($value, \Contao\FrontendUser $user, \Contao\ModulePersonalData $module)
+    {
+        if (empty($this->frontendField)) {
+            throw new Exception('No frontend field configured');
+        }
+        if (empty($this->table)) {
+            throw new Exception('No table configured');
+        }
+
+        $modelClassName = Model::getClassFromTable($this->table);
+        $model = new $modelClassName();
+
+        return $this->personalDataManager->getUnecryptedValueByPidAndPTableAndEmailAndField(
+            $user->{$model->getPersonalDataPidField()},
+            $model->getPersonalDataPtable(),
+            $user->{$model->getPersonalDataEmailField()},
+            $this->frontendField
+        ) ?? $value;
+    }
+
+    public function getFrontendField(): string
+    {
+        return $this->frontendField;
+    }
+
+    public function setFrontendField(string $frontendField): self
+    {
+        $this->frontendField = $frontendField;
+
+        return $this;
+    }
+
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
+    public function setTable(string $table): self
+    {
+        $this->table = $table;
+
+        return $this;
     }
 }

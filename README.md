@@ -117,6 +117,63 @@ $GLOBALS['TL_DCA']['tl_my_table'] = [
 
 This way, editing your records in back-end will work with the same as with the model.
 
+:warning: If the data you are working on can be edited throught the contao's `Personal data` front end module, you will need to extends the `load` & `save` callbacks to precise on which table & field the front end callback should work !
+
+**PHP callback**
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Your\Namespace;
+
+use WEM\PersonalDataManagerBundle\Dca\Field\Callback\Load as PdmCallback; // or Save
+
+class Load
+{
+    /** @var WEM\PersonalDataManagerBundle\Dca\Field\Callback\Load */
+    private $pdmCallback;
+    /** @var string */
+    private $frontendField;
+    /** @var string */
+    private $table;
+
+    public function __construct(
+        PdmCallback $pdmCallback,
+        string $frontendField,
+        string $table
+    ) {
+        $this->pdmCallback = $pdmCallback;
+        $this->frontendField = $frontendField;
+        $this->table = $table;
+
+        $this->pdmCallback->setFrontendField($this->frontendField)->setTable($this->table);
+    }
+
+    public function __invoke()
+    {
+        return $this->pdmCallback->__invoke(...\func_get_args());
+    }
+}
+```
+
+**YAML config file** (like `your/bundle/src/Resources/contao/config/services.yml`)
+```yaml
+services:
+    your.bundle.dca.field.callback.load.tl_my_table.my_field:
+        class: WEM\SmartgearBundle\Classes\Dca\Field\Callback\Load
+        arguments:
+            $pdmCallback: '@wem.personal_data_manager.dca.field.callback.load'
+            $frontendField: 'myField'
+            $table: 'tl_my_table'
+        public: true
+```
+
+**DCA file**
+```php
+$GLOBALS['TL_DCA']['tl_my_table']['fields']['myField']['load_callback'][] = ['your.bundle.dca.field.callback.load.tl_my_table.my_field', '__invoke'];
+```
+
 Usage
 -----
 
