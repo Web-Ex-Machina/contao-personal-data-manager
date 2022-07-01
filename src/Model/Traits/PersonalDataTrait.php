@@ -148,6 +148,10 @@ trait PersonalDataTrait
     public static function findByPk($varValue, array $arrOptions = [])
     {
         $obj = parent::findByPk($varValue, $arrOptions);
+
+        if (!$obj) {
+            return $obj;
+        }
         if (!is_a($obj, self::class)) {
             $obj->detach(false);
 
@@ -168,6 +172,10 @@ trait PersonalDataTrait
     public static function findByIdOrAlias($varId, array $arrOptions = [])
     {
         $obj = parent::findByIdOrAlias($varId, $arrOptions);
+
+        if (!$obj) {
+            return $obj;
+        }
         if (!is_a($obj, self::class)) {
             $obj->detach(false);
 
@@ -322,7 +330,9 @@ trait PersonalDataTrait
     protected static function find(array $arrOptions)
     {
         $obj = parent::find($arrOptions);
-
+        if (!$obj) {
+            return $obj;
+        }
         if (!is_a($obj, self::class)) {
             $obj->detach(false);
 
