@@ -194,35 +194,8 @@ Each action from the user make its token valid for 5 more minutes.
 Hooks
 -----
 
-Multiple hooks are available to customize the bundle
+Multiple hooks are available to customize the bundle. The list is available [here][5].
 
-### Personal Data List
-
-Hook | Return Value | Description
---- | --- | ---
-`renderListButtons` | `string` | *To be completed*
-`renderSingleItem` | `string` | *To be completed*
-`renderSingleItemHeader` | `string` | *To be completed*
-`renderSingleItemTitle` | `string` | *To be completed*
-`renderSingleItemButtons` | `string` | *To be completed*
-`renderSingleItemBody` | `string` | *To be completed*
-`renderSingleItemBodyOriginalModel` | `string` | *To be completed*
-`renderSingleItemBodyOriginalModelSingle` | `string` | *To be completed*
-`renderSingleItemBodyOriginalModelSingleFieldLabel` | `string` | *To be completed*
-`renderSingleItemBodyOriginalModelSingleFieldValue` | `string` | *To be completed*
-`renderSingleItemBodyPersonalData` | `string` | *To be completed*
-`renderSingleItemBodyPersonalDataSingle` | `string` | *To be completed*
-`renderSingleItemBodyPersonalDataSingleFieldLabel` | `string` | *To be completed*
-`renderSingleItemBodyPersonalDataSingleFieldValue` | `string` | *To be completed*
-`renderSingleItemBodyPersonalDataSingleButtons` | `string` | *To be completed*
-`getHrefByPidAndPtableAndEmail` | `string` | URL to show the current item
-
-### CSV Exporter
-
-Hook | Return value | Description
---- | --- | ---
-`formatHeaderForCsvExport` | `array` | Header for CSV exports
-`formatSinglePersonalDataForCsvExport` | `array` | Data for each single Personal Data item
 
 Documentation
 -------------
@@ -252,3 +225,4 @@ You can get the extension with this repository URL : [Github][2]
 [2]: https://github.com/webexmachina/personal-data-manager
 [3]: https://www.webexmachina.fr/
 [4]: https://github.com/plenta/contao-encryption
+[5]: docs/HOOKS.md
