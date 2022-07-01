@@ -26,12 +26,12 @@ Hook | Return Value | Description
 `renderSingleItemBodyOriginalModelSingle` | `string` | Called after an item's original model's single row have been generated
 `renderSingleItemBodyOriginalModelSingleFieldLabel` | `string` | Called after an item's original model's single row field label have been generated
 `renderSingleItemBodyOriginalModelSingleFieldValue` | `string` | Called after an item's original model's single row field value have been generated
-`renderSingleItemBodyPersonalData` | `string` | *To be completed*
-`renderSingleItemBodyPersonalDataSingle` | `string` | *To be completed*
-`renderSingleItemBodyPersonalDataSingleFieldLabel` | `string` | *To be completed*
-`renderSingleItemBodyPersonalDataSingleFieldValue` | `string` | *To be completed*
-`renderSingleItemBodyPersonalDataSingleButtons` | `string` | *To be completed*
-`getHrefByPidAndPtableAndEmail` | `string` | URL to show the current item
+`renderSingleItemBodyPersonalData` | `string` | Called after an item's whole personal data list have been generated
+`renderSingleItemBodyPersonalDataSingle` | `string` | Called after an item's personal data list row have been generated
+`renderSingleItemBodyPersonalDataSingleFieldLabel` | `string` | Called after an item's personal data list row's field label have been generated
+`renderSingleItemBodyPersonalDataSingleFieldValue` | `string` | Called after an item's personal data list row's field value have been generated
+`renderSingleItemBodyPersonalDataSingleButtons` | `string` | Called after an item's personal data list row's buttons have been generated
+`getHrefByPidAndPtableAndEmail` | `string` | Called when clicking on the "show" button of an item
 
 ### CSV Exporter
 
@@ -56,8 +56,13 @@ $email | `string` | The email address linked to the personal data
 $nbRows | `int` | Number of items in the list
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-public function renderListButtons(string $email, int $nbRows, string $buffer): string
+public function renderListButtons(
+	string $email, 
+	int $nbRows, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -79,8 +84,16 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItem(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItem(
+	int $pid, 
+	string $ptable, 
+	string $email, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -101,8 +114,15 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemHeader(int $pid, string $ptable, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemHeader(
+	int $pid, 
+	string $ptable, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -123,8 +143,15 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemTitle(int $pid, string $ptable, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemTitle(
+	int $pid, 
+	string $ptable, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -145,8 +172,15 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemButtons(int $pid, string $ptable, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemButtons(
+	int $pid, 
+	string $ptable, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -167,8 +201,15 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBody(int $pid, string $ptable, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBody(
+	int $pid, 
+	string $ptable, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -189,8 +230,15 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBodyOriginalModel(int $pid, string $ptable, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBodyOriginalModel(
+	int $pid, 
+	string $ptable, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -213,8 +261,17 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBodyOriginalModelSingle(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBodyOriginalModelSingle(
+	int $pid, 
+	string $ptable, 
+	string $field, 
+	$value, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -237,8 +294,17 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBodyOriginalModelSingleFieldLabel(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBodyOriginalModelSingleFieldLabel(
+	int $pid, 
+	string $ptable, 
+	string $field, 
+	$value, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -261,8 +327,17 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBodyOriginalModelSingleFieldValue(int $pid, string $ptable, string $field, $value, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBodyOriginalModelSingleFieldValue(
+	int $pid, 
+	string $ptable, 
+	string $field, 
+	$value, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -283,8 +358,15 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBodyPersonalData(int $pid, string $ptable, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBodyPersonalData(
+	int $pid, 
+	string $ptable, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -306,8 +388,16 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBodyPersonalDataSingle(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBodyPersonalDataSingle(
+	int $pid, 
+	string $ptable, 
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -329,8 +419,16 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBodyPersonalDataSingleFieldLabel(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBodyPersonalDataSingleFieldLabel(
+	int $pid, 
+	string $ptable, 
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -352,8 +450,16 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBodyPersonalDataSingleFieldValue(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBodyPersonalDataSingleFieldValue(
+	int $pid, 
+	string $ptable, 
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
 }
@@ -375,9 +481,90 @@ $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
 
+**Code**:
 ```php
-protected function renderSingleItemBodyPersonalDataSingleButtons(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel, string $buffer): string
+public function renderSingleItemBodyPersonalDataSingleButtons(
+	int $pid, 
+	string $ptable, 
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	string $buffer
+): string
 {
 	return $buffer;
+}
+```
+
+### getHrefByPidAndPtableAndEmail
+
+Called when clicking on the "show" button of an item
+
+**Return value** : `string`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `int` | The pid linked to the personal data
+$ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email linked to the personal data
+$buffer | `string` | The generated HTML code
+
+**Code**:
+```php
+public function getHrefByPidAndPtableAndEmail(
+	string $pid, 
+	string $ptable, 
+	string $email, 
+	string $buffer
+): string
+{
+	return $buffer;
+}
+```
+
+### formatHeaderForCsvExport
+
+Called after the CSV header have been created
+
+**Return value** : `array`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$header | `array` | The header columns for the CSV export
+
+**Code**:
+```php
+public function formatHeaderForCsvExport(
+	array $header
+): array
+{
+	return $header;
+}
+```
+
+### formatSinglePersonalDataForCsvExport
+
+Called after the CSV row for a single personal data row have been created
+
+**Return value** : `array`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$personalData | `WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data row
+$header | `array` | The header columns for the CSV export
+$row | `array` | The row corresponding to the current personal data
+
+**Code**:
+```php
+public function formatSinglePersonalDataForCsvExport(
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	array $header, 
+	array $row
+): array
+{
+	return $row;
 }
 ```
