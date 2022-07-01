@@ -12,7 +12,12 @@ declare(strict_types=1);
  * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
 
-array_insert($GLOBALS['BE_MOD']['personal-data'], 0, [
+// Load icon in Contao 4.2 backend
+if ('BE' === TL_MODE) {
+    $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/backend.css';
+}
+
+array_insert($GLOBALS['BE_MOD']['wem_pdm'], 0, [
     'wem-personal-data-manager' => [
         'callback' => \WEM\PersonalDataManagerBundle\Controller\PersonalDataManagerController::class,
     ],
