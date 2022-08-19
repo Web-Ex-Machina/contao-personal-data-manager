@@ -77,9 +77,9 @@ trait PersonalDataTrait
             $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
             $personalDatas = $manager->findByPidAndPtable(
-            (string) $this->getPersonalDataPidFieldValue(),
-            $this->getPersonalDataPtable()
-        );
+                (string) $this->getPersonalDataPidFieldValue(),
+                $this->getPersonalDataPtable()
+            );
 
             if ($personalDatas) {
                 while ($personalDatas->next()) {
@@ -98,10 +98,10 @@ trait PersonalDataTrait
             // re-find personal data
             $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
             $manager->anonymizeByPidAndPtableAndEmail(
-            (string) $this->getPersonalDataPidFieldValue(),
-            $this->getPersonalDataPtable(),
-            $this->getPersonalDataEmailFieldValue()
-        );
+                (string) $this->getPersonalDataPidFieldValue(),
+                $this->getPersonalDataPtable(),
+                $this->getPersonalDataEmailFieldValue()
+            );
             $this->refresh();
         }
     }
@@ -364,7 +364,7 @@ trait PersonalDataTrait
         if (!$obj) {
             return $obj;
         }
-        if (!is_a($obj, self::class)) {
+        if (is_a($obj, self::class)) {
             $obj->detach(false);
 
             return static::find($arrOptions);
