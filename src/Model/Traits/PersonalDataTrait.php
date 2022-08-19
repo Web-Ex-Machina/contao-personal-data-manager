@@ -364,7 +364,7 @@ trait PersonalDataTrait
         if (!$obj) {
             return $obj;
         }
-        if (is_a($obj, self::class)) {
+        if (!is_a($obj, self::class) && !is_a($obj, \Contao\Model\Collection::class)) {
             $obj->detach(false);
 
             return static::find($arrOptions);
