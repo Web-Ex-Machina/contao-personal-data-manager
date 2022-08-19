@@ -31,6 +31,11 @@ trait PersonalDataTrait
 {
     protected static $personalDataFieldsValues = [];
 
+    public function shouldManagePersonalData(): bool
+    {
+        return true;
+    }
+
     /**
      * Delete the current record and return the number of affected rows.
      *
@@ -39,11 +44,13 @@ trait PersonalDataTrait
     public function delete(): int
     {
         // delete associated personal data
-        $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $manager->deleteByPidAndPtable(
-            (string) $this->{self::$personalDataPidField},
-            self::$personalDataPtable
-        );
+        if ($this->shouldManagePersonalData()) {
+            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $manager->deleteByPidAndPtable(
+                (string) $this->getPersonalDataPidFieldValue(),
+                $this->getPersonalDataPtable()
+            );
+        }
 
         return parent::delete();
     }
@@ -54,7 +61,9 @@ trait PersonalDataTrait
     public function refresh(): void
     {
         parent::refresh();
-        $this->findAndApplyPersonalData();
+        if ($this->shouldManagePersonalData()) {
+            $this->findAndApplyPersonalData();
+        }
     }
 
     /**
@@ -62,18 +71,20 @@ trait PersonalDataTrait
      */
     public function findAndApplyPersonalData(): void
     {
-        // re-find personal data
-        $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+        if ($this->shouldManagePersonalData()) {
+            // re-find personal data
+            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
-        $personalDatas = $manager->findByPidAndPtable(
-            (string) $this->{self::$personalDataPidField},
-            self::$personalDataPtable
+            $personalDatas = $manager->findByPidAndPtable(
+            (string) $this->getPersonalDataPidFieldValue(),
+            $this->getPersonalDataPtable()
         );
 
-        if ($personalDatas) {
-            while ($personalDatas->next()) {
-                $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
+            if ($personalDatas) {
+                while ($personalDatas->next()) {
+                    $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
+                }
             }
         }
     }
@@ -83,13 +94,16 @@ trait PersonalDataTrait
      */
     public function anonymize(): void
     {
-        // re-find personal data
-        $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-        $manager->anonymizeByPidAndPtableAndEmail(
-            (string) $this->{self::$personalDataPidField},
-            self::$personalDataPtable
+        if ($this->shouldManagePersonalData()) {
+            // re-find personal data
+            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $manager->anonymizeByPidAndPtableAndEmail(
+            (string) $this->getPersonalDataPidFieldValue(),
+            $this->getPersonalDataPtable(),
+            $this->getPersonalDataEmailFieldValue()
         );
-        $this->refresh();
+            $this->refresh();
+        }
     }
 
     public function getPersonalDataFieldsDefaultValues(): array
@@ -99,7 +113,7 @@ trait PersonalDataTrait
 
     public function getPersonalDataFieldsDefaultValueForField(string $field): string
     {
-        return self::$personalDataFieldsDefaultValues[$field];
+        return $this->getPersonalDataFieldsDefaultValues()[$field];
     }
 
     public function getPersonalDataFieldsAnonymizedValues(): array
@@ -109,7 +123,7 @@ trait PersonalDataTrait
 
     public function getPersonalDataFieldsAnonymizedValueForField(string $field): string
     {
-        return self::$personalDataFieldsAnonymizedValues[$field];
+        return $this->getPersonalDataFieldsAnonymizedValues()[$field];
     }
 
     public function getPersonalDataFieldsNames(): array
@@ -119,7 +133,7 @@ trait PersonalDataTrait
 
     public function isFieldInPersonalDataFieldsNames(string $field): bool
     {
-        return \in_array($field, self::$personalDataFieldsNames, true);
+        return \in_array($field, $this->getPersonalDataFieldsNames(), true);
     }
 
     public function getPersonalDataPidField(): string
@@ -135,6 +149,16 @@ trait PersonalDataTrait
     public function getPersonalDataPtable(): string
     {
         return self::$personalDataPtable;
+    }
+
+    public function getPersonalDataPidFieldValue(): string
+    {
+        return $this->{$this->getPersonalDataPidField()};
+    }
+
+    public function getPersonalDataEmailFieldValue(): string
+    {
+        return $this->{$this->getPersonalDataEmailField()};
     }
 
     /**
@@ -223,6 +247,7 @@ trait PersonalDataTrait
     protected static function createModelFromDbResult(Result $objResult)
     {
         $model = parent::createModelFromDbResult($objResult);
+
         if ($model) {
             $model->findAndApplyPersonalData();
         }
@@ -261,6 +286,7 @@ trait PersonalDataTrait
     protected static function createCollectionFromDbResult(Result $objResult, $strTable)
     {
         $collection = parent::createCollectionFromDbResult($objResult, $strTable);
+
         while ($collection->next()) {
             $model = $collection->current();
             $model->findAndApplyPersonalData();
@@ -280,12 +306,15 @@ trait PersonalDataTrait
     protected function preSave(array $arrSet): array
     {
         $arrSet = parent::preSave($arrSet);
-        foreach (self::$personalDataFieldsNames as $personalDataFieldName) {
-            self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
-            if (\array_key_exists($personalDataFieldName, self::$personalDataFieldsDefaultValues)) {
-                $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
-            } else {
-                unset($arrSet[$personalDataFieldName]);
+
+        if ($this->shouldManagePersonalData()) {
+            foreach ($this->getPersonalDataFieldsNames() as $personalDataFieldName) {
+                self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
+                if ($this->isFieldInPersonalDataFieldsNames($personalDataFieldName)) {
+                    $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
+                } else {
+                    unset($arrSet[$personalDataFieldName]);
+                }
             }
         }
 
@@ -299,15 +328,17 @@ trait PersonalDataTrait
      */
     protected function postSave($intType): void
     {
-        $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+        if ($this->shouldManagePersonalData()) {
+            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
 
-        $manager->insertOrUpdateForPidAndPtableAndEmail(
-            (string) $this->{self::$personalDataPidField},
-            self::$personalDataPtable,
-            (string) $this->{self::$personalDataEmailField},
-            self::$personalDataFieldsValues
-        );
-        self::$personalDataFieldsValues = [];
+            $manager->insertOrUpdateForPidAndPtableAndEmail(
+                (string) $this->getPersonalDataPidFieldValue(),
+                $this->getPersonalDataPtable(),
+                $this->getPersonalDataEmailFieldValue(),
+                self::$personalDataFieldsValues
+            );
+            self::$personalDataFieldsValues = [];
+        }
         parent::postSave($intType);
     }
 

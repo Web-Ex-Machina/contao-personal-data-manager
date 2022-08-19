@@ -46,7 +46,7 @@ class PersonalDataManager
         $this->validateObject($object);
 
         return PersonalDataModel::findByPidAndPTable(
-            $object->{$object->personalDataPidField},
+            $object->getPersonalDataPidFieldValue(),
             $object->getPersonalDataPtable()
         );
     }
