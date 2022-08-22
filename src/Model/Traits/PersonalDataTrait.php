@@ -232,6 +232,7 @@ trait PersonalDataTrait
             if ($detached) {
                 return static::findMultipleByIds($arrIds, $arrOptions);
             }
+            $obj->reset();
         }
 
         return $obj;
@@ -380,6 +381,7 @@ trait PersonalDataTrait
             if ($detached) {
                 return static::find($arrOptions);
             }
+            $obj->reset();
         }
 
         // if (is_a($obj, self::class)) {
