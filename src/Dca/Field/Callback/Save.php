@@ -62,11 +62,12 @@ class Save
 
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
+        $model->setRow($dc->activeRecord->row());
 
         $pdm = $this->personalDataManager->insertOrUpdateForPidAndPtableAndEmailAndField(
-            $dc->activeRecord->{$model->getPersonalDataPidField()},
+            $model->getPersonalDataPidFieldValue(),
             $model->getPersonalDataPtable(),
-            $dc->activeRecord->{$model->getPersonalDataEmailField()},
+            $model->getPersonalDataEmailFieldValue(),
             $dc->inputName,
             $value
         );

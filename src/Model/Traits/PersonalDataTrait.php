@@ -382,6 +382,18 @@ trait PersonalDataTrait
             }
         }
 
+        // if (is_a($obj, self::class)) {
+        //     $obj->attach();
+        // }
+
+        // if (is_a($obj, \Contao\Model\Collection::class)) {
+        //     while ($obj->next()) {
+        //         if (is_a($obj->current(), self::class)) {
+        //             $obj->attach();
+        //         }
+        //     }
+        // }
+
         return $obj;
     }
 }
