@@ -178,7 +178,8 @@ class PersonalDataManagerAction
 
         (new Response($csv, 200, [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment;filename='.$this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.csv',
+            'Content-Disposition' => 'attachment',
+            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.csv',
         ]))->send();
         exit();
     }
@@ -195,7 +196,8 @@ class PersonalDataManagerAction
 
         (new Response($csv, 200, [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment;filename='.$this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.csv',
+            'Content-Disposition' => 'attachment',
+            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.csv',
         ]))->send();
         exit();
     }
