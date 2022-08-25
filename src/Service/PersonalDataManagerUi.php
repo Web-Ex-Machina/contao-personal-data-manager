@@ -54,7 +54,10 @@ class PersonalDataManagerUi
             $dcaLoader->load();
             System::loadLanguageFile($ptable);
             foreach ($arrPids as $pid => $singleItemData) {
-                $renderedItems[] = $this->renderSingleItem((int) $pid, $ptable, $email, $singleItemData['personalDatas'], $singleItemData['originalModel']);
+                $renderedItem = $this->renderSingleItem((int) $pid, $ptable, $email, $singleItemData['personalDatas'], $singleItemData['originalModel']);
+                if (!empty($renderedItem)) {
+                    $renderedItems[] = $renderedItem;
+                }
             }
         }
         $tpl->items = $renderedItems;
@@ -576,15 +579,16 @@ class PersonalDataManagerUi
 
     protected function getFieldLabelTranslated(string $ptable, string $field): string
     {
+        System::loadLanguageFile($ptable);
         if (\array_key_exists($field, $GLOBALS['TL_LANG'][$ptable])) {
             if (\is_array($GLOBALS['TL_LANG'][$ptable][$field])) {
-                return $this->translator->trans(sprintf('%s.%s', $ptable, $field).'.0', [], 'contao_default') ?? $field;
+                return $this->translator->trans(sprintf('%s.%s.0', $ptable, $field), [], 'contao_default') ?? $field;
             }
 
             return $this->translator->trans(sprintf('%s.%s', $ptable, $field), [], 'contao_default') ?? $field;
         }
 
-        return sprintf('%s.%s', $ptable, $field).'.0';
+        return sprintf('%s.%s.0', $ptable, $field);
     }
 
     protected function unencrypt($value)
