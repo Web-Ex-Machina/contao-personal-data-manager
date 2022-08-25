@@ -39,6 +39,17 @@ Hook | Return value | Description
 --- | --- | ---
 `formatHeaderForCsvExport` | `array` | Header for CSV exports
 `formatSinglePersonalDataForCsvExport` | `array` | Data for each single Personal Data item
+`exportByEmail` | `\Contao\Model\Collection|null` | Data to export
+`exportByPidAndPtableAndEmail` | `\Contao\Model\Collection|null` | Data to export
+
+
+### Anonymizer
+
+Hook | Return value | Description
+--- | --- | ---
+`anonymizeByEmail` | `\Contao\Model\Collection|null` | Called after retrieving personal data linked to an email and before anonymization process
+`anonymizeByPidAndPtableAndEmail` | `\Contao\Model\Collection|null` | Called after retrieving personal data linked to a pid, ptable and email and before anonymization process
+`anonymizeByPidAndPtableAndEmailAndField` | `\WEM\PersonalDataManagerBundle\Model\PersonalData|null` | Called after retrieving personal data linked to pid, ptable, email and field and before anonymization process
 
 Details
 -------
@@ -110,6 +121,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
@@ -119,6 +131,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemHeader(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
 	string $buffer
@@ -139,6 +152,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
@@ -148,6 +162,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemTitle(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
 	string $buffer
@@ -168,6 +183,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
@@ -177,6 +193,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemButtons(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
 	string $buffer
@@ -197,6 +214,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
@@ -206,6 +224,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemBody(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
 	string $buffer
@@ -226,6 +245,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
@@ -235,6 +255,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemBodyOriginalModel(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
 	string $buffer
@@ -255,6 +276,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $field | `string` | The field linked to the personal data
 $value | `mixed` | The value linked to the personal data
 $personalDatas | `array` | All personal data linked to the item
@@ -266,6 +288,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemBodyOriginalModelSingle(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	string $field, 
 	$value, 
 	array $personalDatas, 
@@ -288,6 +311,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $field | `string` | The field linked to the personal data
 $value | `mixed` | The value linked to the personal data
 $personalDatas | `array` | All personal data linked to the item
@@ -299,6 +323,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemBodyOriginalModelSingleFieldLabel(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	string $field, 
 	$value, 
 	array $personalDatas, 
@@ -321,6 +346,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $field | `string` | The field linked to the personal data
 $value | `mixed` | The value linked to the personal data
 $personalDatas | `array` | All personal data linked to the item
@@ -331,7 +357,8 @@ $buffer | `string` | The generated HTML code
 ```php
 public function renderSingleItemBodyOriginalModelSingleFieldValue(
 	int $pid, 
-	string $ptable, 
+	string $ptable,
+	string $email, 
 	string $field, 
 	$value, 
 	array $personalDatas, 
@@ -354,6 +381,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
 $buffer | `string` | The generated HTML code
@@ -363,6 +391,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemBodyPersonalData(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
 	string $buffer
@@ -383,6 +412,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalData | `WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data row linked to the item
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
@@ -393,6 +423,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemBodyPersonalDataSingle(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
@@ -414,6 +445,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalData | `WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data row linked to the item
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
@@ -424,6 +456,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemBodyPersonalDataSingleFieldLabel(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
@@ -445,6 +478,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalData | `WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data row linked to the item
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
@@ -455,6 +489,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemBodyPersonalDataSingleFieldValue(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
@@ -476,6 +511,7 @@ Name | Type | Description
 --- | --- | ---
 $pid | `int` | The pid linked to the personal data
 $ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
 $personalData | `WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data row linked to the item
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
@@ -486,6 +522,7 @@ $buffer | `string` | The generated HTML code
 public function renderSingleItemBodyPersonalDataSingleButtons(
 	int $pid, 
 	string $ptable, 
+	string $email,
 	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
@@ -514,8 +551,8 @@ $buffer | `string` | The generated HTML code
 ```php
 public function getHrefByPidAndPtableAndEmail(
 	string $pid, 
-	string $ptable, 
-	string $email, 
+	string $ptable,
+	string $email,
 	string $buffer
 ): string
 {
@@ -566,5 +603,134 @@ public function formatSinglePersonalDataForCsvExport(
 ): array
 {
 	return $row;
+}
+```
+
+### exportByEmail
+
+Called after retrieving personal data linked to an email and before export process
+
+**Return value** : `\Contao\Model\Collection|null`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$email | `string` | The email
+$pdms | `\Contao\Model\Collection|null` | The personal data found
+
+**Code**:
+```php
+public function exportByEmail(
+	string $email, 
+	?\Contao\Model\Collection $pdms
+): ?\Contao\Model\Collection
+{
+    return $pdms;
+}
+```
+
+### exportByPidAndPtableAndEmail
+
+Called after retrieving personal data linked to a pid, ptable and email and before export process
+
+**Return value** : `\Contao\Model\Collection|null`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `string` | The pid
+$ptable | `string` | The ptable
+$email | `string` | The email
+$pdms | `\Contao\Model\Collection|null` | The personal data found
+
+**Code**:
+```php
+public function exportByPidAndPtableAndEmail(
+	string $pid, 
+	string $ptable, 
+	string $email, 
+	?\Contao\Model\Collection $pdms
+): ?\Contao\Model\Collection
+{
+    return $pdms;
+}
+```
+
+### anonymizeByEmail
+
+Called after retrieving personal data linked to an email and before anonymization process
+
+**Return value** : `\Contao\Model\Collection|null`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$email | `string` | The email
+$pdms | `\Contao\Model\Collection|null` | The personal data found
+
+**Code**:
+```php
+public function anonymizeByEmail(
+	string $email, 
+	?\Contao\Model\Collection $pdms
+): ?\Contao\Model\Collection
+{
+    return $pdms;
+}
+```
+
+### anonymizeByPidAndPtableAndEmail
+
+Called after retrieving personal data linked to a pid, ptable and email and before anonymization process
+
+**Return value** : `\Contao\Model\Collection|null`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `string` | The pid
+$ptable | `string` | The ptable
+$email | `string` | The email
+$pdms | `\Contao\Model\Collection|null` | The personal data found
+
+**Code**:
+```php
+public function anonymizeByPidAndPtableAndEmail(
+	string $pid, 
+	string $ptable, 
+	string $email, 
+	?\Contao\Model\Collection $pdms
+): ?\Contao\Model\Collection
+{
+    return $pdms;
+}
+```
+
+### anonymizeByPidAndPtableAndEmailAndField
+
+Called after retrieving personal data linked to a pid, ptable, email and field and before anonymization process
+
+**Return value** : `\WEM\PersonalDataManagerBundle\Model\PersonalData|null`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `string` | The pid
+$ptable | `string` | The ptable
+$email | `string` | The email
+$field | `string` | The field
+$pdm | `\WEM\PersonalDataManagerBundle\Model\PersonalData|null` | The personal data found
+
+**Code**:
+```php
+public function anonymizeByEmail(
+	string $pid, 
+	string $ptable, 
+	string $email, 
+	string $field, 
+	?\WEM\PersonalDataManagerBundle\Model\PersonalData $pdm
+): ?\WEM\PersonalDataManagerBundle\Model\PersonalData
+{
+    return $pdm;
 }
 ```

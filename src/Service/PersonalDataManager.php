@@ -110,6 +110,13 @@ class PersonalDataManager
     {
         $anonymized = [];
         $pdms = PersonalDataModel::findByEmail($email);
+
+        if (isset($GLOBALS['WEM_HOOKS']['anonymizeByEmail']) && \is_array($GLOBALS['WEM_HOOKS']['anonymizeByEmail'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['anonymizeByEmail'] as $callback) {
+                $pdms = System::importStatic($callback[0])->{$callback[1]}($email, $pdms);
+            }
+        }
+
         if (!$pdms) {
             return null;
         }
@@ -136,6 +143,12 @@ class PersonalDataManager
     public function exportByEmail(string $email): string
     {
         $pdms = PersonalDataModel::findByEmail($email);
+
+        if (isset($GLOBALS['WEM_HOOKS']['exportByEmail']) && \is_array($GLOBALS['WEM_HOOKS']['exportByEmail'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['exportByEmail'] as $callback) {
+                $pdms = System::importStatic($callback[0])->{$callback[1]}($email, $pdms);
+            }
+        }
 
         return $this->csvFormatter->formatPersonalDataForCsv($pdms);
     }
@@ -165,6 +178,13 @@ class PersonalDataManager
     {
         $anonymized = [];
         $pdms = PersonalDataModel::findByPidAndPTableAndEmail($pid, $ptable, $email);
+
+        if (isset($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail']) && \is_array($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail'] as $callback) {
+                $pdms = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdms);
+            }
+        }
+
         if (!$pdms) {
             return null;
         }
@@ -193,6 +213,12 @@ class PersonalDataManager
     public function exportByPidAndPtableAndEmail(string $pid, string $ptable, string $email): string
     {
         $pdms = PersonalDataModel::findByPidAndPTableAndEmail($pid, $ptable, $email);
+
+        if (isset($GLOBALS['WEM_HOOKS']['exportByPidAndPtableAndEmail']) && \is_array($GLOBALS['WEM_HOOKS']['exportByPidAndPtableAndEmail'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['exportByPidAndPtableAndEmail'] as $callback) {
+                $pdms = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdms);
+            }
+        }
 
         return $this->csvFormatter->formatPersonalDataForCsv($pdms);
     }
@@ -236,6 +262,13 @@ class PersonalDataManager
     public function anonymizeByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): ?string
     {
         $pdm = PersonalDataModel::findOneByPidAndPTableAndEmailAndField($pid, $ptable, $email, $field);
+
+        if (isset($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField']) && \is_array($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField'] as $callback) {
+                $pdm = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdm);
+            }
+        }
+
         if (!$pdm) {
             return null;
         }

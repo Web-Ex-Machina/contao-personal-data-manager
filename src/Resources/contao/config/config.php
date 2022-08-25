@@ -36,6 +36,7 @@ array_insert($GLOBALS['FE_MOD'], 2, [
 ]);
 
 $GLOBALS['WEM_HOOKS'] = $GLOBALS['WEM_HOOKS'] ?? [];
+// UI
 $GLOBALS['WEM_HOOKS']['renderListButtons'] = $GLOBALS['WEM_HOOKS']['renderListButtons'] ?? [];
 $GLOBALS['WEM_HOOKS']['renderSingleItem'] = $GLOBALS['WEM_HOOKS']['renderSingleItem'] ?? [];
 $GLOBALS['WEM_HOOKS']['renderSingleItemHeader'] = $GLOBALS['WEM_HOOKS']['renderSingleItemHeader'] ?? [];
@@ -54,3 +55,10 @@ $GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons'] = $GLOBAL
 $GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail'] = $GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail'] ?? [];
 $GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport'] = $GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport'] ?? [];
 $GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'] = $GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'] ?? [];
+// Anonymize
+$GLOBALS['WEM_HOOKS']['anonymizeByEmail'] = $GLOBALS['WEM_HOOKS']['anonymizeByEmail'] ?? [];
+$GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail'] = $GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail'] ?? [];
+$GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField'] = $GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField'] ?? [];
+// Export
+$GLOBALS['WEM_HOOKS']['exportByEmail'] = $GLOBALS['WEM_HOOKS']['exportByEmail'] ?? [];
+$GLOBALS['WEM_HOOKS']['exportByPidAndPtableAndEmail'] = $GLOBALS['WEM_HOOKS']['exportByPidAndPtableAndEmail'] ?? [];

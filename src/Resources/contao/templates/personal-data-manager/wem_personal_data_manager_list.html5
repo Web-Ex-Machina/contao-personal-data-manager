@@ -109,7 +109,8 @@
 
 		function anonymizeSinglePersonalData(url, pid, ptable, field){
 			let singleElement = getSinglePersonalValueContainer(pid, ptable, field);
-			let email = getSingleItem(pid, ptable).getAttribute('data-email');
+			// let email = getSingleItem(pid, ptable).getAttribute('data-email');
+			let email = getParentItem(singleElement).getAttribute('data-email');
 			let singleElementFieldButtons = singleElement.querySelector('.pdm-item__personal_data_single__buttons');
 			displayLoader(singleElement);
 
@@ -312,12 +313,17 @@
 
 		function replaceByAnonymizedValue(pid, ptable, field, value){
 			let singleOriginal = getSingleOriginalValueContainer(pid, ptable, field);
-			let singlePersonal = getSinglePersonalValueContainer(pid, ptable, field);
-			let singleoriginalValueContainer = singleOriginal.querySelector('.pdm-item__original_model_single__value');
-			let singlePersonalValueContainer = singlePersonal.querySelector('.pdm-item__personal_data_single__value');
+			if(singleOriginal){
+				let singleoriginalValueContainer = singleOriginal.querySelector('.pdm-item__original_model_single__value');
+				singleoriginalValueContainer.innerHTML = value;
+			}
 
-			singleoriginalValueContainer.innerHTML = value;
-			singlePersonalValueContainer.innerHTML = value;
+			let singlePersonal = getSinglePersonalValueContainer(pid, ptable, field);
+			if(singlePersonal){
+				let singlePersonalValueContainer = singlePersonal.querySelector('.pdm-item__personal_data_single__value');
+				singlePersonalValueContainer.innerHTML = value;
+			}
+
 		}
 
 		function getSingleOriginalValueContainer(pid, ptable, field){
@@ -330,6 +336,17 @@
 
 		function getSingleItem(pid, ptable){
 			return document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+		}
+
+		function getParentItem(element){
+			if(element.classList.contains('pdm-item')){
+				return element;
+			}
+			return getParentItem(element.parentNode);
+		}
+
+		function getPersonalDataSingleItem(pid, ptable){
+			return document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
 		}
 
 		function downloadBlobFile(blob, filename){

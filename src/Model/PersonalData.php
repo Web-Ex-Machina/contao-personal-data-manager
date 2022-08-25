@@ -68,6 +68,22 @@ class PersonalData extends Model
     }
 
     /**
+     * Find one record by pid, ptable and email.
+     *
+     * @param string $pid    The pid
+     * @param string $ptable The ptable
+     * @param string $email  The email
+     *
+     * @return self|null
+     */
+    public static function findOneByPidAndPTableAndEmail(string $pid, string $ptable, string $email)
+    {
+        $collection = static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email], 1);
+
+        return !$collection ? null : $collection->current();
+    }
+
+    /**
      * Find record by pid, ptable and field.
      *
      * @param string $pid    The pid
