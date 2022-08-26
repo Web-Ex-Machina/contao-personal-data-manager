@@ -16,6 +16,7 @@ List
 
 Hook | Return Value | Description
 --- | --- | ---
+`sortData` | `array` | Called after the personal data have been retrieved and arranged.
 `renderListButtons` | `string` | Called after the action buttons for the whole list have been generated.
 `renderSingleItem` | `string` | Called after a whole item have been generated.
 `renderSingleItemHeader` | `string` | Called after the item's header have been generated.
@@ -53,6 +54,42 @@ Hook | Return value | Description
 
 Details
 -------
+
+### sortData
+
+Called after the personal data have been retrieved and arranged.
+
+**Return value** : `array` in the following form
+```php
+[
+	'ptable'=>[
+		'id'=>[
+			'originalModel'=> 'The model corresponding to personal data pid & ptable or the one you want to display in the "original object" section',
+			'personalDatas'=>[
+				'first personalData linked to the "originalModel" entity',
+				'second personalData linked to the "originalModel" entity'
+			]
+		]
+	]
+]
+```
+
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$sorted | `string` | The data already sorted
+$personalDatas | `\Contao\Model\Collection|null` | The raw Personal Data Collection used to build the sorted data array
+
+**Code**:
+```php
+public function sortData(
+	array $sorted, 
+	?\Contao\Model\Collection $personalDatas
+): array
+{
+	return $sorted;
+}
 
 ### renderListButtons
 

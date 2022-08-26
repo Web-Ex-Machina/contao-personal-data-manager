@@ -297,9 +297,9 @@ class PersonalDataManagerUi
     protected function sortData(?Collection $personalDatas): array
     {
         $sorted = [];
-        if (!$personalDatas) {
-            return [];
-        }
+        // if (!$personalDatas) {
+        //     return [];
+        // }
 
         while ($personalDatas->next()) {
             if (!\array_key_exists($personalDatas->ptable, $sorted)) {
@@ -317,6 +317,12 @@ class PersonalDataManagerUi
         foreach ($sorted as $ptable => $pids) {
             ksort($pids);
             $sorted[$ptable] = $pids;
+        }
+
+        if (isset($GLOBALS['WEM_HOOKS']['sortData']) && \is_array($GLOBALS['WEM_HOOKS']['sortData'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['sortData'] as $callback) {
+                $sorted = System::importStatic($callback[0])->{$callback[1]}($sorted, $personalDatas);
+            }
         }
 
         return $sorted;
