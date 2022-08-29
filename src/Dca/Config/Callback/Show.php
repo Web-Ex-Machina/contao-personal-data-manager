@@ -40,7 +40,7 @@ class Show
                     if (preg_match('/(.*)<small>(.*)<\/small>/', $label, $matches)) {
                         $fieldName = $matches[2];
                         if ($model->isFieldInPersonalDataFieldsNames($fieldName)) {
-                            $modalData[$table][$index][$label] = $this->personalDataManager->getUnecryptedValueByPidAndPTableAndEmailAndField(
+                            $modalData[$table][$index][$label] = $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
                                 $data[$model->getPersonalDataPidField()],
                                 $model->getPersonalDataPtable(),
                                 $data[$model->getPersonalDataEmailField()],

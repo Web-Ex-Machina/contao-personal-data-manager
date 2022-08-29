@@ -32,7 +32,7 @@ class ListLabelGroup
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
 
-        return $this->personalDataManager->getUnecryptedValueByPidAndPTableAndEmailAndField(
+        return $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
             $data[$model->getPersonalDataPidField()],
             $model->getPersonalDataPtable(),
             $data[$model->getPersonalDataEmailField()],

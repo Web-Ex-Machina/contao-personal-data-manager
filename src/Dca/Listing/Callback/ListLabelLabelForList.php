@@ -38,7 +38,7 @@ class ListLabelLabelForList
         // They are in the same order, so $index can be used
         foreach ($labelFields as $index => $label) {
             if ($model->isFieldInPersonalDataFieldsNames($label)) {
-                $labels[$index] = $this->personalDataManager->getUnecryptedValueByPidAndPTableAndEmailAndField(
+                $labels[$index] = $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
                     $row[$model->getPersonalDataPidField()],
                     $model->getPersonalDataPtable(),
                     $row[$model->getPersonalDataEmailField()],
