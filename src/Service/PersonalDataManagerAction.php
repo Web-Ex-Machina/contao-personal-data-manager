@@ -176,7 +176,7 @@ class PersonalDataManagerAction
 
         $csv = $this->manager->exportByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
 
-        (new Response(utf8_decode($csv), 200, [
+        (new Response($csv, 200, [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => 'attachment',
             'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.csv',
@@ -194,7 +194,7 @@ class PersonalDataManagerAction
 
         $csv = $this->manager->exportByEmail(Input::post('email'));
 
-        (new Response(utf8_decode($csv), 200, [
+        (new Response($csv, 200, [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => 'attachment',
             'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.csv',
