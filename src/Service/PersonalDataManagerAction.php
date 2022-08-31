@@ -22,6 +22,7 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Exception\AccessDeniedException;
+use WEM\UtilsBundle\Classes\StringUtil;
 
 class PersonalDataManagerAction
 {
@@ -176,8 +177,8 @@ class PersonalDataManagerAction
 
         $csv = $this->manager->exportByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
 
-        (new Response($csv, 200, [
-            'Content-Type' => 'text/csv; charset=utf-8',
+        (new Response(mb_convert_encoding(StringUtil::decodeEntities($csv), 'UTF-16LE', 'UTF-8'), 200, [
+            'Content-Type' => 'text/csv; charset=utf-16le',
             'Content-Disposition' => 'attachment',
             'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.csv',
         ]))->send();
@@ -194,8 +195,8 @@ class PersonalDataManagerAction
 
         $csv = $this->manager->exportByEmail(Input::post('email'));
 
-        (new Response($csv, 200, [
-            'Content-Type' => 'text/csv; charset=utf-8',
+        (new Response(mb_convert_encoding(StringUtil::decodeEntities($csv), 'UTF-16LE', 'UTF-8'), 200, [
+            'Content-Type' => 'text/csv; charset=utf-16le',
             'Content-Disposition' => 'attachment',
             'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.csv',
         ]))->send();
