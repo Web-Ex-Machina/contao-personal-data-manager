@@ -413,13 +413,22 @@ class PersonalDataManager
 
     public function anonymize(PersonalDataModel $personalData): ?string
     {
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+
         $originalModel = Model::getClassFromTable($personalData->ptable);
         $obj = new $originalModel();
         $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
+        $value = $encryptionService->decrypt($personalData->value);
         $personalData->value = $anonymizedValue;
         $personalData->anonymized = true;
         $personalData->anonymizedAt = time();
         $personalData->save();
+
+        if (isset($GLOBALS['WEM_HOOKS']['anonymize']) && \is_array($GLOBALS['WEM_HOOKS']['anonymize'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['anonymize'] as $callback) {
+                System::importStatic($callback[0])->{$callback[1]}($personalData, $value);
+            }
+        }
 
         return $anonymizedValue;
     }

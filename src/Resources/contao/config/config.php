@@ -56,6 +56,7 @@ $GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail'] = $GLOBALS['WEM_HOOKS']['
 $GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport'] = $GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport'] ?? [];
 $GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'] = $GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'] ?? [];
 // Anonymize
+$GLOBALS['WEM_HOOKS']['anonymize'] = $GLOBALS['WEM_HOOKS']['anonymize'] ?? [];
 $GLOBALS['WEM_HOOKS']['anonymizeByEmail'] = $GLOBALS['WEM_HOOKS']['anonymizeByEmail'] ?? [];
 $GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail'] = $GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail'] ?? [];
 $GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField'] = $GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField'] ?? [];

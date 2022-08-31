@@ -27,7 +27,7 @@
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.DEFAULT.noUrlProvided">
         <source>No URL provided to show this item.</source>
-        <target>Aucune URL n'a pas fournie pour afficher cet élément</target>
+        <target>Aucune URL n'a été fournie pour afficher cet élément</target>
       </trans-unit>
       <trans-unit id="WEM.PEDAMA.DEFAULT.accessDenied">
         <source>You can't access this component.</source>

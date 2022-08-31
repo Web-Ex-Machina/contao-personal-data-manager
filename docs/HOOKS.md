@@ -48,6 +48,7 @@ Hook | Return value | Description
 
 Hook | Return value | Description
 --- | --- | ---
+`anonymize` | `void` | Called after a personal data have been anonymized
 `anonymizeByEmail` | `\Contao\Model\Collection|null` | Called after retrieving personal data linked to an email and before anonymization process
 `anonymizeByPidAndPtableAndEmail` | `\Contao\Model\Collection|null` | Called after retrieving personal data linked to a pid, ptable and email and before anonymization process
 `anonymizeByPidAndPtableAndEmailAndField` | `\WEM\PersonalDataManagerBundle\Model\PersonalData|null` | Called after retrieving personal data linked to pid, ptable, email and field and before anonymization process
@@ -690,6 +691,29 @@ public function exportByPidAndPtableAndEmail(
 ): ?\Contao\Model\Collection
 {
     return $pdms;
+}
+```
+
+### anonymize
+
+Called after a personal data have been anonymized
+
+**Return value** : `void`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$personalData | `\WEM\PersonalDataManagerBundle\Model\PersonalData` | The anonymized personal data
+$value | `mixed` | The decrypted value before anonymization
+
+**Code**:
+```php
+public function anonymize(
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	$value
+): void
+{
+    // do stuff
 }
 ```
 
