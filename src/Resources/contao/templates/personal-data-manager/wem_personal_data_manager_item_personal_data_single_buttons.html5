@@ -1,3 +1,5 @@
 <div class="pdm-item__personal_data_single__buttons" data-pid="<?php echo $this->pid; ?>" data-ptable="<?php echo $this->ptable; ?>" data-field="<?php echo $this->field; ?>">
-	<?php echo $this->anonymize; ?>
+	<?php foreach($this->buttons as $button): ?>
+		<?php echo $button; ?>
+	<?php endforeach; ?>
 </div>

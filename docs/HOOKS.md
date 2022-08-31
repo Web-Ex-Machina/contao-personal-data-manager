@@ -17,10 +17,12 @@ List
 Hook | Return Value | Description
 --- | --- | ---
 `sortData` | `array` | Called after the personal data have been retrieved and arranged.
+`buildListButtons` | `array` | Called after the action buttons for the whole list have been generated.
 `renderListButtons` | `string` | Called after the action buttons for the whole list have been generated.
 `renderSingleItem` | `string` | Called after a whole item have been generated.
 `renderSingleItemHeader` | `string` | Called after the item's header have been generated.
 `renderSingleItemTitle` | `string` | Called after an item's header's title have been generated.
+`buildSingleItemButtons` | `array` | Called after an item's header's buttons have been generated.
 `renderSingleItemButtons` | `string` | Called after an item's header's buttons have been generated.
 `renderSingleItemBody` | `string` | Called after an item's body have been generated.
 `renderSingleItemBodyOriginalModel` | `string` | Called after an item's whole original model have been generated.
@@ -31,6 +33,7 @@ Hook | Return Value | Description
 `renderSingleItemBodyPersonalDataSingle` | `string` | Called after an item's personal data list row have been generated
 `renderSingleItemBodyPersonalDataSingleFieldLabel` | `string` | Called after an item's personal data list row's field label have been generated
 `renderSingleItemBodyPersonalDataSingleFieldValue` | `string` | Called after an item's personal data list row's field value have been generated
+`buildSingleItemBodyPersonalDataSingleButtons` | `array` | Called after an item's personal data list row's buttons have been generated
 `renderSingleItemBodyPersonalDataSingleButtons` | `string` | Called after an item's personal data list row's buttons have been generated
 `getHrefByPidAndPtableAndEmail` | `string` | Called when clicking on the "show" button of an item
 
@@ -91,6 +94,32 @@ public function sortData(
 {
 	return $sorted;
 }
+```
+
+### buildListButtons
+
+Called after the action buttons for the whole list have been generated.
+
+**Return value** : `array`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$email | `string` | The email address linked to the personal data
+$nbRows | `int` | Number of items in the list
+$buttons | `array` | The array containing buttons HTML code
+
+**Code**:
+```php
+public function buildListButtons(
+	string $email, 
+	int $nbRows, 
+	array $buttons
+): array
+{
+	return $buttons;
+}
+```
 
 ### renderListButtons
 
@@ -207,6 +236,37 @@ public function renderSingleItemTitle(
 ): string
 {
 	return $buffer;
+}
+```
+
+### buildSingleItemButtons
+
+Called after an item's header's buttons have been generated.
+
+**Return value** : `array`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `int` | The pid linked to the personal data
+$ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
+$personalDatas | `array` | All personal data linked to the item
+$originalModel | `Contao\Model` | The original model
+$buttons | `array` | The array containing buttons HTML code
+
+**Code**:
+```php
+public function buildSingleItemButtons(
+	int $pid, 
+	string $ptable, 
+	string $email,
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	array $buttons
+): array
+{
+	return $buttons;
 }
 ```
 
@@ -535,6 +595,39 @@ public function renderSingleItemBodyPersonalDataSingleFieldValue(
 ): string
 {
 	return $buffer;
+}
+```
+
+### buildSingleItemBodyPersonalDataSingleButtons
+
+Called after an item's personal data list row's field buttons have been generated
+
+**Return value** : `array`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `int` | The pid linked to the personal data
+$ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
+$personalData | `WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data row linked to the item
+$personalDatas | `array` | All personal data linked to the item
+$originalModel | `Contao\Model` | The original model
+$buttons | `array` | The array containing buttons HTML code
+
+**Code**:
+```php
+public function buildSingleItemBodyPersonalDataSingleButtons(
+	int $pid, 
+	string $ptable, 
+	string $email,
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	array $buttons
+): array
+{
+	return $buttons;
 }
 ```
 

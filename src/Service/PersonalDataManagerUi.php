@@ -84,10 +84,24 @@ class PersonalDataManagerUi
     {
         $tpl = new FrontendTemplate('wem_personal_data_manager_list_buttons');
         $tpl->email = $email;
-        $tpl->anonymize = 0 === $nbRows ? '' : $this->renderListButtonAnonymize($email);
-        $tpl->export = 0 === $nbRows ? '' : $this->renderListButtonExport($email);
 
+        $tpl->buttons = $this->buildListButtons($email, $nbRows);
         return $tpl->parse();
+    }
+
+    public function buildListButtons(string $email, int $nbRows): array
+    {
+        $buttons = [];
+        $buttons['anonymize'] = 0 === $nbRows ? '' : $this->renderListButtonAnonymize($email);
+        $buttons['export'] = 0 === $nbRows ? '' : $this->renderListButtonExport($email);
+
+        if (isset($GLOBALS['WEM_HOOKS']['buildListButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildListButtons'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['buildListButtons'] as $callback) {
+                $buttons = System::importStatic($callback[0])->{$callback[1]}($email, $nbRows, $buttons);
+            }
+        }
+
+        return $buttons;
     }
 
     public function formatListButtonAnonymize(string $email): string
@@ -149,11 +163,25 @@ class PersonalDataManagerUi
         $tpl = new FrontendTemplate('wem_personal_data_manager_item_buttons');
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
-        $tpl->anonymize = $this->renderSingleItemButtonAnonymize($pid, $ptable, $email, $personalDatas, $originalModel);
-        $tpl->export = $this->renderSingleItemButtonExport($pid, $ptable, $email, $personalDatas, $originalModel);
-        $tpl->show = $this->renderSingleItemButtonShow($pid, $ptable, $email, $personalDatas, $originalModel);
+        $tpl->buttons = $this->buildSingleItemButtons($pid, $ptable, $email, $personalDatas, $originalModel);
 
         return $tpl->parse();
+    }
+
+    public function buildSingleItemButtons(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): array
+    {
+        $buttons = [];
+        $buttons['show'] = $this->renderSingleItemButtonShow($pid, $ptable, $email, $personalDatas, $originalModel);
+        $buttons['anonymize'] = $this->renderSingleItemButtonAnonymize($pid, $ptable, $email, $personalDatas, $originalModel);
+        $buttons['export'] = $this->renderSingleItemButtonExport($pid, $ptable, $email, $personalDatas, $originalModel);
+
+        if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'] as $callback) {
+                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $buttons);
+            }
+        }
+
+        return $buttons;
     }
 
     public function formatSingleItemButtonAnonymize(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): string
@@ -284,9 +312,21 @@ class PersonalDataManagerUi
         $tpl->ptable = $ptable;
         $tpl->field = $personalData->field;
         $tpl->email = $email;
-        $tpl->anonymize = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonAnonymize($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
-
+        $tpl->buttons = $this->buildSingleItemBodyPersonalDataSingleButtons($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
         return $tpl->parse();
+    }
+
+    public function buildSingleItemBodyPersonalDataSingleButtons(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): array
+    {
+        $buttons = [];
+        $buttons['anonymize'] = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonAnonymize($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
+
+        if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons'] as $callback) {
+                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $buttons);
+            }
+        }
+        return $buttons;
     }
 
     public function formatSingleItemBodyPersonalDataSingleButtonAnonymize(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
