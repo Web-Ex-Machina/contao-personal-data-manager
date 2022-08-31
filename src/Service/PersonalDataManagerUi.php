@@ -92,7 +92,8 @@ class PersonalDataManagerUi
 
     public function formatListButtonAnonymize(string $email): string
     {
-        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-list__button_anonymize">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-list__button_anonymize">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeConfirm', [], 'contao_default'),
@@ -102,7 +103,8 @@ class PersonalDataManagerUi
 
     public function formatListButtonExport(string $email): string
     {
-        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-list__button_export">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-list__button_export">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExportTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExport', [], 'contao_default')
@@ -156,7 +158,8 @@ class PersonalDataManagerUi
 
     public function formatSingleItemButtonAnonymize(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__button_anonymize_all">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__button_anonymize_all">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllConfirm', [], 'contao_default'),
@@ -166,7 +169,8 @@ class PersonalDataManagerUi
 
     public function formatSingleItemButtonExport(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-item__button_export">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-item__button_export">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonExportTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonExport', [], 'contao_default')
@@ -175,7 +179,8 @@ class PersonalDataManagerUi
 
     public function formatSingleItemButtonShow(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_show pdm-item__button_show">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_show pdm-item__button_show">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonShowTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonShow', [], 'contao_default')
@@ -286,7 +291,8 @@ class PersonalDataManagerUi
 
     public function formatSingleItemBodyPersonalDataSingleButtonAnonymize(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__personal_data_single__button_anonymize">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__personal_data_single__button_anonymize">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeConfirm', [], 'contao_default'),
@@ -297,21 +303,19 @@ class PersonalDataManagerUi
     protected function sortData(?Collection $personalDatas): array
     {
         $sorted = [];
-        // if (!$personalDatas) {
-        //     return [];
-        // }
-
-        while ($personalDatas->next()) {
-            if (!\array_key_exists($personalDatas->ptable, $sorted)) {
-                $sorted[$personalDatas->ptable] = [];
+        if ($personalDatas) {
+            while ($personalDatas->next()) {
+                if (!\array_key_exists($personalDatas->ptable, $sorted)) {
+                    $sorted[$personalDatas->ptable] = [];
+                }
+                if (!\array_key_exists($personalDatas->pid, $sorted[$personalDatas->ptable])) {
+                    $sorted[$personalDatas->ptable][$personalDatas->pid] = [
+                        'originalModel' => $this->getOriginalObject((int) $personalDatas->pid, $personalDatas->ptable),
+                        'personalDatas' => [],
+                    ];
+                }
+                $sorted[$personalDatas->ptable][$personalDatas->pid]['personalDatas'][] = $personalDatas->current();
             }
-            if (!\array_key_exists($personalDatas->pid, $sorted[$personalDatas->ptable])) {
-                $sorted[$personalDatas->ptable][$personalDatas->pid] = [
-                    'originalModel' => $this->getOriginalObject((int) $personalDatas->pid, $personalDatas->ptable),
-                    'personalDatas' => [],
-                ];
-            }
-            $sorted[$personalDatas->ptable][$personalDatas->pid]['personalDatas'][] = $personalDatas->current();
         }
         ksort($sorted);
         foreach ($sorted as $ptable => $pids) {
