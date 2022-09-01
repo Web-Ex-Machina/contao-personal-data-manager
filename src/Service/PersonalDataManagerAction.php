@@ -270,6 +270,7 @@ class PersonalDataManagerAction
             'status' => $objFile ? 'success' : 'error',
             'msg' => '',
             'content' => $content,
+            'name' => $objFile ? $objFile->name : '',
         ];
     }
 
