@@ -24,384 +24,392 @@
 	</div>
 </div>
 <script type="text/javascript">
+	var WEM = WEM || {};
 	(function() {
-		function applyEvents(){
-			document.querySelectorAll('.pdm-item__personal_data_single__button_anonymize').forEach(function(button){
-				button.addEventListener('click',function(e){
-					e.preventDefault();
-					if(!confirm(e.target.getAttribute('data-confirm'))){
-						return false;
-					}
-					
-					let pid = e.target.parentNode.getAttribute('data-pid');
-					let ptable = e.target.parentNode.getAttribute('data-ptable');
-					let field = e.target.parentNode.getAttribute('data-field');
-					let url = e.target.getAttribute('href');
-					anonymizeSinglePersonalData(url, pid, ptable, field);
-					return false;
-				});
-			});
-
-			document.querySelectorAll('.pdm-item__button_anonymize_all').forEach(function(button){
-				button.addEventListener('click',function(e){
-					e.preventDefault();
-					if(!confirm(e.target.getAttribute('data-confirm'))){
-						return false;
-					}
-					
-					let pid = e.target.parentNode.getAttribute('data-pid');
-					let ptable = e.target.parentNode.getAttribute('data-ptable');
-					let url = e.target.getAttribute('href');
-					anonymizePersonalDataItem(url, pid, ptable);
-					return false;
-				});
-			});
-
-			document.querySelectorAll('.pdm-item__button_export').forEach(function(button){
-				button.addEventListener('click',function(e){
-					e.preventDefault();
-					
-					let pid = e.target.parentNode.getAttribute('data-pid');
-					let ptable = e.target.parentNode.getAttribute('data-ptable');
-					let url = e.target.getAttribute('href');
-					exportPersonalDataItem(url, pid, ptable);
-					return false;
-				});
-			});
-
-			document.querySelectorAll('.pdm-list__button_anonymize').forEach(function(button){
-				button.addEventListener('click',function(e){
-					e.preventDefault();
-					if(!confirm(e.target.getAttribute('data-confirm'))){
-						return false;
-					}
-					
-					let email = e.target.parentNode.getAttribute('data-email');
-					let url = e.target.getAttribute('href');
-					anonymizeAllPersonalData(url, email);
-					return false;
-				});
-			});
-
-			document.querySelectorAll('.pdm-list__button_export').forEach(function(button){
-				button.addEventListener('click',function(e){
-					e.preventDefault();
-					
-					let email = e.target.parentNode.getAttribute('data-email');
-					let url = e.target.getAttribute('href');
-					exportAllPersonalData(url, email);
-					return false;
-				});
-			});
-
-			document.querySelectorAll('.pdm-item__button_show').forEach(function(button){
-				button.addEventListener('click',function(e){
-					e.preventDefault();
-					
-					let pid = e.target.parentNode.getAttribute('data-pid');
-					let ptable = e.target.parentNode.getAttribute('data-ptable');
-					let url = e.target.getAttribute('href');
-					showPersonalDataItem(url, pid, ptable);
-					return false;
-				});
-			});
-		};
-
-		function anonymizeSinglePersonalData(url, pid, ptable, field){
-			let singleElement = getSinglePersonalValueContainer(pid, ptable, field);
-			// let email = getSingleItem(pid, ptable).getAttribute('data-email');
-			let email = getParentItem(singleElement).getAttribute('data-email');
-			let singleElementFieldButtons = singleElement.querySelector('.pdm-item__personal_data_single__buttons');
-			displayLoader(singleElement);
-
-			postData(url,{
-				'action':'anonymize_single_personal_data',
-				'pid':pid,
-				'ptable':ptable,
-				'email':email,
-				'field':field,
-			})
-			.then(data => data.json())
-			.then(data =>{
-				if("success" == data.status){
-					singleElementFieldButtons.innerHTML = '';
-					replaceByAnonymizedValue(pid, ptable, field, data.value);
-				}else{
-					alert(data.msg);	
-				}
-				hideLoader(singleElement);
-			}).catch(function(e) {
-				alert("Une erreur est survenue");
-				console.log(e);
-			});
-		};
-
-		function anonymizePersonalDataItem(url, pid, ptable){
-			let item = getSingleItem(pid, ptable);
-			let email = item.getAttribute('data-email');
-			let singleElementFieldButtonss = item.querySelectorAll('.pdm-item__personal_data_single__buttons');
-			let itemAnonymizeButton = item.querySelectorAll('.pdm-button_anonymize');
-			let itemExportButton = item.querySelectorAll('.pdm-button_export');
-			
-			displayLoader(item);
-
-			postData(url,{
-				'action':'anonymize_personal_data_item',
-				'pid':pid,
-				'ptable':ptable,
-				'email':email
-			})
-			.then(data => data.json())
-			.then(data =>{
-				if("success" == data.status){
-					for(var ptable in data.values){
-						for(var pid in data.values[ptable]){
-							for(var field in data.values[ptable][pid]){
-								var value = data.values[ptable][pid][field];
-								replaceByAnonymizedValue(pid, ptable, field, value);
-							}
+		WEM.pdm = WEM.pdm || {
+			init:function(){
+				self.applyEvents();
+			},
+			applyEvents:function(){
+				document.querySelectorAll('.pdm-item__personal_data_single__button_anonymize').forEach(function(button){
+					button.addEventListener('click',function(e){
+						e.preventDefault();
+						if(!confirm(e.target.getAttribute('data-confirm'))){
+							return false;
 						}
-					}
-					singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
-						singleElementFieldButtons.innerHTML = '';
+						
+						let pid = e.target.parentNode.getAttribute('data-pid');
+						let ptable = e.target.parentNode.getAttribute('data-ptable');
+						let field = e.target.parentNode.getAttribute('data-field');
+						let url = e.target.getAttribute('href');
+						self.anonymizeSinglePersonalData(url, pid, ptable, field);
+						return false;
 					});
-					itemAnonymizeButton.innerHTML = '';
-					itemExportButton.innerHTML = '';
-				}else{
-					alert(data.msg);	
-				}
+				});
+
+				document.querySelectorAll('.pdm-item__button_anonymize_all').forEach(function(button){
+					button.addEventListener('click',function(e){
+						e.preventDefault();
+						if(!confirm(e.target.getAttribute('data-confirm'))){
+							return false;
+						}
+						
+						let pid = e.target.parentNode.getAttribute('data-pid');
+						let ptable = e.target.parentNode.getAttribute('data-ptable');
+						let url = e.target.getAttribute('href');
+						self.anonymizePersonalDataItem(url, pid, ptable);
+						return false;
+					});
+				});
+
+				document.querySelectorAll('.pdm-item__button_export').forEach(function(button){
+					button.addEventListener('click',function(e){
+						e.preventDefault();
+						
+						let pid = e.target.parentNode.getAttribute('data-pid');
+						let ptable = e.target.parentNode.getAttribute('data-ptable');
+						let url = e.target.getAttribute('href');
+						self.exportPersonalDataItem(url, pid, ptable);
+						return false;
+					});
+				});
+
+				document.querySelectorAll('.pdm-list__button_anonymize').forEach(function(button){
+					button.addEventListener('click',function(e){
+						e.preventDefault();
+						if(!confirm(e.target.getAttribute('data-confirm'))){
+							return false;
+						}
+						
+						let email = e.target.parentNode.getAttribute('data-email');
+						let url = e.target.getAttribute('href');
+						self.anonymizeAllPersonalData(url, email);
+						return false;
+					});
+				});
+
+				document.querySelectorAll('.pdm-list__button_export').forEach(function(button){
+					button.addEventListener('click',function(e){
+						e.preventDefault();
+						
+						let email = e.target.parentNode.getAttribute('data-email');
+						let url = e.target.getAttribute('href');
+						self.exportAllPersonalData(url, email);
+						return false;
+					});
+				});
+
+				document.querySelectorAll('.pdm-item__button_show').forEach(function(button){
+					button.addEventListener('click',function(e){
+						e.preventDefault();
+						
+						let pid = e.target.parentNode.getAttribute('data-pid');
+						let ptable = e.target.parentNode.getAttribute('data-ptable');
+						let url = e.target.getAttribute('href');
+						self.showPersonalDataItem(url, pid, ptable);
+						return false;
+					});
+				});
+			},
+
+			anonymizeSinglePersonalData:function(url, pid, ptable, field){
+				let singleElement = self.getSinglePersonalValueContainer(pid, ptable, field);
+				// let email = getSingleItem(pid, ptable).getAttribute('data-email');
+				let email = self.getParentItem(singleElement).getAttribute('data-email');
+				let singleElementFieldButtons = singleElement.querySelector('.pdm-item__personal_data_single__buttons');
+				self.displayLoader(singleElement);
+
+				self.postData(url,{
+					'action':'anonymize_single_personal_data',
+					'pid':pid,
+					'ptable':ptable,
+					'email':email,
+					'field':field,
+				})
+				.then(data => data.json())
+				.then(data =>{
+					if("success" == data.status){
+						singleElementFieldButtons.innerHTML = '';
+						self.replaceByAnonymizedValue(pid, ptable, field, data.value);
+					}else{
+						alert(data.msg);	
+					}
+					self.hideLoader(singleElement);
+				}).catch(function(e) {
+					alert("Une erreur est survenue");
+					console.log(e);
+				});
+			},
+
+			anonymizePersonalDataItem:function(url, pid, ptable){
+				let item = self.getSingleItem(pid, ptable);
+				let email = item.getAttribute('data-email');
+				let singleElementFieldButtonss = item.querySelectorAll('.pdm-item__personal_data_single__buttons');
+				let itemAnonymizeButton = item.querySelectorAll('.pdm-button_anonymize');
+				let itemExportButton = item.querySelectorAll('.pdm-button_export');
 				
-				hideLoader(item);
-			}).catch(function(e) {
-				alert("Une erreur est survenue");
-				console.log(e);
-			});
-		};
+				self.displayLoader(item);
 
-		function anonymizeAllPersonalData(url, email){
-			let list = document.querySelector('.pdm-list');
-			let singleElementFieldValues = document.querySelectorAll('.pdm-item__personal_data_single__value');
-			let singleElementFieldButtonss = document.querySelectorAll('.pdm-item__personal_data_single__buttons');
-			let itemAnonymizeButtons = document.querySelectorAll('.pdm-button_anonymize');
-			let itemExportButtons = document.querySelectorAll('.pdm-button_export');
-			
-			displayLoader(list);
-
-			postData(url,{
-				'action':'anonymize_all_personal_data',
-				'email':email
-			})
-			.then(data => data.json())
-			.then(data =>{
-				if("success" == data.status){
-					for(var ptable in data.values){
-						for(var pid in data.values[ptable]){
-							for(var field in data.values[ptable][pid]){
-								var value = data.values[ptable][pid][field];
-								replaceByAnonymizedValue(pid, ptable, field, value);
+				self.postData(url,{
+					'action':'anonymize_personal_data_item',
+					'pid':pid,
+					'ptable':ptable,
+					'email':email
+				})
+				.then(data => data.json())
+				.then(data =>{
+					if("success" == data.status){
+						for(var ptable in data.values){
+							for(var pid in data.values[ptable]){
+								for(var field in data.values[ptable][pid]){
+									var value = data.values[ptable][pid][field];
+									self.replaceByAnonymizedValue(pid, ptable, field, value);
+								}
 							}
 						}
-					}
-
-					singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
-						singleElementFieldButtons.innerHTML = '';
-					});
-					itemAnonymizeButtons.forEach(function(itemAnonymizeButton){
+						singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
+							singleElementFieldButtons.innerHTML = '';
+						});
 						itemAnonymizeButton.innerHTML = '';
-						itemAnonymizeButton.classList.add('hidden');
-					});
-					itemExportButtons.forEach(function(itemExportButton){
 						itemExportButton.innerHTML = '';
-						itemExportButton.classList.add('hidden');
-					});
-				}else{
-					alert(data.msg);	
-				}
+					}else{
+						alert(data.msg);	
+					}
+					
+					self.hideLoader(item);
+				}).catch(function(e) {
+					alert("Une erreur est survenue");
+					console.log(e);
+				});
+			},
+
+			anonymizeAllPersonalData:function(url, email){
+				let list = document.querySelector('.pdm-list');
+				let singleElementFieldValues = document.querySelectorAll('.pdm-item__personal_data_single__value');
+				let singleElementFieldButtonss = document.querySelectorAll('.pdm-item__personal_data_single__buttons');
+				let itemAnonymizeButtons = document.querySelectorAll('.pdm-button_anonymize');
+				let itemExportButtons = document.querySelectorAll('.pdm-button_export');
 				
-				hideLoader(list);
-			}).catch(function(e) {
-				alert("Une erreur est survenue");
-				console.log(e);
-			});
-		};
+				self.displayLoader(list);
 
-		function exportPersonalDataItem(url, pid, ptable){
-			let item = getSingleItem(pid, ptable);
-			let email = item.getAttribute('data-email');
-			
-			displayLoader(item);
+				self.postData(url,{
+					'action':'anonymize_all_personal_data',
+					'email':email
+				})
+				.then(data => data.json())
+				.then(data =>{
+					if("success" == data.status){
+						for(var ptable in data.values){
+							for(var pid in data.values[ptable]){
+								for(var field in data.values[ptable][pid]){
+									var value = data.values[ptable][pid][field];
+									self.replaceByAnonymizedValue(pid, ptable, field, value);
+								}
+							}
+						}
 
-			postData(url,{
-				'action':'export_single',
-				'pid':pid,
-				'ptable':ptable,
-				'email':email
-			})
-			.then(response => {
-				if(response.ok) {
-					response.blob().then(function(blob) {
-						downloadBlobFile(blob,response.headers.get('filename'));
-					});
-				} else {
-					response.json().then(function(json){
-						alert(json.msg);
-					});
-				}
-				hideLoader(item);
-			}).catch(function(e) {
-				alert("Une erreur est survenue");
-				console.log(e);
-			});
-		};
+						singleElementFieldButtonss.forEach(function(singleElementFieldButtons){
+							singleElementFieldButtons.innerHTML = '';
+						});
+						itemAnonymizeButtons.forEach(function(itemAnonymizeButton){
+							itemAnonymizeButton.innerHTML = '';
+							itemAnonymizeButton.classList.add('hidden');
+						});
+						itemExportButtons.forEach(function(itemExportButton){
+							itemExportButton.innerHTML = '';
+							itemExportButton.classList.add('hidden');
+						});
+					}else{
+						alert(data.msg);	
+					}
+					
+					self.hideLoader(list);
+				}).catch(function(e) {
+					alert("Une erreur est survenue");
+					console.log(e);
+				});
+			},
 
-		function exportAllPersonalData(url, email){
-			let list = document.querySelector('.pdm-list');
-			
-			displayLoader(list);
-
-			postData(url,{
-				'action':'export_all',
-				'email':email
-			})
-			.then(response => {
-				if(response.ok) {
-					response.blob().then(function(blob) {
-						downloadBlobFile(blob,response.headers.get('filename'));
-					});
-				} else {
-					response.json().then(function(json){
-						alert(json.msg);
-					});
-				}
-				hideLoader(list);
-			}).catch(function(e) {
-				alert("Une erreur est survenue");
-				console.log(e);
-			});
-		};
-
-		function showPersonalDataItem(url, pid, ptable){
-			let item = getSingleItem(pid, ptable);
-			let email = item.getAttribute('data-email');
-			
-			displayLoader(item);
-
-			postData(url,{
-				'action':'show_personal_data_item',
-				'pid':pid,
-				'ptable':ptable,
-				'email':email
-			})
-			.then(data => data.json())
-			.then(data =>{
-				if("success" == data.status){
-					Object.assign(document.createElement('a'), {
-						target: '_blank',
-						rel: 'noopener noreferrer',
-						href: data.href,
-					}).click();
-				}else{
-					alert(data.msg);
-				}
+			exportPersonalDataItem:function(url, pid, ptable){
+				let item = self.getSingleItem(pid, ptable);
+				let email = item.getAttribute('data-email');
 				
-				hideLoader(item);
-			}).catch(function(e) {
-				alert("Une erreur est survenue");
-				console.log(e);
-			});
-		};
+				self.displayLoader(item);
 
-		function replaceByAnonymizedValue(pid, ptable, field, value){
-			let singleOriginal = getSingleOriginalValueContainer(pid, ptable, field);
-			if(singleOriginal){
-				let singleoriginalValueContainer = singleOriginal.querySelector('.pdm-item__original_model_single__value');
-				singleoriginalValueContainer.innerHTML = value;
+				self.postData(url,{
+					'action':'export_single',
+					'pid':pid,
+					'ptable':ptable,
+					'email':email
+				})
+				.then(response => {
+					if(response.ok) {
+						response.blob().then(function(blob) {
+							self.downloadBlobFile(blob,response.headers.get('filename'));
+						});
+					} else {
+						response.json().then(function(json){
+							alert(json.msg);
+						});
+					}
+					self.hideLoader(item);
+				}).catch(function(e) {
+					alert("Une erreur est survenue");
+					console.log(e);
+				});
+			},
+
+			exportAllPersonalData:function(url, email){
+				let list = document.querySelector('.pdm-list');
+				
+				self.displayLoader(list);
+
+				self.postData(url,{
+					'action':'export_all',
+					'email':email
+				})
+				.then(response => {
+					if(response.ok) {
+						response.blob().then(function(blob) {
+							self.downloadBlobFile(blob,response.headers.get('filename'));
+						});
+					} else {
+						response.json().then(function(json){
+							alert(json.msg);
+						});
+					}
+					self.hideLoader(list);
+				}).catch(function(e) {
+					alert("Une erreur est survenue");
+					console.log(e);
+				});
+			},
+
+			showPersonalDataItem:function(url, pid, ptable){
+				let item = self.getSingleItem(pid, ptable);
+				let email = item.getAttribute('data-email');
+				
+				self.displayLoader(item);
+
+				self.postData(url,{
+					'action':'show_personal_data_item',
+					'pid':pid,
+					'ptable':ptable,
+					'email':email
+				})
+				.then(data => data.json())
+				.then(data =>{
+					if("success" == data.status){
+						Object.assign(document.createElement('a'), {
+							target: '_blank',
+							rel: 'noopener noreferrer',
+							href: data.href,
+						}).click();
+					}else{
+						alert(data.msg);
+					}
+					
+					self.hideLoader(item);
+				}).catch(function(e) {
+					alert("Une erreur est survenue");
+					console.log(e);
+				});
+			},
+
+			replaceByAnonymizedValue:function(pid, ptable, field, value){
+				let singleOriginal = self.getSingleOriginalValueContainer(pid, ptable, field);
+				if(singleOriginal){
+					let singleoriginalValueContainer = singleOriginal.querySelector('.pdm-item__original_model_single__value');
+					singleoriginalValueContainer.innerHTML = value;
+				}
+
+				let singlePersonal = self.getSinglePersonalValueContainer(pid, ptable, field);
+				if(singlePersonal){
+					let singlePersonalValueContainer = singlePersonal.querySelector('.pdm-item__personal_data_single__value');
+					singlePersonalValueContainer.innerHTML = value;
+				}
+
+			},
+
+			getSingleOriginalValueContainer:function(pid, ptable, field){
+				return document.querySelector('.pdm-item__original_model_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
+			},
+
+			getSinglePersonalValueContainer:function(pid, ptable, field){
+				return document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
+			},
+
+			getSingleItem:function(pid, ptable){
+				return document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+			},
+
+			getParentItem:function(element){
+				if(element.classList.contains('pdm-item')){
+					return element;
+				}
+				return self.getParentItem(element.parentNode);
+			},
+
+			getPersonalDataSingleItem:function(pid, ptable){
+				return document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
+			},
+
+			downloadBlobFile:function(blob, filename){
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				// the filename you want
+				a.download = filename;
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url);
+			},
+
+			displayLoader:function(element){
+				let loader = document.createElement('div');
+				loader.classList.add('pdm-loader');
+				element.appendChild(loader);
+			},
+
+			hideLoader:function(element){
+				element.removeChild(element.querySelector('.pdm-loader'));
+			},
+
+			postData:async function(url,data) {
+				var request = new FormData();
+
+				for(var i in data) {
+					request.append(i, data[i]);
+				}
+
+				return self.postDataCustom(url,request,{});
+			},
+
+			postDataCustom:async function(url,request, additionnalOptions) {
+				request.append('TL_WEM_AJAX', 1);
+				request.append('REQUEST_TOKEN', '<?php echo $this->token ?>');
+				request.append('wem_module', 'be_pdm');
+
+				var options = {
+					method: 'POST',
+					mode: 'same-origin',
+					cache: 'no-cache',
+					body: request
+				};
+
+				options = Object.assign(options,additionnalOptions);
+
+				const response = await fetch(url, options);
+				// const response = await fetch("<?php echo $this->request ?>", options);
+
+				return response;
 			}
 
-			let singlePersonal = getSinglePersonalValueContainer(pid, ptable, field);
-			if(singlePersonal){
-				let singlePersonalValueContainer = singlePersonal.querySelector('.pdm-item__personal_data_single__value');
-				singlePersonalValueContainer.innerHTML = value;
-			}
-
 		}
-
-		function getSingleOriginalValueContainer(pid, ptable, field){
-			return document.querySelector('.pdm-item__original_model_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
-		}
-
-		function getSinglePersonalValueContainer(pid, ptable, field){
-			return document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"][data-field="'+field+'"]');
-		}
-
-		function getSingleItem(pid, ptable){
-			return document.querySelector('.pdm-item[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
-		}
-
-		function getParentItem(element){
-			if(element.classList.contains('pdm-item')){
-				return element;
-			}
-			return getParentItem(element.parentNode);
-		}
-
-		function getPersonalDataSingleItem(pid, ptable){
-			return document.querySelector('.pdm-item__personal_data_single[data-pid="'+pid+'"][data-ptable="'+ptable+'"]');
-		}
-
-		function downloadBlobFile(blob, filename){
-			const url = window.URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.style.display = 'none';
-			a.href = url;
-			// the filename you want
-			a.download = filename;
-			document.body.appendChild(a);
-			a.click();
-			window.URL.revokeObjectURL(url);
-		}
-
-		function displayLoader(element){
-			let loader = document.createElement('div');
-			loader.classList.add('pdm-loader');
-			element.appendChild(loader);
-		};
-
-		function hideLoader(element){
-			element.removeChild(element.querySelector('.pdm-loader'));
-		};
-
-		async function postData(url,data) {
-			var request = new FormData();
-
-			for(var i in data) {
-				request.append(i, data[i]);
-			}
-
-			return postDataCustom(url,request,{});
-		};
-
-		async function postDataCustom(url,request, additionnalOptions) {
-			request.append('TL_WEM_AJAX', 1);
-			request.append('REQUEST_TOKEN', '<?php echo $this->token ?>');
-			request.append('wem_module', 'be_pdm');
-
-			var options = {
-				method: 'POST',
-				mode: 'same-origin',
-				cache: 'no-cache',
-				body: request
-			};
-
-			options = Object.assign(options,additionnalOptions);
-
-			const response = await fetch(url, options);
-			// const response = await fetch("<?php echo $this->request ?>", options);
-
-			return response;
-		};
-
-
-		applyEvents();
+		var self = WEM.pdm;
+	})();
+	(function() {
+		WEM.pdm.init();
 	})();
 </script>

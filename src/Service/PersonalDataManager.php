@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace WEM\PersonalDataManagerBundle\Service;
 
+use Contao\File;
+use Contao\FilesModel;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\System;
@@ -444,6 +446,22 @@ class PersonalDataManager
         }
 
         return $href;
+    }
+
+    public function getFileByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): ?File
+    {
+        $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
+        if (!$pdm) {
+            throw new Exception('Unable to find personal data');
+        }
+
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+        $objFileModel = FilesModel::findByUuid($encryptionService->decrypt($pdm->value));
+        if (!$objFileModel) {
+            throw new Exception('Unable to find the file');
+        }
+
+        return new File($objFileModel->path);
     }
 
     /**

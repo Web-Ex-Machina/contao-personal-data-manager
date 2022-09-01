@@ -86,6 +86,7 @@ class PersonalDataManagerUi
         $tpl->email = $email;
 
         $tpl->buttons = $this->buildListButtons($email, $nbRows);
+
         return $tpl->parse();
     }
 
@@ -313,6 +314,7 @@ class PersonalDataManagerUi
         $tpl->field = $personalData->field;
         $tpl->email = $email;
         $tpl->buttons = $this->buildSingleItemBodyPersonalDataSingleButtons($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
+
         return $tpl->parse();
     }
 
@@ -326,6 +328,7 @@ class PersonalDataManagerUi
                 $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $buttons);
             }
         }
+
         return $buttons;
     }
 

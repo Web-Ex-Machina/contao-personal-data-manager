@@ -69,6 +69,12 @@ class PersonalDataManagerAction
                     case 'show_personal_data_item':
                         $arrResponse = $this->showSingleItem();
                     break;
+                    case 'show_file_single_personal_data':
+                        $arrResponse = $this->showFileSinglePersonalData();
+                    break;
+                    case 'download_file_single_personal_data':
+                        $arrResponse = $this->downloadFileSinglePersonalData();
+                    break;
                     default:
                         throw new Exception('Unknown route');
                 }
@@ -230,6 +236,77 @@ class PersonalDataManagerAction
             'msg' => '',
             'href' => $href,
         ];
+    }
+
+    protected function showFileSinglePersonalData(): array
+    {
+        if (empty(Input::post('pid'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.pidEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('ptable'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('email'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('field'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.fieldEmpty', [], 'contao_default'));
+        }
+
+        $this->checkAccess();
+
+        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+
+        $content = $objFile ? sprintf(
+            'data:%s;base64,%s',
+            $objFile->mime,
+            base64_encode($objFile->getContent())
+        ) : '';
+
+        return [
+            'status' => $objFile ? 'success' : 'error',
+            'msg' => '',
+            'content' => $content,
+        ];
+    }
+
+    protected function downloadFileSinglePersonalData(): void
+    {
+        if (empty(Input::post('pid'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.pidEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('ptable'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('email'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('field'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.fieldEmpty', [], 'contao_default'));
+        }
+
+        $this->checkAccess();
+
+        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+
+        // $content = $objFile ? sprintf(
+        //     'data:%s;base64,%s',
+        //     $objFile->mime,
+        //     base64_encode($objFile->getContent())
+        // ) : '';
+
+        (new Response($objFile->getContent(), 200, [
+            'Content-Type' => $objFile->mime,
+            'Content-Disposition' => 'attachment',
+            'filename' => $objFile->name,
+        ]))->send();
+        exit();
     }
 
     protected function checkAccess(): void
