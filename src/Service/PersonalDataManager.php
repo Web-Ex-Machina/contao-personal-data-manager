@@ -454,14 +454,52 @@ class PersonalDataManager
         if (!$pdm) {
             throw new Exception('Unable to find personal data');
         }
+        if (!$this->isPersonalDataLinkedToFile($pdm)) {
+            throw new Exception('Personal data not linked to a file');
+        }
 
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
-        $objFileModel = FilesModel::findByUuid($encryptionService->decrypt($pdm->value));
+
+        $value = $encryptionService->decrypt($pdm->value);
+        $objFileModel = null;
+
+        if (FilesModel::getTable() === $ptable) {
+            switch ($field) {
+                case 'id':
+                case 'name':
+                case 'path':
+                    $objFileModel = FilesModel::findOneBy($field, $value);
+                break;
+                case 'uuid':
+                    $objFileModel = FilesModel::findByUuid($value);
+                break;
+            }
+        }
+
+        if (isset($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField']) && \is_array($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField'] as $callback) {
+                $objFileModel = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $field, $pdm, $value, $objFileModel);
+            }
+        }
+
         if (!$objFileModel) {
             throw new Exception('Unable to find the file');
         }
 
         return new File($objFileModel->path);
+    }
+
+    public function isPersonalDataLinkedToFile(PersonalDataModel $pdm): bool
+    {
+        $isLinkedToFile = FilesModel::getTable() === $pdm->ptable;
+
+        if (isset($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile']) && \is_array($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile'] as $callback) {
+                $isLinkedToFile = System::importStatic($callback[0])->{$callback[1]}($pdm, $isLinkedToFile);
+            }
+        }
+
+        return $isLinkedToFile;
     }
 
     /**

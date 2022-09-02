@@ -36,6 +36,8 @@ Hook | Return Value | Description
 `buildSingleItemBodyPersonalDataSingleButtons` | `array` | Called after an item's personal data list row's buttons have been generated
 `renderSingleItemBodyPersonalDataSingleButtons` | `string` | Called after an item's personal data list row's buttons have been generated
 `getHrefByPidAndPtableAndEmail` | `string` | Called when clicking on the "show" button of an item
+`isPersonalDataLinkedToFile` | `bool` | Check if a single personal data item is associated to a file (without testing if the linked file exists or not)
+`getFileByPidAndPtableAndEmailAndField` | `\Contao\FilesModel|null` | Called when clicking on the "show" or "download" button of a single personal data item associated to a file
 
 ### CSV Exporter
 
@@ -613,6 +615,7 @@ $email | `string` | The email address linked to the personal data
 $personalData | `WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data row linked to the item
 $personalDatas | `array` | All personal data linked to the item
 $originalModel | `Contao\Model` | The original model
+$file | `Contao\File|null` | The file associated to the personal data if any
 $buttons | `array` | The array containing buttons HTML code
 
 **Code**:
@@ -624,6 +627,7 @@ public function buildSingleItemBodyPersonalDataSingleButtons(
 	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
 	array $personalDatas, 
 	\Contao\Model $originalModel, 
+	\Contao\File $file, 
 	array $buttons
 ): array
 {
@@ -661,6 +665,62 @@ public function renderSingleItemBodyPersonalDataSingleButtons(
 ): string
 {
 	return $buffer;
+}
+```
+
+### isPersonalDataLinkedToFile
+
+Check if a single personal data item is associated to a file (without testing if the linked file exists or not)
+
+**Return value** : `bool`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$personalData | `\WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data
+$isLinkedToFile | `bool` | The value calculated by the system and previous hooks (if any)
+
+**Code**:
+```php
+public function isPersonalDataLinkedToFile(
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData,
+	bool $isLinkedToFile
+): bool
+{
+	return $isLinkedToFile;
+}
+```
+
+### getFileByPidAndPtableAndEmailAndField
+
+Called when clicking on the "show" or "download" button of a single personal data item linked to a file
+
+**Return value** : `\Contao\FilesModel|null`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `int` | The pid linked to the personal data
+$ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email linked to the personal data
+$field | `string` | The field linked to the personal data
+$personalData | `\WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data
+$value | `mixed` | The personal data's value (decrypted)
+$objFileModel | `\Contao\FilesModel|null` | The FilesModel object found linked to the personal data
+
+**Code**:
+```php
+public function getFileByPidAndPtableAndEmailAndField(
+	string $pid, 
+	string $ptable,
+	string $email,
+	string $field,
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	$value,
+	?\Contao\FilesModel $objFileModel
+): ?\Contao\FilesModel
+{
+	return $objFileModel;
 }
 ```
 

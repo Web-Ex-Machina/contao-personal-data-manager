@@ -16,12 +16,14 @@ namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\DcaLoader;
 use Contao\Environment;
+use Contao\File;
 use Contao\FrontendTemplate;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\RequestToken;
 use Contao\System;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use WEM\PersonalDataManagerBundle\Classes\FileUtil;
 use WEM\PersonalDataManagerBundle\Model\PersonalData;
 
 class PersonalDataManagerUi
@@ -303,6 +305,7 @@ class PersonalDataManagerUi
 
     public function formatSingleItemBodyPersonalDataSingleFieldValue(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
+        // here we could check if the data is linked to a file and display its name
         return $personalData->anonymized ? ($personalData->value ?? '') : $this->unencrypt($personalData->value);
     }
 
@@ -323,9 +326,23 @@ class PersonalDataManagerUi
         $buttons = [];
         $buttons['anonymize'] = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonAnonymize($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
 
+        // here we could check if the data is linked to a file and display "show" & "download" buttons
+        $objFile = null;
+        if ($this->manager->isPersonalDataLinkedToFile($personalData)) {
+            try {
+                $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField($personalData->pid, $personalData->ptable, $personalData->email, $personalData->field);
+                if (FileUtil::isDisplayableInBrowser($objFile)) {
+                    $buttons['show'] = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonShowFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $objFile);
+                }
+                $buttons['download'] = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonDownloadFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $objFile);
+            } catch (Exception $e) {
+                // do nothing
+            }
+        }
+
         if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons'] as $callback) {
-                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $buttons);
+                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $objFile, $buttons);
             }
         }
 
@@ -340,6 +357,26 @@ class PersonalDataManagerUi
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeConfirm', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymize', [], 'contao_default')
+        );
+    }
+
+    public function formatSingleItemBodyPersonalDataSingleButtonShowFile(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel, File $file): string
+    {
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_show_file pdm-item__personal_data_single__button_show_file">%s</a>',
+            $this->url,
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonShowFileTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonShowFile', [], 'contao_default')
+        );
+    }
+
+    public function formatSingleItemBodyPersonalDataSingleButtonDownloadFile(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel, File $file): string
+    {
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_download_file pdm-item__personal_data_single__button_download_file">%s</a>',
+            $this->url,
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDownloadFileTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDownloadFile', [], 'contao_default')
         );
     }
 
@@ -621,6 +658,16 @@ class PersonalDataManagerUi
     protected function renderSingleItemBodyPersonalDataSingleButtonAnonymize(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
         return $this->formatSingleItemBodyPersonalDataSingleButtonAnonymize($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
+    }
+
+    protected function renderSingleItemBodyPersonalDataSingleButtonShowFile(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel, File $file): string
+    {
+        return $this->formatSingleItemBodyPersonalDataSingleButtonShowFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $file);
+    }
+
+    protected function renderSingleItemBodyPersonalDataSingleButtonDownloadFile(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel, File $file): string
+    {
+        return $this->formatSingleItemBodyPersonalDataSingleButtonDownloadFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $file);
     }
 
     protected function getOriginalObject(int $pid, string $ptable)
