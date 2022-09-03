@@ -179,24 +179,8 @@
 				.then(data => data.json())
 				.then(data =>{
 					if("success" == data.status){
-						var modal = new app.ModalFW({
-							name : 'modal-pdm-show-file',
-							content: '<iframe src="'+data.content+'" width="100%" height="'+window.innerHeight*.75+'px"></iframe>',
-							width:'75%',
-							blnDismiss:false,
-							onClose: function(){
-								modal.destroy();
-							},
-							onOpen: function(){
-								// doesn't work, how can I find a workaround ?
-								modal.$el[0].querySelector('iframe').addEventListener('load',function(e){
-									e.target.querySelectorAll('img').forEach(function(img){
-										img.style = "margin: auto;";
-									});
-								});
-							}
-						});
-						modal.open();
+						WEM.pdmmodal.createModal('pdm-file-show-modal', '<iframe src="'+data.content+'" width="100%" height="'+window.innerHeight*.75+'px"></iframe>');
+						WEM.pdmmodal.openModal('pdm-file-show-modal');
 					}else{
 						alert(data.msg);	
 					}
