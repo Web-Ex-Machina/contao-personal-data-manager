@@ -452,6 +452,12 @@ class PersonalDataManager
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
         $originalModel = Model::getClassFromTable($personalData->ptable);
+
+        $objFile = null;
+        if ($this->isPersonalDataLinkedToFile($personalData)) {
+            $objFile = $this->getFileByPidAndPtableAndEmailAndField($personalData->pid, $personalData->ptable, $personalData->email, $personalData->field);
+        }
+
         $obj = new $originalModel();
         $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
         $value = $encryptionService->decrypt($personalData->value);
@@ -462,8 +468,17 @@ class PersonalDataManager
 
         if (isset($GLOBALS['WEM_HOOKS']['anonymize']) && \is_array($GLOBALS['WEM_HOOKS']['anonymize'])) {
             foreach ($GLOBALS['WEM_HOOKS']['anonymize'] as $callback) {
-                System::importStatic($callback[0])->{$callback[1]}($personalData, $value);
+                System::importStatic($callback[0])->{$callback[1]}($personalData, $value, $objFile);
             }
+        }
+
+        // here we should anonymize the file if pdm linked to one
+        if ($objFile) {
+            $objFileDeletedTplContent = file_get_contents(TL_ROOT.'/public/bundles/wempersonaldatamanager/images/file_deleted.jpg');
+
+            $objFile->write($objFileDeletedTplContent);
+            $objFile->renameTo(str_replace($objFile->name, sprintf('file_deleted_%s.jpg', time()), $objFile->path));
+            $objFile->close();
         }
 
         return $anonymizedValue;

@@ -53,7 +53,7 @@ Hook | Return value | Description
 
 Hook | Return value | Description
 --- | --- | ---
-`anonymize` | `void` | Called after a personal data have been anonymized
+`anonymize` | `void` | Called after a personal data have been anonymized but before the associated file (if any) is.
 `anonymizeByEmail` | `\Contao\Model\Collection|null` | Called after retrieving personal data linked to an email and before anonymization process
 `anonymizeByPidAndPtableAndEmail` | `\Contao\Model\Collection|null` | Called after retrieving personal data linked to a pid, ptable and email and before anonymization process
 `anonymizeByPidAndPtableAndEmailAndField` | `\WEM\PersonalDataManagerBundle\Model\PersonalData|null` | Called after retrieving personal data linked to pid, ptable, email and field and before anonymization process
@@ -849,7 +849,7 @@ public function exportByPidAndPtableAndEmail(
 
 ### anonymize
 
-Called after a personal data have been anonymized
+Called after a personal data have been anonymized but before the associated file (if any) is.
 
 **Return value** : `void`
 
@@ -858,12 +858,14 @@ Name | Type | Description
 --- | --- | ---
 $personalData | `\WEM\PersonalDataManagerBundle\Model\PersonalData` | The anonymized personal data
 $value | `mixed` | The decrypted value before anonymization
+$file | `\Contao\File|null` | The file associated to the personal data if any
 
 **Code**:
 ```php
 public function anonymize(
 	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
-	$value
+	$value,
+	\Contao\File $file
 ): void
 {
     // do stuff
