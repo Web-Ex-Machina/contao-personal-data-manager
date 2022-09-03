@@ -22,7 +22,6 @@ use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Exception\AccessDeniedException;
-use WEM\UtilsBundle\Classes\StringUtil;
 
 class PersonalDataManagerAction
 {
@@ -181,12 +180,13 @@ class PersonalDataManagerAction
 
         $this->checkAccess();
 
-        $csv = $this->manager->exportByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
-
-        (new Response(mb_convert_encoding(StringUtil::decodeEntities($csv), 'UTF-16LE', 'UTF-8'), 200, [
-            'Content-Type' => 'text/csv; charset=utf-16le',
+        $zipName = $this->manager->exportByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
+        $zipContent = file_get_contents($zipName);
+        unlink($zipName);
+        (new Response($zipContent, 200, [
+            'Content-Type' => ' application/zip',
             'Content-Disposition' => 'attachment',
-            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.csv',
+            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.zip',
         ]))->send();
         exit();
     }
@@ -199,12 +199,13 @@ class PersonalDataManagerAction
 
         $this->checkAccess();
 
-        $csv = $this->manager->exportByEmail(Input::post('email'));
-
-        (new Response(mb_convert_encoding(StringUtil::decodeEntities($csv), 'UTF-16LE', 'UTF-8'), 200, [
-            'Content-Type' => 'text/csv; charset=utf-16le',
+        $zipName = $this->manager->exportByEmail(Input::post('email'));
+        $zipContent = file_get_contents($zipName);
+        unlink($zipName);
+        (new Response($zipContent, 200, [
+            'Content-Type' => ' application/zip',
             'Content-Disposition' => 'attachment',
-            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.csv',
+            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.zip',
         ]))->send();
         exit();
     }
