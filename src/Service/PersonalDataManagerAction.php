@@ -68,6 +68,12 @@ class PersonalDataManagerAction
                     case 'show_personal_data_item':
                         $arrResponse = $this->showSingleItem();
                     break;
+                    case 'show_file_single_personal_data':
+                        $arrResponse = $this->showFileSinglePersonalData();
+                    break;
+                    case 'download_file_single_personal_data':
+                        $arrResponse = $this->downloadFileSinglePersonalData();
+                    break;
                     default:
                         throw new Exception('Unknown route');
                 }
@@ -174,12 +180,13 @@ class PersonalDataManagerAction
 
         $this->checkAccess();
 
-        $csv = $this->manager->exportByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
-
-        (new Response($csv, 200, [
-            'Content-Type' => 'text/csv',
+        $zipName = $this->manager->exportByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
+        $zipContent = file_get_contents($zipName);
+        unlink($zipName);
+        (new Response($zipContent, 200, [
+            'Content-Type' => ' application/zip',
             'Content-Disposition' => 'attachment',
-            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.csv',
+            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.zip',
         ]))->send();
         exit();
     }
@@ -192,12 +199,13 @@ class PersonalDataManagerAction
 
         $this->checkAccess();
 
-        $csv = $this->manager->exportByEmail(Input::post('email'));
-
-        (new Response($csv, 200, [
-            'Content-Type' => 'text/csv',
+        $zipName = $this->manager->exportByEmail(Input::post('email'));
+        $zipContent = file_get_contents($zipName);
+        unlink($zipName);
+        (new Response($zipContent, 200, [
+            'Content-Type' => ' application/zip',
             'Content-Disposition' => 'attachment',
-            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.csv',
+            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.zip',
         ]))->send();
         exit();
     }
@@ -229,6 +237,78 @@ class PersonalDataManagerAction
             'msg' => '',
             'href' => $href,
         ];
+    }
+
+    protected function showFileSinglePersonalData(): array
+    {
+        if (empty(Input::post('pid'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.pidEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('ptable'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('email'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('field'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.fieldEmpty', [], 'contao_default'));
+        }
+
+        $this->checkAccess();
+
+        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+
+        $content = $objFile ? sprintf(
+            'data:%s;base64,%s',
+            $objFile->mime,
+            base64_encode($objFile->getContent())
+        ) : '';
+
+        return [
+            'status' => $objFile ? 'success' : 'error',
+            'msg' => '',
+            'content' => $content,
+            'name' => $objFile ? $objFile->name : '',
+        ];
+    }
+
+    protected function downloadFileSinglePersonalData(): void
+    {
+        if (empty(Input::post('pid'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.pidEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('ptable'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('email'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
+        }
+
+        if (empty(Input::post('field'))) {
+            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.fieldEmpty', [], 'contao_default'));
+        }
+
+        $this->checkAccess();
+
+        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+
+        // $content = $objFile ? sprintf(
+        //     'data:%s;base64,%s',
+        //     $objFile->mime,
+        //     base64_encode($objFile->getContent())
+        // ) : '';
+
+        (new Response($objFile->getContent(), 200, [
+            'Content-Type' => $objFile->mime,
+            'Content-Disposition' => 'attachment',
+            'filename' => $objFile->name,
+        ]))->send();
+        exit();
     }
 
     protected function checkAccess(): void

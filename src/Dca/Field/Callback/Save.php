@@ -62,11 +62,12 @@ class Save
 
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
+        $model->setRow($dc->activeRecord->row());
 
         $pdm = $this->personalDataManager->insertOrUpdateForPidAndPtableAndEmailAndField(
-            $dc->activeRecord->{$model->getPersonalDataPidField()},
+            $model->getPersonalDataPidFieldValue(),
             $model->getPersonalDataPtable(),
-            $dc->activeRecord->{$model->getPersonalDataEmailField()},
+            $model->getPersonalDataEmailFieldValue(),
             $dc->inputName,
             $value
         );
@@ -78,33 +79,35 @@ class Save
 
     public function invokeFrontend($value, \Contao\FrontendUser $user, \Contao\ModulePersonalData $module)
     {
-        if (empty($this->frontendField)) {
-            throw new Exception('No frontend field configured');
-        }
-        if (empty($this->table)) {
-            throw new Exception('No table configured');
-        }
+        // if (empty($this->frontendField)) {
+        //     throw new Exception('No frontend field configured');
+        // }
+        // if (empty($this->table)) {
+        //     throw new Exception('No table configured');
+        // }
 
-        $returnValue = $value;
+        // $returnValue = $value;
 
-        $modelClassName = Model::getClassFromTable($this->table);
-        $model = new $modelClassName();
+        // $modelClassName = Model::getClassFromTable($this->table);
+        // $model = $modelClassName::findByPk($user->id);
 
-        $pdm = $this->personalDataManager->insertOrUpdateForPidAndPtableAndEmailAndField(
-            $user->{$model->getPersonalDataPidField()},
-            $model->getPersonalDataPtable(),
-            $user->{$model->getPersonalDataEmailField()},
-            $this->frontendField,
-            $value
-        );
+        // $pdm = $this->personalDataManager->insertOrUpdateForPidAndPtableAndEmailAndField(
+        //     $model->getPersonalDataPidFieldValue(),
+        //     $model->getPersonalDataPtable(),
+        //     $model->getPersonalDataEmailFieldValue(),
+        //     $this->frontendField,
+        //     $value
+        // );
 
-        $returnValue = $pdm->value;
+        // $returnValue = $pdm->value;
 
-        return $model->getPersonalDataFieldsDefaultValueForField($this->frontendField);
+        // the model's postSave method will handle this
+        return $value;
     }
 
     public function invokeFrontendRegistration($value)
     {
+        // the model's postSave method will handle this
         return $value;
     }
 

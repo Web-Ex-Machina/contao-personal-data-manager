@@ -103,6 +103,8 @@ class PersonalDataManager extends Module
         if (Input::get('pdm_token')) {
             $this->Template->subtemplate = 'mod_personaldatamanager_manager';
             $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/pdm.css';
+            $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/pdm-modal.css';
+            $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/wempersonaldatamanager/js/pdm-modal.js';
             // check the token is connected to an email and is valid and equals to the email in session
             if (null !== $session->get('wem_pdm_email')
                 && null !== Input::get('pdm_token')

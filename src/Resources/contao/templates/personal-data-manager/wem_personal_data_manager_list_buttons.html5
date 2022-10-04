@@ -1,4 +1,5 @@
 <div class="pdm-list__header__buttons" data-email="<?php echo $this->email; ?>">
-	<?php echo $this->export; ?>
-	<?php echo $this->anonymize; ?>
+	<?php foreach($this->buttons as $button): ?>
+		<?php echo $button; ?>
+	<?php endforeach; ?>
 </div>

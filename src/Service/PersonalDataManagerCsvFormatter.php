@@ -77,7 +77,7 @@ class PersonalDataManagerCsvFormatter
             $personalData->ptable,
             $personalData->email,
             $GLOBALS['TL_DCA'][$personalData->ptable]['fields'][$personalData->field]['label'] ?? $personalData->field,
-            $personalData->anonymized ? $personalData->value : $encryptionService->decrypt($personalData->value),
+            $personalData->anonymized ? $personalData->value : '"'.$encryptionService->decrypt($personalData->value).'"',
             $personalData->anonymized ? $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymizedValueYes', [], 'contao_default') : $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymizedValueNo', [], 'contao_default'),
         ];
         if (isset($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport']) && \is_array($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'])) {

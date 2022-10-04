@@ -39,10 +39,10 @@ trait PDMDCTableTrait
         if ($model->isFieldInPersonalDataFieldsNames($field)) {
             $obj = $model::findOneById(end($this->current));
 
-            return $personalDataManager->getUnecryptedValueByPidAndPTableAndEmailAndField(
-                $obj->{$model->getPersonalDataPidField()},
+            return $personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
+                $obj->getPersonalDataPidFieldValue(),
                 $model->getPersonalDataPtable(),
-                $obj->{$model->getPersonalDataEmailField()},
+                $obj->getPersonalDataEmailFieldValue(),
                 $field
             );
         }

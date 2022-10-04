@@ -31,11 +31,14 @@ class ListLabelGroup
     {
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
+        $model->setRow($data);
 
-        return $this->personalDataManager->getUnecryptedValueByPidAndPTableAndEmailAndField(
-            $data[$model->getPersonalDataPidField()],
+        return $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
+            // $data[$model->getPersonalDataPidField()],
+            $model->getPersonalDataPidFieldValue(),
             $model->getPersonalDataPtable(),
-            $data[$model->getPersonalDataEmailField()],
+            // $data[$model->getPersonalDataEmailField()],
+            $model->getPersonalDataEmailFieldValue(),
             $field
         );
     }

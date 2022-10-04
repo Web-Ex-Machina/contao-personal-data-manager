@@ -55,11 +55,12 @@ class Load
 
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
+        $model->setRow($dc->activeRecord->row());
 
-        return $this->personalDataManager->getUnecryptedValueByPidAndPTableAndEmailAndField(
-            $dc->activeRecord->{$model->getPersonalDataPidField()},
+        return $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
+            $model->getPersonalDataPidFieldValue(),
             $model->getPersonalDataPtable(),
-            $dc->activeRecord->{$model->getPersonalDataEmailField()},
+            $model->getPersonalDataEmailFieldValue(),
             $dc->inputName
         ) ?? $value;
     }
@@ -76,7 +77,7 @@ class Load
         $modelClassName = Model::getClassFromTable($this->table);
         $model = new $modelClassName();
 
-        return $this->personalDataManager->getUnecryptedValueByPidAndPTableAndEmailAndField(
+        return $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
             $user->{$model->getPersonalDataPidField()},
             $model->getPersonalDataPtable(),
             $user->{$model->getPersonalDataEmailField()},
