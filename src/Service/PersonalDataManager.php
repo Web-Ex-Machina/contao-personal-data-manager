@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace WEM\PersonalDataManagerBundle\Service;
 
+use Contao\File;
+use Contao\FilesModel;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\System;
@@ -22,6 +24,8 @@ use InvalidArgumentException;
 use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
 use WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken as PersonalDataAccessTokenModel;
 use WEM\PersonalDataManagerBundle\Model\Traits\PersonalDataTrait;
+use WEM\UtilsBundle\Classes\StringUtil;
+use ZipArchive;
 
 class PersonalDataManager
 {
@@ -174,7 +178,23 @@ class PersonalDataManager
             }
         }
 
-        return $this->csvFormatter->formatPersonalDataForCsv($pdms);
+        $csvContent = $this->csvFormatter->formatPersonalDataForCsv($pdms);
+
+        $zipName = $email.'.zip';
+        $zip = new ZipArchive();
+        $res = $zip->open($zipName, ZipArchive::CREATE);
+
+        if (!$res) {
+            throw new Exception('Unable to create zip archive');
+        }
+
+        $zip->addFromString('data.csv', mb_convert_encoding(StringUtil::decodeEntities($csvContent), 'UTF-16LE', 'UTF-8'));
+        if ($pdms) {
+            $zip = $this->addAllLinkedFilesToZipArchive($zip, $pdms);
+        }
+        $zip->close();
+
+        return $zipName;
     }
 
     /**
@@ -244,7 +264,23 @@ class PersonalDataManager
             }
         }
 
-        return $this->csvFormatter->formatPersonalDataForCsv($pdms);
+        $csvContent = $this->csvFormatter->formatPersonalDataForCsv($pdms);
+
+        $zipName = $email.'-'.$ptable.'-'.$pid.'.zip';
+        $zip = new ZipArchive();
+        $res = $zip->open($zipName, ZipArchive::CREATE);
+
+        if (!$res) {
+            throw new Exception('Unable to create zip archive');
+        }
+
+        $zip->addFromString('data.csv', mb_convert_encoding(StringUtil::decodeEntities($csvContent), 'UTF-16LE', 'UTF-8'));
+        if ($pdms) {
+            $zip = $this->addAllLinkedFilesToZipArchive($zip, $pdms);
+        }
+        $zip->close();
+
+        return $zipName;
     }
 
     /**
@@ -413,13 +449,37 @@ class PersonalDataManager
 
     public function anonymize(PersonalDataModel $personalData): ?string
     {
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+
         $originalModel = Model::getClassFromTable($personalData->ptable);
+
+        $objFile = null;
+        if ($this->isPersonalDataLinkedToFile($personalData)) {
+            $objFile = $this->getFileByPidAndPtableAndEmailAndField($personalData->pid, $personalData->ptable, $personalData->email, $personalData->field);
+        }
+
         $obj = new $originalModel();
         $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
+        $value = $encryptionService->decrypt($personalData->value);
         $personalData->value = $anonymizedValue;
         $personalData->anonymized = true;
         $personalData->anonymizedAt = time();
         $personalData->save();
+
+        if (isset($GLOBALS['WEM_HOOKS']['anonymize']) && \is_array($GLOBALS['WEM_HOOKS']['anonymize'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['anonymize'] as $callback) {
+                System::importStatic($callback[0])->{$callback[1]}($personalData, $value, $objFile);
+            }
+        }
+
+        // here we should anonymize the file if pdm linked to one
+        if ($objFile) {
+            $objFileDeletedTplContent = file_get_contents(TL_ROOT.'/public/bundles/wempersonaldatamanager/images/file_deleted.jpg');
+
+            $objFile->write($objFileDeletedTplContent);
+            $objFile->renameTo(str_replace($objFile->name, sprintf('file_deleted_%s.jpg', time()), $objFile->path));
+            $objFile->close();
+        }
 
         return $anonymizedValue;
     }
@@ -435,6 +495,60 @@ class PersonalDataManager
         }
 
         return $href;
+    }
+
+    public function getFileByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): ?File
+    {
+        $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
+        if (!$pdm) {
+            throw new Exception('Unable to find personal data');
+        }
+        if (!$this->isPersonalDataLinkedToFile($pdm)) {
+            throw new Exception('Personal data not linked to a file');
+        }
+
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+
+        $value = $encryptionService->decrypt($pdm->value);
+        $objFileModel = null;
+
+        if (FilesModel::getTable() === $ptable) {
+            switch ($field) {
+                case 'id':
+                case 'name':
+                case 'path':
+                    $objFileModel = FilesModel::findOneBy($field, $value);
+                break;
+                case 'uuid':
+                    $objFileModel = FilesModel::findByUuid($value);
+                break;
+            }
+        }
+
+        if (isset($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField']) && \is_array($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField'] as $callback) {
+                $objFileModel = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $field, $pdm, $value, $objFileModel);
+            }
+        }
+
+        if (!$objFileModel) {
+            throw new Exception('Unable to find the file');
+        }
+
+        return new File($objFileModel->path);
+    }
+
+    public function isPersonalDataLinkedToFile(PersonalDataModel $pdm): bool
+    {
+        $isLinkedToFile = FilesModel::getTable() === $pdm->ptable;
+
+        if (isset($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile']) && \is_array($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile'] as $callback) {
+                $isLinkedToFile = System::importStatic($callback[0])->{$callback[1]}($pdm, $isLinkedToFile);
+            }
+        }
+
+        return $isLinkedToFile;
     }
 
     /**
@@ -521,5 +635,21 @@ class PersonalDataManager
         if (!\in_array('WEM\PersonalDataManagerBundle\Model\Trait\PersonalDataTrait', class_uses($object), true)) {
             throw new InvalidArgumentException('The object does not use the "PersonalDataTrait".');
         }
+    }
+
+    protected function addAllLinkedFilesToZipArchive(ZipArchive $zip, $pdms): ZipArchive
+    {
+        $pdms->reset();
+        while ($pdms->next()) {
+            $pdm = $pdms->current();
+            if ($this->isPersonalDataLinkedToFile($pdm)) {
+                $objFile = $this->getFileByPidAndPtableAndEmailAndField($pdm->pid, $pdm->ptable, $pdm->email, $pdm->field);
+                if ($objFile) {
+                    $zip->addFromString(sprintf('%s/%s/%s', $pdm->ptable, $pdm->pid, $objFile->name), $objFile->getContent());
+                }
+            }
+        }
+
+        return $zip;
     }
 }

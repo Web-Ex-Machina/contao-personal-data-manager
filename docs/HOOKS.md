@@ -17,10 +17,12 @@ List
 Hook | Return Value | Description
 --- | --- | ---
 `sortData` | `array` | Called after the personal data have been retrieved and arranged.
+`buildListButtons` | `array` | Called after the action buttons for the whole list have been generated.
 `renderListButtons` | `string` | Called after the action buttons for the whole list have been generated.
 `renderSingleItem` | `string` | Called after a whole item have been generated.
 `renderSingleItemHeader` | `string` | Called after the item's header have been generated.
 `renderSingleItemTitle` | `string` | Called after an item's header's title have been generated.
+`buildSingleItemButtons` | `array` | Called after an item's header's buttons have been generated.
 `renderSingleItemButtons` | `string` | Called after an item's header's buttons have been generated.
 `renderSingleItemBody` | `string` | Called after an item's body have been generated.
 `renderSingleItemBodyOriginalModel` | `string` | Called after an item's whole original model have been generated.
@@ -31,8 +33,11 @@ Hook | Return Value | Description
 `renderSingleItemBodyPersonalDataSingle` | `string` | Called after an item's personal data list row have been generated
 `renderSingleItemBodyPersonalDataSingleFieldLabel` | `string` | Called after an item's personal data list row's field label have been generated
 `renderSingleItemBodyPersonalDataSingleFieldValue` | `string` | Called after an item's personal data list row's field value have been generated
+`buildSingleItemBodyPersonalDataSingleButtons` | `array` | Called after an item's personal data list row's buttons have been generated
 `renderSingleItemBodyPersonalDataSingleButtons` | `string` | Called after an item's personal data list row's buttons have been generated
 `getHrefByPidAndPtableAndEmail` | `string` | Called when clicking on the "show" button of an item
+`isPersonalDataLinkedToFile` | `bool` | Check if a single personal data item is associated to a file (without testing if the linked file exists or not)
+`getFileByPidAndPtableAndEmailAndField` | `\Contao\FilesModel|null` | Called when clicking on the "show" or "download" button of a single personal data item associated to a file
 
 ### CSV Exporter
 
@@ -48,6 +53,7 @@ Hook | Return value | Description
 
 Hook | Return value | Description
 --- | --- | ---
+`anonymize` | `void` | Called after a personal data have been anonymized but before the associated file (if any) is.
 `anonymizeByEmail` | `\Contao\Model\Collection|null` | Called after retrieving personal data linked to an email and before anonymization process
 `anonymizeByPidAndPtableAndEmail` | `\Contao\Model\Collection|null` | Called after retrieving personal data linked to a pid, ptable and email and before anonymization process
 `anonymizeByPidAndPtableAndEmailAndField` | `\WEM\PersonalDataManagerBundle\Model\PersonalData|null` | Called after retrieving personal data linked to pid, ptable, email and field and before anonymization process
@@ -90,6 +96,32 @@ public function sortData(
 {
 	return $sorted;
 }
+```
+
+### buildListButtons
+
+Called after the action buttons for the whole list have been generated.
+
+**Return value** : `array`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$email | `string` | The email address linked to the personal data
+$nbRows | `int` | Number of items in the list
+$buttons | `array` | The array containing buttons HTML code
+
+**Code**:
+```php
+public function buildListButtons(
+	string $email, 
+	int $nbRows, 
+	array $buttons
+): array
+{
+	return $buttons;
+}
+```
 
 ### renderListButtons
 
@@ -206,6 +238,37 @@ public function renderSingleItemTitle(
 ): string
 {
 	return $buffer;
+}
+```
+
+### buildSingleItemButtons
+
+Called after an item's header's buttons have been generated.
+
+**Return value** : `array`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `int` | The pid linked to the personal data
+$ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
+$personalDatas | `array` | All personal data linked to the item
+$originalModel | `Contao\Model` | The original model
+$buttons | `array` | The array containing buttons HTML code
+
+**Code**:
+```php
+public function buildSingleItemButtons(
+	int $pid, 
+	string $ptable, 
+	string $email,
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	array $buttons
+): array
+{
+	return $buttons;
 }
 ```
 
@@ -537,6 +600,41 @@ public function renderSingleItemBodyPersonalDataSingleFieldValue(
 }
 ```
 
+### buildSingleItemBodyPersonalDataSingleButtons
+
+Called after an item's personal data list row's field buttons have been generated
+
+**Return value** : `array`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `int` | The pid linked to the personal data
+$ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email address linked to the personal data
+$personalData | `WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data row linked to the item
+$personalDatas | `array` | All personal data linked to the item
+$originalModel | `Contao\Model` | The original model
+$file | `Contao\File|null` | The file associated to the personal data if any
+$buttons | `array` | The array containing buttons HTML code
+
+**Code**:
+```php
+public function buildSingleItemBodyPersonalDataSingleButtons(
+	int $pid, 
+	string $ptable, 
+	string $email,
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	array $personalDatas, 
+	\Contao\Model $originalModel, 
+	\Contao\File $file, 
+	array $buttons
+): array
+{
+	return $buttons;
+}
+```
+
 ### renderSingleItemBodyPersonalDataSingleButtons
 
 Called after an item's personal data list row's field buttons have been generated
@@ -567,6 +665,62 @@ public function renderSingleItemBodyPersonalDataSingleButtons(
 ): string
 {
 	return $buffer;
+}
+```
+
+### isPersonalDataLinkedToFile
+
+Check if a single personal data item is associated to a file (without testing if the linked file exists or not)
+
+**Return value** : `bool`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$personalData | `\WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data
+$isLinkedToFile | `bool` | The value calculated by the system and previous hooks (if any)
+
+**Code**:
+```php
+public function isPersonalDataLinkedToFile(
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData,
+	bool $isLinkedToFile
+): bool
+{
+	return $isLinkedToFile;
+}
+```
+
+### getFileByPidAndPtableAndEmailAndField
+
+Called when clicking on the "show" or "download" button of a single personal data item linked to a file
+
+**Return value** : `\Contao\FilesModel|null`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$pid | `int` | The pid linked to the personal data
+$ptable | `string` | The ptable linked to the personal data
+$email | `string` | The email linked to the personal data
+$field | `string` | The field linked to the personal data
+$personalData | `\WEM\PersonalDataManagerBundle\Model\PersonalData` | The personal data
+$value | `mixed` | The personal data's value (decrypted)
+$objFileModel | `\Contao\FilesModel|null` | The FilesModel object found linked to the personal data
+
+**Code**:
+```php
+public function getFileByPidAndPtableAndEmailAndField(
+	string $pid, 
+	string $ptable,
+	string $email,
+	string $field,
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	$value,
+	?\Contao\FilesModel $objFileModel
+): ?\Contao\FilesModel
+{
+	return $objFileModel;
 }
 ```
 
@@ -690,6 +844,31 @@ public function exportByPidAndPtableAndEmail(
 ): ?\Contao\Model\Collection
 {
     return $pdms;
+}
+```
+
+### anonymize
+
+Called after a personal data have been anonymized but before the associated file (if any) is.
+
+**Return value** : `void`
+
+**Arguments**:
+Name | Type | Description
+--- | --- | ---
+$personalData | `\WEM\PersonalDataManagerBundle\Model\PersonalData` | The anonymized personal data
+$value | `mixed` | The decrypted value before anonymization
+$file | `\Contao\File|null` | The file associated to the personal data if any
+
+**Code**:
+```php
+public function anonymize(
+	\WEM\PersonalDataManagerBundle\Model\PersonalData $personalData, 
+	$value,
+	\Contao\File $file
+): void
+{
+    // do stuff
 }
 ```
 

@@ -16,12 +16,14 @@ namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\DcaLoader;
 use Contao\Environment;
+use Contao\File;
 use Contao\FrontendTemplate;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\RequestToken;
 use Contao\System;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use WEM\PersonalDataManagerBundle\Classes\FileUtil;
 use WEM\PersonalDataManagerBundle\Model\PersonalData;
 
 class PersonalDataManagerUi
@@ -84,15 +86,31 @@ class PersonalDataManagerUi
     {
         $tpl = new FrontendTemplate('wem_personal_data_manager_list_buttons');
         $tpl->email = $email;
-        $tpl->anonymize = 0 === $nbRows ? '' : $this->renderListButtonAnonymize($email);
-        $tpl->export = 0 === $nbRows ? '' : $this->renderListButtonExport($email);
+
+        $tpl->buttons = $this->buildListButtons($email, $nbRows);
 
         return $tpl->parse();
     }
 
+    public function buildListButtons(string $email, int $nbRows): array
+    {
+        $buttons = [];
+        $buttons['anonymize'] = 0 === $nbRows ? '' : $this->renderListButtonAnonymize($email);
+        $buttons['export'] = 0 === $nbRows ? '' : $this->renderListButtonExport($email);
+
+        if (isset($GLOBALS['WEM_HOOKS']['buildListButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildListButtons'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['buildListButtons'] as $callback) {
+                $buttons = System::importStatic($callback[0])->{$callback[1]}($email, $nbRows, $buttons);
+            }
+        }
+
+        return $buttons;
+    }
+
     public function formatListButtonAnonymize(string $email): string
     {
-        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-list__button_anonymize">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-list__button_anonymize">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeConfirm', [], 'contao_default'),
@@ -102,7 +120,8 @@ class PersonalDataManagerUi
 
     public function formatListButtonExport(string $email): string
     {
-        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-list__button_export">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-list__button_export">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExportTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExport', [], 'contao_default')
@@ -147,16 +166,31 @@ class PersonalDataManagerUi
         $tpl = new FrontendTemplate('wem_personal_data_manager_item_buttons');
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
-        $tpl->anonymize = $this->renderSingleItemButtonAnonymize($pid, $ptable, $email, $personalDatas, $originalModel);
-        $tpl->export = $this->renderSingleItemButtonExport($pid, $ptable, $email, $personalDatas, $originalModel);
-        $tpl->show = $this->renderSingleItemButtonShow($pid, $ptable, $email, $personalDatas, $originalModel);
+        $tpl->buttons = $this->buildSingleItemButtons($pid, $ptable, $email, $personalDatas, $originalModel);
 
         return $tpl->parse();
     }
 
+    public function buildSingleItemButtons(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): array
+    {
+        $buttons = [];
+        $buttons['show'] = $this->renderSingleItemButtonShow($pid, $ptable, $email, $personalDatas, $originalModel);
+        $buttons['anonymize'] = $this->renderSingleItemButtonAnonymize($pid, $ptable, $email, $personalDatas, $originalModel);
+        $buttons['export'] = $this->renderSingleItemButtonExport($pid, $ptable, $email, $personalDatas, $originalModel);
+
+        if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'] as $callback) {
+                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $buttons);
+            }
+        }
+
+        return $buttons;
+    }
+
     public function formatSingleItemButtonAnonymize(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__button_anonymize_all">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__button_anonymize_all">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllConfirm', [], 'contao_default'),
@@ -166,7 +200,8 @@ class PersonalDataManagerUi
 
     public function formatSingleItemButtonExport(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-item__button_export">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-item__button_export">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonExportTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonExport', [], 'contao_default')
@@ -175,7 +210,8 @@ class PersonalDataManagerUi
 
     public function formatSingleItemButtonShow(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_show pdm-item__button_show">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_show pdm-item__button_show">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonShowTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonShow', [], 'contao_default')
@@ -269,6 +305,7 @@ class PersonalDataManagerUi
 
     public function formatSingleItemBodyPersonalDataSingleFieldValue(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
+        // here we could check if the data is linked to a file and display its name
         return $personalData->anonymized ? ($personalData->value ?? '') : $this->unencrypt($personalData->value);
     }
 
@@ -279,14 +316,43 @@ class PersonalDataManagerUi
         $tpl->ptable = $ptable;
         $tpl->field = $personalData->field;
         $tpl->email = $email;
-        $tpl->anonymize = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonAnonymize($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
+        $tpl->buttons = $this->buildSingleItemBodyPersonalDataSingleButtons($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
 
         return $tpl->parse();
     }
 
+    public function buildSingleItemBodyPersonalDataSingleButtons(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): array
+    {
+        $buttons = [];
+        $buttons['anonymize'] = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonAnonymize($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
+
+        // here we could check if the data is linked to a file and display "show" & "download" buttons
+        $objFile = null;
+        if ($this->manager->isPersonalDataLinkedToFile($personalData)) {
+            try {
+                $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField($personalData->pid, $personalData->ptable, $personalData->email, $personalData->field);
+                if (FileUtil::isDisplayableInBrowser($objFile)) {
+                    $buttons['show'] = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonShowFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $objFile);
+                }
+                $buttons['download'] = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonDownloadFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $objFile);
+            } catch (Exception $e) {
+                // do nothing
+            }
+        }
+
+        if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons'])) {
+            foreach ($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons'] as $callback) {
+                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $objFile, $buttons);
+            }
+        }
+
+        return $buttons;
+    }
+
     public function formatSingleItemBodyPersonalDataSingleButtonAnonymize(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__personal_data_single__button_anonymize">%s</a>',
+        return sprintf(
+            '<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__personal_data_single__button_anonymize">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeConfirm', [], 'contao_default'),
@@ -294,24 +360,42 @@ class PersonalDataManagerUi
         );
     }
 
+    public function formatSingleItemBodyPersonalDataSingleButtonShowFile(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel, File $file): string
+    {
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_show_file pdm-item__personal_data_single__button_show_file">%s</a>',
+            $this->url,
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonShowFileTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonShowFile', [], 'contao_default')
+        );
+    }
+
+    public function formatSingleItemBodyPersonalDataSingleButtonDownloadFile(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel, File $file): string
+    {
+        return sprintf(
+            '<a href="%s" title="%s" class="pdm-button pdm-button_download_file pdm-item__personal_data_single__button_download_file">%s</a>',
+            $this->url,
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDownloadFileTitle', [], 'contao_default'),
+            $this->translator->trans('WEM.PEDAMA.ITEM.buttonDownloadFile', [], 'contao_default')
+        );
+    }
+
     protected function sortData(?Collection $personalDatas): array
     {
         $sorted = [];
-        // if (!$personalDatas) {
-        //     return [];
-        // }
-
-        while ($personalDatas->next()) {
-            if (!\array_key_exists($personalDatas->ptable, $sorted)) {
-                $sorted[$personalDatas->ptable] = [];
+        if ($personalDatas) {
+            while ($personalDatas->next()) {
+                if (!\array_key_exists($personalDatas->ptable, $sorted)) {
+                    $sorted[$personalDatas->ptable] = [];
+                }
+                if (!\array_key_exists($personalDatas->pid, $sorted[$personalDatas->ptable])) {
+                    $sorted[$personalDatas->ptable][$personalDatas->pid] = [
+                        'originalModel' => $this->getOriginalObject((int) $personalDatas->pid, $personalDatas->ptable),
+                        'personalDatas' => [],
+                    ];
+                }
+                $sorted[$personalDatas->ptable][$personalDatas->pid]['personalDatas'][] = $personalDatas->current();
             }
-            if (!\array_key_exists($personalDatas->pid, $sorted[$personalDatas->ptable])) {
-                $sorted[$personalDatas->ptable][$personalDatas->pid] = [
-                    'originalModel' => $this->getOriginalObject((int) $personalDatas->pid, $personalDatas->ptable),
-                    'personalDatas' => [],
-                ];
-            }
-            $sorted[$personalDatas->ptable][$personalDatas->pid]['personalDatas'][] = $personalDatas->current();
         }
         ksort($sorted);
         foreach ($sorted as $ptable => $pids) {
@@ -574,6 +658,16 @@ class PersonalDataManagerUi
     protected function renderSingleItemBodyPersonalDataSingleButtonAnonymize(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
         return $this->formatSingleItemBodyPersonalDataSingleButtonAnonymize($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
+    }
+
+    protected function renderSingleItemBodyPersonalDataSingleButtonShowFile(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel, File $file): string
+    {
+        return $this->formatSingleItemBodyPersonalDataSingleButtonShowFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $file);
+    }
+
+    protected function renderSingleItemBodyPersonalDataSingleButtonDownloadFile(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel, File $file): string
+    {
+        return $this->formatSingleItemBodyPersonalDataSingleButtonDownloadFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $file);
     }
 
     protected function getOriginalObject(int $pid, string $ptable)

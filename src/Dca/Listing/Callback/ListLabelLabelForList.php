@@ -31,6 +31,7 @@ class ListLabelLabelForList
     {
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
+        $model->setRow($row);
 
         $labelFields = $GLOBALS['TL_DCA'][$dc->table]['list']['label']['fields'];
 
@@ -39,9 +40,11 @@ class ListLabelLabelForList
         foreach ($labelFields as $index => $label) {
             if ($model->isFieldInPersonalDataFieldsNames($label)) {
                 $labels[$index] = $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
-                    $row[$model->getPersonalDataPidField()],
+                    // $row[$model->getPersonalDataPidField()],
+                    $model->getPersonalDataPidFieldValue(),
                     $model->getPersonalDataPtable(),
-                    $row[$model->getPersonalDataEmailField()],
+                    // $row[$model->getPersonalDataEmailField()],
+                    $model->getPersonalDataEmailFieldValue(),
                     $label
                 );
             }
