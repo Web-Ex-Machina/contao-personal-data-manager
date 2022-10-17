@@ -3,6 +3,16 @@ Personal Data Manager bundle for Contao Open Source CMS
 
 The purpose of this project is to allow a better handling of personal data in Contao CMS.
 
+Warning
+-------
+
+Be aware that this bundle _alters_ data registered in the database. So all entities managed by this bundles will have the encrypted data version in their database tables.
+Retrieving those data thanks to a configured model (see below) will not make a difference as before.
+However, SQL queries to directly work with the database could be a problem, as they will work on encrypted data.
+
+eg : if you configure your `Member` model to be managed by this bundle, you will have to create an `EventListener` on the `SendNewsletterEvent` event, as it retrieves the newsletter recipients' data with an SQL query directly from `tl_member` instead of using the model.
+See [this example][6].
+
 Functionnalities
 -------------------
  
@@ -226,3 +236,4 @@ You can get the extension with this repository URL : [Github][2]
 [3]: https://www.webexmachina.fr/
 [4]: https://github.com/plenta/contao-encryption
 [5]: docs/HOOKS.md
+[6]: docs/examples/members_and_newsletters/example.md
