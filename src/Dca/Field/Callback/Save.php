@@ -16,7 +16,6 @@ namespace WEM\PersonalDataManagerBundle\Dca\Field\Callback;
 
 use Contao\DataContainer;
 use Contao\Model;
-use Exception;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
 
 class Save
@@ -97,28 +96,6 @@ class Save
 
     public function invokeFrontend($value, \Contao\FrontendUser $user, \Contao\ModulePersonalData $module)
     {
-        // if (empty($this->frontendField)) {
-        //     throw new Exception('No frontend field configured');
-        // }
-        // if (empty($this->table)) {
-        //     throw new Exception('No table configured');
-        // }
-
-        // $returnValue = $value;
-
-        // $modelClassName = Model::getClassFromTable($this->table);
-        // $model = $modelClassName::findByPk($user->id);
-
-        // $pdm = $this->personalDataManager->insertOrUpdateForPidAndPtableAndEmailAndField(
-        //     $model->getPersonalDataPidFieldValue(),
-        //     $model->getPersonalDataPtable(),
-        //     $model->getPersonalDataEmailFieldValue(),
-        //     $this->frontendField,
-        //     $value
-        // );
-
-        // $returnValue = $pdm->value;
-
         // the model's postSave method will handle this
         return $value;
     }
