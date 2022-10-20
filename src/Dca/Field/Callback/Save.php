@@ -64,6 +64,10 @@ class Save
         $model = new $modelClassName();
         $model->setRow($dc->activeRecord->row());
 
+        if (empty($model->getPersonalDataEmailFieldValue())) {
+            return $value;
+        }
+
         $pdm = $this->personalDataManager->insertOrUpdateForPidAndPtableAndEmailAndField(
             $model->getPersonalDataPidFieldValue(),
             $model->getPersonalDataPtable(),
@@ -73,6 +77,20 @@ class Save
         );
 
         $returnValue = $pdm->value;
+
+        // \WEM\SmartgearBundle\Classes\Util::log('=====');
+        // \WEM\SmartgearBundle\Classes\Util::log('invokeBackend');
+        // \WEM\SmartgearBundle\Classes\Util::log(print_r($dc->activeRecord->row(), true));
+
+        // // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataPidFieldValue());
+        // // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataPtable());
+        // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataEmailField());
+        // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataEmailFieldValue());
+
+        // \WEM\SmartgearBundle\Classes\Util::log($dc->inputName);
+        // \WEM\SmartgearBundle\Classes\Util::log($value);
+        // \WEM\SmartgearBundle\Classes\Util::log($pdm->value);
+        // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataFieldsDefaultValueForField($dc->inputName));
 
         return $model->getPersonalDataFieldsDefaultValueForField($dc->inputName);
     }
