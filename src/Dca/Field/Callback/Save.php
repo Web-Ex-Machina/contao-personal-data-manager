@@ -16,7 +16,6 @@ namespace WEM\PersonalDataManagerBundle\Dca\Field\Callback;
 
 use Contao\DataContainer;
 use Contao\Model;
-use Exception;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
 
 class Save
@@ -78,47 +77,11 @@ class Save
 
         $returnValue = $pdm->value;
 
-        // \WEM\SmartgearBundle\Classes\Util::log('=====');
-        // \WEM\SmartgearBundle\Classes\Util::log('invokeBackend');
-        // \WEM\SmartgearBundle\Classes\Util::log(print_r($dc->activeRecord->row(), true));
-
-        // // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataPidFieldValue());
-        // // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataPtable());
-        // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataEmailField());
-        // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataEmailFieldValue());
-
-        // \WEM\SmartgearBundle\Classes\Util::log($dc->inputName);
-        // \WEM\SmartgearBundle\Classes\Util::log($value);
-        // \WEM\SmartgearBundle\Classes\Util::log($pdm->value);
-        // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataFieldsDefaultValueForField($dc->inputName));
-
         return $model->getPersonalDataFieldsDefaultValueForField($dc->inputName);
     }
 
     public function invokeFrontend($value, \Contao\FrontendUser $user, \Contao\ModulePersonalData $module)
     {
-        // if (empty($this->frontendField)) {
-        //     throw new Exception('No frontend field configured');
-        // }
-        // if (empty($this->table)) {
-        //     throw new Exception('No table configured');
-        // }
-
-        // $returnValue = $value;
-
-        // $modelClassName = Model::getClassFromTable($this->table);
-        // $model = $modelClassName::findByPk($user->id);
-
-        // $pdm = $this->personalDataManager->insertOrUpdateForPidAndPtableAndEmailAndField(
-        //     $model->getPersonalDataPidFieldValue(),
-        //     $model->getPersonalDataPtable(),
-        //     $model->getPersonalDataEmailFieldValue(),
-        //     $this->frontendField,
-        //     $value
-        // );
-
-        // $returnValue = $pdm->value;
-
         // the model's postSave method will handle this
         return $value;
     }

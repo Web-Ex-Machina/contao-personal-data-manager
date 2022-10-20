@@ -97,6 +97,7 @@ $GLOBALS['TL_DCA']['tl_my_table'] = [
         'dataContainer' => DC_Table_Custom::class,
         'ondelete_callback' => [['wem.personal_data_manager.dca.config.callback.delete', '__invoke']],
         'onshow_callback' => [['wem.personal_data_manager.dca.config.callback.show', '__invoke']],
+        'onsubmit_callback' => [['wem.personal_data_manager.dca.config.callback.submit', '__invoke']],
     ],
     'list'=>[
         'label' => [
@@ -108,7 +109,6 @@ $GLOBALS['TL_DCA']['tl_my_table'] = [
         'myField'=>[
             // ...
             'load_callback' => [['wem.personal_data_manager.dca.field.callback.load', '__invoke']],
-            'save_callback' => [['wem.personal_data_manager.dca.field.callback.save', '__invoke']],
         ]
     ]
 ]
@@ -117,7 +117,7 @@ $GLOBALS['TL_DCA']['tl_my_table'] = [
 
 This way, editing your records in back-end will work with the same as with the model.
 
-:warning: If the data you are working on can be edited throught the contao's `Personal data` front end module, you will need to extends the `load` & `save` callbacks to precise on which table & field the front end callback should work !
+:warning: If the data you are working on can be edited throught the contao's `Personal data` front end module, you will need to extends the `load` callbacks to precise on which table & field the front end callback should work !
 
 **PHP callback**
 ```php
