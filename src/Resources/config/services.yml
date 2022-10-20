@@ -64,3 +64,9 @@ services:
     arguments:
       $personalDataManager: '@wem.personal_data_manager.service.personal_data_manager'
     public: true
+
+  wem.personal_data_manager.dca.config.callback.submit:
+    class: WEM\PersonalDataManagerBundle\Dca\Config\Callback\Submit
+    arguments:
+      $personalDataManager: '@wem.personal_data_manager.service.personal_data_manager'
+    public: true

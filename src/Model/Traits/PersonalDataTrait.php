@@ -158,7 +158,7 @@ trait PersonalDataTrait
 
     public function getPersonalDataEmailFieldValue(): string
     {
-        return $this->{$this->getPersonalDataEmailField()};
+        return null !== $this->{$this->getPersonalDataEmailField()} ? $this->{$this->getPersonalDataEmailField()} : '';
     }
 
     /**
