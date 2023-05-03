@@ -362,6 +362,7 @@ trait PersonalDataTrait
     protected static function find(array $arrOptions)
     {
         $obj = parent::find($arrOptions);
+
         if (!$obj) {
             return $obj;
         }

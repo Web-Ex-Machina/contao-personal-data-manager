@@ -51,11 +51,14 @@ class Submit
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = $modelClassName::findByPk($dc->id);
 
-        $model->setRow($dc->activeRecord->row());
+        // $model->setRow($dc->activeRecord->row());
         foreach ($dc->activeRecord->row() as $key => $value) {
-            if (!$model->isFieldInPersonalDataFieldsNames($key)) {
+            if (!$model->isFieldInPersonalDataFieldsNames($key)
+            || $value === $model->getPersonalDataFieldsDefaultValueForField($key)
+            ) {
                 continue;
             }
+            $model->{$key} = $value;
             $model->markModified($key);
         }
 
