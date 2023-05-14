@@ -18,7 +18,7 @@
     },
     "require":
     {
-        "php": ">=7.4",
+        "php": "^7.4 || ^8.0",
         "contao/core-bundle": "~4.13",
         "webexmachina/contao-utils": "^0.3",
         "plenta/contao-encryption": "^2.1"
