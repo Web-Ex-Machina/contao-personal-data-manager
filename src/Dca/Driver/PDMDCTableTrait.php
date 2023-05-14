@@ -40,7 +40,7 @@ trait PDMDCTableTrait
             $obj = $model::findOneById(end($this->current));
 
             return $personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
-                $obj->getPersonalDataPidFieldValue(),
+                (int) $obj->getPersonalDataPidFieldValue(),
                 $model->getPersonalDataPtable(),
                 $obj->getPersonalDataEmailFieldValue(),
                 $field

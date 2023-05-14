@@ -41,7 +41,7 @@ class Show
                         $fieldName = $matches[2];
                         if ($model->isFieldInPersonalDataFieldsNames($fieldName)) {
                             $modalData[$table][$index][$label] = $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
-                                $data[$model->getPersonalDataPidField()],
+                                (int) $data[$model->getPersonalDataPidField()],
                                 $model->getPersonalDataPtable(),
                                 $data[$model->getPersonalDataEmailField()],
                                 $fieldName

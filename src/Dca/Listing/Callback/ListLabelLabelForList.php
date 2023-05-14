@@ -41,7 +41,7 @@ class ListLabelLabelForList
             if ($model->isFieldInPersonalDataFieldsNames($label)) {
                 $labels[$index] = $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
                     // $row[$model->getPersonalDataPidField()],
-                    $model->getPersonalDataPidFieldValue(),
+                    (int) $model->getPersonalDataPidFieldValue(),
                     $model->getPersonalDataPtable(),
                     // $row[$model->getPersonalDataEmailField()],
                     $model->getPersonalDataEmailFieldValue(),

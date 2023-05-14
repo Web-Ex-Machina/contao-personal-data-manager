@@ -50,7 +50,7 @@ class PersonalDataManager
         $this->validateObject($object);
 
         return PersonalDataModel::findByPidAndPtable(
-            $object->getPersonalDataPidFieldValue(),
+            (int) $object->getPersonalDataPidFieldValue(),
             $object->getPersonalDataPtable()
         );
     }
@@ -82,12 +82,12 @@ class PersonalDataManager
     /**
      * Retrieves personal data linked to a pid and a ptable.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      *
      * @return Collection|null The associated personal data
      */
-    public function findByPidAndPtable(string $pid, string $ptable): ?Collection
+    public function findByPidAndPtable(int $pid, string $ptable): ?Collection
     {
         return PersonalDataModel::findByPidAndPtable($pid, $ptable);
     }
@@ -95,12 +95,12 @@ class PersonalDataManager
     /**
      * Delete personal data linked to a pid and a ptable.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      *
      * @return array The deleted ids
      */
-    public function deleteByPidAndPtable(string $pid, string $ptable): array
+    public function deleteByPidAndPtable(int $pid, string $ptable): array
     {
         return PersonalDataModel::deleteByPidAndPtable($pid, $ptable);
     }
@@ -200,13 +200,13 @@ class PersonalDataManager
     /**
      * Delete personal data linked to a pid, a ptable and an email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      *
      * @return array The deleted ids
      */
-    public function deleteByPidAndPtableAndEmail(string $pid, string $ptable, string $email): array
+    public function deleteByPidAndPtableAndEmail(int $pid, string $ptable, string $email): array
     {
         return PersonalDataModel::deleteByPidAndPtableAndEmail($pid, $ptable, $email);
     }
@@ -214,11 +214,11 @@ class PersonalDataManager
     /**
      * Anonymize personal data linked to a pid, a ptable and an email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      */
-    public function anonymizeByPidAndPtableAndEmail(string $pid, string $ptable, string $email): ?array
+    public function anonymizeByPidAndPtableAndEmail(int $pid, string $ptable, string $email): ?array
     {
         $anonymized = [];
         $pdms = PersonalDataModel::findByPidAndPtableAndEmail($pid, $ptable, $email);
@@ -250,11 +250,11 @@ class PersonalDataManager
     /**
      * Export personal data linked to a pid, a ptable and an email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      */
-    public function exportByPidAndPtableAndEmail(string $pid, string $ptable, string $email): string
+    public function exportByPidAndPtableAndEmail(int $pid, string $ptable, string $email): string
     {
         $pdms = PersonalDataModel::findByPidAndPtableAndEmail($pid, $ptable, $email);
 
@@ -286,14 +286,14 @@ class PersonalDataManager
     /**
      * Retrieves a single personal data linked to a pid, a ptable, an email and a field.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      * @param string $email  The field
      *
      * @return PersonalDataModel|null The associated personal data
      */
-    public function findOneByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): ?PersonalDataModel
+    public function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?PersonalDataModel
     {
         return PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
     }
@@ -301,13 +301,13 @@ class PersonalDataManager
     /**
      * Delete personal data linked to a pid, a ptable and an email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      *
      * @return array The deleted ids
      */
-    public function deleteByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): array
+    public function deleteByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): array
     {
         return PersonalDataModel::deleteByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
     }
@@ -315,11 +315,11 @@ class PersonalDataManager
     /**
      * Anonymize personal data linked to a pid, a ptable and an email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      */
-    public function anonymizeByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): ?string
+    public function anonymizeByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?string
     {
         $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
 
@@ -339,14 +339,14 @@ class PersonalDataManager
     /**
      * Retrieves a single personal data unecrypted value linked to a pid, a ptable, an email and a field.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      * @param string $email  The field
      *
      * @return string|null The unencrypted associated personal data value
      */
-    public function getUnecryptedValueByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): ?string
+    public function getUnecryptedValueByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?string
     {
         $personalData = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
         if (!$personalData) {
@@ -396,14 +396,14 @@ class PersonalDataManager
     /**
      * Inserts (or update) personal data linked to a pid, a ptable and an email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      * @param array  $datas  Array of datas (['field'=>'value'])
      *
      * @return array The personal datas inserted (or updated)
      */
-    public function insertOrUpdateForPidAndPtableAndEmail(string $pid, string $ptable, string $email, array $datas): array
+    public function insertOrUpdateForPidAndPtableAndEmail(int $pid, string $ptable, string $email, array $datas): array
     {
         $pdms = [];
         foreach ($datas as $field => $value) {
@@ -416,7 +416,7 @@ class PersonalDataManager
     /**
      * Inserts (or update) personal data linked to a pid, a ptabl, an email and a field.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      * @param string $field  The field
@@ -424,7 +424,7 @@ class PersonalDataManager
      *
      * @return PersonalDataModel The personal data record
      */
-    public function insertOrUpdateForPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field, $value): PersonalDataModel
+    public function insertOrUpdateForPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field, $value): PersonalDataModel
     {
         $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
         $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field) ?? new PersonalDataModel();
@@ -484,7 +484,7 @@ class PersonalDataManager
         return $anonymizedValue;
     }
 
-    public function getHrefByPidAndPtableAndEmail(string $pid, string $ptable, string $email)
+    public function getHrefByPidAndPtableAndEmail(int $pid, string $ptable, string $email)
     {
         $href = '';
 
@@ -497,7 +497,7 @@ class PersonalDataManager
         return $href;
     }
 
-    public function getFileByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): ?File
+    public function getFileByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?File
     {
         $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
         if (!$pdm) {

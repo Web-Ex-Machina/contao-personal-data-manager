@@ -266,7 +266,7 @@ class PersonalDataManagerUi
 
     public function formatSingleItemBodyOriginalModelSingleFieldValue(int $pid, string $ptable, string $email, string $field, $value, array $personalDatas, Model $originalModel): string
     {
-        return $value ?? '';
+        return (string) $value ?? '';
     }
 
     public function formatSingleItemBodyPersonalData(int $pid, string $ptable, string $email, array $personalDatas, Model $originalModel): string

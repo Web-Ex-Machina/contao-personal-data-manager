@@ -113,7 +113,7 @@ class PersonalDataManagerAction
         }
         $this->checkAccess();
 
-        $anonymizeValue = $this->manager->anonymizeByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+        $anonymizeValue = $this->manager->anonymizeByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
 
         return [
             'status' => 'success',
@@ -138,7 +138,7 @@ class PersonalDataManagerAction
 
         $this->checkAccess();
 
-        $anonymizeValues = $this->manager->anonymizeByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
+        $anonymizeValues = $this->manager->anonymizeByPidAndPtableAndEmail((int) Input::post('pid'), Input::post('ptable'), Input::post('email'));
 
         return [
             'status' => 'success',
@@ -180,7 +180,7 @@ class PersonalDataManagerAction
 
         $this->checkAccess();
 
-        $zipName = $this->manager->exportByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
+        $zipName = $this->manager->exportByPidAndPtableAndEmail((int) Input::post('pid'), Input::post('ptable'), Input::post('email'));
         $zipContent = file_get_contents($zipName);
         unlink($zipName);
         (new Response($zipContent, 200, [
@@ -226,7 +226,7 @@ class PersonalDataManagerAction
 
         $this->checkAccess();
 
-        $href = $this->manager->getHrefByPidAndPtableAndEmail(Input::post('pid'), Input::post('ptable'), Input::post('email'));
+        $href = $this->manager->getHrefByPidAndPtableAndEmail((int) Input::post('pid'), Input::post('ptable'), Input::post('email'));
 
         if (empty($href)) {
             throw new Exception($this->translator->trans('WEM.PEDAMA.DEFAULT.noUrlProvided', [], 'contao_default'));
@@ -259,7 +259,7 @@ class PersonalDataManagerAction
 
         $this->checkAccess();
 
-        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
 
         $content = $objFile ? sprintf(
             'data:%s;base64,%s',
@@ -295,7 +295,7 @@ class PersonalDataManagerAction
 
         $this->checkAccess();
 
-        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField(Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
 
         // $content = $objFile ? sprintf(
         //     'data:%s;base64,%s',

@@ -47,7 +47,7 @@ trait PersonalDataTrait
         if ($this->shouldManagePersonalData()) {
             $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
             $manager->deleteByPidAndPtable(
-                (string) $this->getPersonalDataPidFieldValue(),
+                (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable()
             );
         }
@@ -77,7 +77,7 @@ trait PersonalDataTrait
             $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
             $personalDatas = $manager->findByPidAndPtable(
-                (string) $this->getPersonalDataPidFieldValue(),
+                (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable()
             );
 
@@ -98,7 +98,7 @@ trait PersonalDataTrait
             // re-find personal data
             $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
             $manager->anonymizeByPidAndPtableAndEmail(
-                (string) $this->getPersonalDataPidFieldValue(),
+                (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable(),
                 $this->getPersonalDataEmailFieldValue()
             );
@@ -151,9 +151,9 @@ trait PersonalDataTrait
         return self::$personalDataPtable;
     }
 
-    public function getPersonalDataPidFieldValue(): string
+    public function getPersonalDataPidFieldValue(): int
     {
-        return $this->{$this->getPersonalDataPidField()};
+        return (int) $this->{$this->getPersonalDataPidField()};
     }
 
     public function getPersonalDataEmailFieldValue(): string
@@ -333,7 +333,7 @@ trait PersonalDataTrait
             $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
 
             $manager->insertOrUpdateForPidAndPtableAndEmail(
-                (string) $this->getPersonalDataPidFieldValue(),
+                (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable(),
                 $this->getPersonalDataEmailFieldValue(),
                 self::$personalDataFieldsValues
