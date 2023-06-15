@@ -22,6 +22,7 @@ use Contao\Model;
 use Contao\Model\Collection;
 use Contao\RequestToken;
 use Contao\System;
+use Exception;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Classes\FileUtil;
 use WEM\PersonalDataManagerBundle\Model\PersonalData;
@@ -180,7 +181,7 @@ class PersonalDataManagerUi
 
         if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'] as $callback) {
-                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $buttons);
+                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, null, $personalDatas, $originalModel, $buttons);
             }
         }
 

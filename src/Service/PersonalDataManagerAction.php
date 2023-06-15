@@ -29,6 +29,8 @@ class PersonalDataManagerAction
     private $translator;
     /** @var PersonalDataManager */
     private $manager;
+    /** @var \Contao\User */
+    private $user;
 
     public function __construct(
         TranslatorInterface $translator,

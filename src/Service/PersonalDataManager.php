@@ -23,7 +23,7 @@ use Exception;
 use InvalidArgumentException;
 use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
 use WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken as PersonalDataAccessTokenModel;
-use WEM\PersonalDataManagerBundle\Model\Traits\PersonalDataTrait;
+use WEM\PersonalDataManagerBundle\Model\Traits\PersonalDataTrait as PersonalDataTrait;
 use WEM\UtilsBundle\Classes\StringUtil;
 use ZipArchive;
 

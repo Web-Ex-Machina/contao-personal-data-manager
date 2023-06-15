@@ -1,5 +1,9 @@
 Personal Data Manager bundle for Contao Open Source CMS
 ======================
+v1.0.2 - 2023-06-15
+
+- UPDATED : PHP 8.2 compatibility
+
 v1.0.1 - 2023-05-03
 
 - Fix : member toggling in BE could result in data loss

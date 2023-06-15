@@ -29,13 +29,13 @@ class Submit
         $this->personalDataManager = $personalDataManager;
     }
 
-    public function __invoke()
+    public function __invoke(): void
     {
         if (2 === \func_num_args()) {
-            return $this->invokeFrontend(...\func_get_args());
+            $this->invokeFrontend(...\func_get_args());
         }
 
-        return $this->invokeBackend(...\func_get_args());
+        $this->invokeBackend(...\func_get_args());
     }
 
     protected function invokeFrontend(FrontendUser $user, ModulePersonalData $module): void
