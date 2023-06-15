@@ -829,7 +829,7 @@ Called after retrieving personal data linked to a pid, ptable and email and befo
 **Arguments**:
 Name | Type | Description
 --- | --- | ---
-$pid | `string` | The pid
+$pid | `int` | The pid
 $ptable | `string` | The ptable
 $email | `string` | The email
 $pdms | `\Contao\Model\Collection|null` | The personal data found
@@ -837,7 +837,7 @@ $pdms | `\Contao\Model\Collection|null` | The personal data found
 **Code**:
 ```php
 public function exportByPidAndPtableAndEmail(
-	string $pid, 
+	int $pid, 
 	string $ptable, 
 	string $email, 
 	?\Contao\Model\Collection $pdms
@@ -904,7 +904,7 @@ Called after retrieving personal data linked to a pid, ptable and email and befo
 **Arguments**:
 Name | Type | Description
 --- | --- | ---
-$pid | `string` | The pid
+$pid | `int` | The pid
 $ptable | `string` | The ptable
 $email | `string` | The email
 $pdms | `\Contao\Model\Collection|null` | The personal data found
@@ -912,7 +912,7 @@ $pdms | `\Contao\Model\Collection|null` | The personal data found
 **Code**:
 ```php
 public function anonymizeByPidAndPtableAndEmail(
-	string $pid, 
+	int $pid, 
 	string $ptable, 
 	string $email, 
 	?\Contao\Model\Collection $pdms
@@ -931,7 +931,7 @@ Called after retrieving personal data linked to a pid, ptable, email and field a
 **Arguments**:
 Name | Type | Description
 --- | --- | ---
-$pid | `string` | The pid
+$pid | `int` | The pid
 $ptable | `string` | The ptable
 $email | `string` | The email
 $field | `string` | The field
@@ -940,7 +940,7 @@ $pdm | `\WEM\PersonalDataManagerBundle\Model\PersonalData|null` | The personal d
 **Code**:
 ```php
 public function anonymizeByEmail(
-	string $pid, 
+	int $pid, 
 	string $ptable, 
 	string $email, 
 	string $field, 

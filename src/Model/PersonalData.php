@@ -41,12 +41,12 @@ class PersonalData extends Model
     /**
      * Find records by pid and ptable.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      *
      * @return \Contao\Collection|null
      */
-    public static function findByPidAndPtable(string $pid, string $ptable)
+    public static function findByPidAndPtable(int $pid, string $ptable)
     {
         return static::findItems(['pid' => $pid, 'ptable' => $ptable]);
     }
@@ -54,13 +54,13 @@ class PersonalData extends Model
     /**
      * Find record by pid, ptable and field.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $field  The field
      *
      * @return self|null
      */
-    public static function findOneByPidAndPtableAndField(string $pid, string $ptable, string $field)
+    public static function findOneByPidAndPtableAndField(int $pid, string $ptable, string $field)
     {
         return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'field' => $field], 1);
     }
@@ -68,13 +68,13 @@ class PersonalData extends Model
     /**
      * Find records by pid, ptable and email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      *
      * @return \Contao\Model\Collection|null
      */
-    public static function findByPidAndPtableAndEmail(string $pid, string $ptable, string $email)
+    public static function findByPidAndPtableAndEmail(int $pid, string $ptable, string $email)
     {
         return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email]);
     }
@@ -82,13 +82,13 @@ class PersonalData extends Model
     /**
      * Find one record by pid, ptable and email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      *
      * @return self|null
      */
-    public static function findOneByPidAndPtableAndEmail(string $pid, string $ptable, string $email)
+    public static function findOneByPidAndPtableAndEmail(int $pid, string $ptable, string $email)
     {
         $collection = static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email], 1);
 
@@ -98,14 +98,14 @@ class PersonalData extends Model
     /**
      * Find record by pid, ptable and field.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      * @param string $field  The field
      *
      * @return self|null
      */
-    public static function findOneByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field)
+    public static function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field)
     {
         $collection = static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email, 'field' => $field], 1);
 
@@ -151,12 +151,12 @@ class PersonalData extends Model
     /**
      * Delete rows by pid and ptable.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      *
      * @return array The array of deleted ids
      */
-    public static function deleteByPidAndPtable(string $pid, string $ptable): array
+    public static function deleteByPidAndPtable(int $pid, string $ptable): array
     {
         $ids = [];
         $items = self::findByPidAndPtable($pid, $ptable);
@@ -194,13 +194,13 @@ class PersonalData extends Model
     /**
      * Delete rows by pid, ptable and email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      *
      * @return array The array of deleted ids
      */
-    public static function deleteByPidAndPtableAndEmail(string $pid, string $ptable, string $email): array
+    public static function deleteByPidAndPtableAndEmail(int $pid, string $ptable, string $email): array
     {
         $ids = [];
         $items = self::findByPidAndPtableAndEmail($pid, $ptable, $email);
@@ -217,14 +217,14 @@ class PersonalData extends Model
     /**
      * Delete rows by pid, ptable and email.
      *
-     * @param string $pid    The pid
+     * @param int    $pid    The pid
      * @param string $ptable The ptable
      * @param string $email  The email
      * @param string $field  The field
      *
      * @return array The array of deleted ids
      */
-    public static function deleteByPidAndPtableAndEmailAndField(string $pid, string $ptable, string $email, string $field): array
+    public static function deleteByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): array
     {
         $ids = [];
         $item = self::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);

@@ -35,7 +35,7 @@ class ListLabelGroup
 
         return $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
             // $data[$model->getPersonalDataPidField()],
-            $model->getPersonalDataPidFieldValue(),
+            (int) $model->getPersonalDataPidFieldValue(),
             $model->getPersonalDataPtable(),
             // $data[$model->getPersonalDataEmailField()],
             $model->getPersonalDataEmailFieldValue(),
