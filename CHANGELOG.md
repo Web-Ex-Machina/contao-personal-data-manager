@@ -3,6 +3,7 @@ Personal Data Manager bundle for Contao Open Source CMS
 v1.0.2 - 2023-06-15
 
 - UPDATED : PHP 8.2 compatibility
+- FIXED : undefined variable given as parameter in `buildSingleItemButtons`'s hook has been removed (documentation was not mentionning it)
 
 v1.0.1 - 2023-05-03
 

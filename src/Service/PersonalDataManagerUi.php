@@ -181,7 +181,7 @@ class PersonalDataManagerUi
 
         if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'] as $callback) {
-                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, null, $personalDatas, $originalModel, $buttons);
+                $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $buttons);
             }
         }
 
