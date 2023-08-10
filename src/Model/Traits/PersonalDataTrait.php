@@ -310,11 +310,15 @@ trait PersonalDataTrait
 
         if ($this->shouldManagePersonalData()) {
             foreach ($this->getPersonalDataFieldsNames() as $personalDataFieldName) {
-                self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
-                if ($this->isFieldInPersonalDataFieldsNames($personalDataFieldName)) {
-                    $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
-                } else {
-                    unset($arrSet[$personalDataFieldName]);
+                // here check if the data has been modifier or not
+                // field not present in $arrSet && field not modified ? Do not apply the default behaviour, let it be
+                if(array_key_exists($personalDataFieldName,$this->arrModified)){
+                    self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
+                    if ($this->isFieldInPersonalDataFieldsNames($personalDataFieldName)) {
+                        $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
+                    } else {
+                        unset($arrSet[$personalDataFieldName]);
+                    }
                 }
             }
         }

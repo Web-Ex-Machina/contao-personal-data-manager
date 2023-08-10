@@ -33,14 +33,15 @@ class Submit
     {
         if (2 === \func_num_args()) {
             $this->invokeFrontend(...\func_get_args());
+        } else {
+            $this->invokeBackend(...\func_get_args());
         }
-
-        $this->invokeBackend(...\func_get_args());
     }
 
     protected function invokeFrontend(FrontendUser $user, ModulePersonalData $module): void
     {
         // nothing to do here
+        // when the hook is called, the Member object has already been updated
     }
 
     protected function invokeBackend(DataContainer $dc): void
