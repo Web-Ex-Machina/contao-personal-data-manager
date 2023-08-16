@@ -1,6 +1,9 @@
 Personal Data Manager bundle for Contao Open Source CMS
 ======================
 
+v1.0.4 - 2023-08-16
+- UPDATED : bundle now requires [webexmachina/contao-utils](https://github.com/Web-Ex-Machina/contao-utils) ^1.0
+
 v1.0.3 - 2023-08-10
 - FIXED : If a field is not transmitted to the model's `preSave()` function, it should not be managed by the PDM
 
