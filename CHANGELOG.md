@@ -1,6 +1,9 @@
 Personal Data Manager bundle for Contao Open Source CMS
 ======================
 
+v1.0.5 - 2024-01-24
+- FIXED : CSS & JS files for modal were not included in the BE page
+
 v1.0.4 - 2023-08-16
 - UPDATED : bundle now requires [webexmachina/contao-utils](https://github.com/Web-Ex-Machina/contao-utils) ^1.0
 

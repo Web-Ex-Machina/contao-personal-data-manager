@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -48,6 +48,8 @@ class PersonalDataManagerController extends Controller
         ?DataContainer $dc
     ) {
         $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/pdm.css';
+        $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/wempersonaldatamanager/js/pdm-modal.js';
+        $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/pdm-modal.css';
     }
 
     public function generate()
