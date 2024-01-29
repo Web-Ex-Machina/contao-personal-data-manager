@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -57,6 +57,10 @@ class PersonalDataManagerUi
             $dcaLoader->load();
             System::loadLanguageFile($ptable);
             foreach ($arrPids as $pid => $singleItemData) {
+                // if originalModel has been deleted, do not manage the remaining PDM data about it
+                if (null === $singleItemData['originalModel']) {
+                    continue;
+                }
                 $renderedItem = $this->renderSingleItem((int) $pid, $ptable, $email, $singleItemData['personalDatas'], $singleItemData['originalModel']);
                 if (!empty($renderedItem)) {
                     $renderedItems[] = $renderedItem;

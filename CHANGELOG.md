@@ -1,6 +1,9 @@
 Personal Data Manager bundle for Contao Open Source CMS
 ======================
 
+v1.0.6 - 2024-01-29
+- FIXED : Do not try to manage PDM data referencing an unexisting source model
+
 v1.0.5 - 2024-01-24
 - FIXED : CSS & JS files for modal were not included in the BE page
 
