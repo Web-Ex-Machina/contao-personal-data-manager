@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -33,7 +33,7 @@ class ListLabelGroup
         $model = new $modelClassName();
         $model->setRow($data);
 
-        return $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
+        $group = $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
             // $data[$model->getPersonalDataPidField()],
             (int) $model->getPersonalDataPidFieldValue(),
             $model->getPersonalDataPtable(),
@@ -41,5 +41,22 @@ class ListLabelGroup
             $model->getPersonalDataEmailFieldValue(),
             $field
         );
+
+        if (!\array_key_exists('group_callback_previous', $GLOBALS['TL_DCA'][$dc->table]['list']['label'])) {
+            return $group;
+        }
+
+        // Call the group callback ($group, $sortingMode, $firstOrderBy, $row, $this)
+        if (\is_array($GLOBALS['TL_DCA'][$dc->table]['list']['label']['group_callback_previous'] ?? null)) {
+            $strClass = $GLOBALS['TL_DCA'][$dc->table]['list']['label']['group_callback_previous'][0];
+            $strMethod = $GLOBALS['TL_DCA'][$dc->table]['list']['label']['group_callback_previous'][1];
+
+            $dc->import($strClass);
+            $group = $dc->$strClass->$strMethod($group, $mode, $field, $data, $dc);
+        } elseif (\is_callable($GLOBALS['TL_DCA'][$dc->table]['list']['label']['group_callback_previous'] ?? null)) {
+            $group = $GLOBALS['TL_DCA'][$dc->table]['list']['label']['group_callback_previous']($group, $mode, $field, $data, $dc);
+        }
+
+        return $group;
     }
 }

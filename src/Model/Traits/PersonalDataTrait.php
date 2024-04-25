@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -312,7 +312,7 @@ trait PersonalDataTrait
             foreach ($this->getPersonalDataFieldsNames() as $personalDataFieldName) {
                 // here check if the data has been modifier or not
                 // field not present in $arrSet && field not modified ? Do not apply the default behaviour, let it be
-                if(array_key_exists($personalDataFieldName,$this->arrModified)){
+                if (\array_key_exists($personalDataFieldName, $this->arrModified)) {
                     self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
                     if ($this->isFieldInPersonalDataFieldsNames($personalDataFieldName)) {
                         $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
@@ -370,12 +370,12 @@ trait PersonalDataTrait
         if (!$obj) {
             return $obj;
         }
-        if (!is_a($obj, self::class) && !is_a($obj, \Contao\Model\Collection::class)) {
+        if (!is_a($obj, self::class) && !is_a($obj, Model\Collection::class)) {
             $obj->detach(false);
 
             return static::find($arrOptions);
         }
-        if (is_a($obj, \Contao\Model\Collection::class)) {
+        if (is_a($obj, Model\Collection::class)) {
             $detached = false;
             while ($obj->next()) {
                 if (!is_a($obj->current(), self::class)) {

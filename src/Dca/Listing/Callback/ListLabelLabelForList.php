@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -48,6 +48,17 @@ class ListLabelLabelForList
                     $label
                 );
             }
+        }
+
+        // dump($GLOBALS['TL_DCA'][$dc->table]['list']);
+
+        if (!\array_key_exists('label_callback_previous', $GLOBALS['TL_DCA'][$dc->table]['list']['label'])) {
+            return $labels;
+        }
+        if (\is_array($GLOBALS['TL_DCA'][$dc->table]['list']['label']['label_callback_previous'] ?? null)) {
+            $labels = \Contao\System::importStatic($GLOBALS['TL_DCA'][$dc->table]['list']['label']['label_callback_previous'][0])->{$GLOBALS['TL_DCA'][$dc->table]['list']['label']['label_callback_previous'][1]}($row, $labelSingle, $dc, $labels);
+        } else {
+            $labels = $GLOBALS['TL_DCA'][$dc->table]['list']['label']['label_callback_previous']($row, $labelSingle, $dc, $labels);
         }
 
         return $labels;
