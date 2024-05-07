@@ -19,8 +19,8 @@ use Contao\Controller;
 use Contao\DataContainer;
 use Contao\Environment;
 use Contao\Input;
-use Contao\RequestToken;
 use Contao\System;
+use Contao\User;
 use Symfony\Component\Routing\Annotation\Route;
 use Terminal42\ServiceAnnotationBundle\Annotation\ServiceTag;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi;
@@ -41,9 +41,9 @@ class PersonalDataManagerController extends Controller
      *
      * @var string
      */
-    protected $strTemplate = 'be_wem_personal_data_manager';
+    protected string $strTemplate = 'be_wem_personal_data_manager';
 
-    protected $user;
+    protected User $user;
 
     public function __construct(
         ?DataContainer $dc
@@ -66,7 +66,7 @@ class PersonalDataManagerController extends Controller
 
         $tpl->email = Input::post('email') ?? '';
         $tpl->request = Environment::get('request');
-        $tpl->token = RequestToken::get();
+        $tpl->token = System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue();
         if (empty($tpl->email)) {
             $tpl->content = $GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['PleaseFillEmail'];
         } else {

@@ -21,7 +21,6 @@ use Contao\Input;
 use Contao\Message;
 use Contao\Module;
 use Contao\PageModel;
-use Contao\RequestToken;
 use Contao\StringUtil;
 use Contao\System;
 use Exception;
@@ -131,7 +130,7 @@ class PersonalDataManager extends Module
         // display form
         $this->Template->email = $email;
         $this->Template->request = Environment::get('request');
-        $this->Template->token = RequestToken::get();
+        $this->Template->token = System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue();
     }
 
     protected function displayPersonalDataManagerUi(string $email): void

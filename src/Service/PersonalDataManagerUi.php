@@ -20,7 +20,6 @@ use Contao\File;
 use Contao\FrontendTemplate;
 use Contao\Model;
 use Contao\Model\Collection;
-use Contao\RequestToken;
 use Contao\System;
 use Exception;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -72,7 +71,7 @@ class PersonalDataManagerUi
 
         $tpl->items = $renderedItems;
         $tpl->request = Environment::get('request');
-        $tpl->token = RequestToken::get();
+        $tpl->token = System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue();
         $tpl->buttons = $this->renderListButtons($email, count($data));
 
         return $tpl->parse();

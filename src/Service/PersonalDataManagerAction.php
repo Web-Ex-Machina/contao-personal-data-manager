@@ -17,8 +17,6 @@ namespace WEM\PersonalDataManagerBundle\Service;
 use Contao\BackendUser;
 use Contao\FrontendUser;
 use Contao\Input;
-use Contao\Request;
-use Contao\RequestToken;
 use Contao\User;
 use Exception;
 use InvalidArgumentException;
@@ -93,7 +91,7 @@ class PersonalDataManagerAction
             }
 
             // Add Request Token to JSON answer and return
-            $arrResponse['rt'] = RequestToken::get();
+            $arrResponse['rt'] = System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue();
             $response = new Response(json_encode($arrResponse), $returnHttpCode);
             $response->send();
 
