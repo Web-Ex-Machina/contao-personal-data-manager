@@ -24,13 +24,10 @@ use function func_num_args;
 
 class Save
 {
-    /** @var PersonalDataManager */
     protected PersonalDataManager $personalDataManager;
 
-    /** @var string */
     protected string $frontendField;
 
-    /** @var string */
     protected string $table;
 
     public function __construct(
@@ -61,7 +58,7 @@ class Save
     public function invokeBackend($value, DataContainer $dc)
     {
         return $value;
-        // todo : dead code ??
+        // TODO : dead code ??
         if (!$dc->id) {
             return $value;
         }

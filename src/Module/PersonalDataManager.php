@@ -24,6 +24,7 @@ use Contao\PageModel;
 use Contao\StringUtil;
 use Contao\System;
 use Exception;
+use WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi;
 
 //deprecated
 
@@ -38,8 +39,6 @@ class PersonalDataManager extends Module
 
     /**
      * Do not display the module if there are no articles.
-     *
-     * @return string
      */
     public function generate(): string
     {
@@ -66,12 +65,12 @@ class PersonalDataManager extends Module
     {
         // Handle ajax request
         if (Input::post('TL_WEM_AJAX')) {
-            /** @var PersonalDataManagerUi */
+            /** @var PersonalDataManagerUi $pdmAction */
             $pdmAction = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager_action');
             $pdmAction->processAjaxRequest();
         }
 
-        /* @var PageModel */
+        /* @var PageModel $objPage */
         global $objPage;
         $session = System::getContainer()->get('session'); // Init session
         $pdm = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');

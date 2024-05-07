@@ -15,16 +15,16 @@ declare(strict_types=1);
 namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\BackendUser;
+use Contao\File;
 use Contao\FrontendUser;
 use Contao\Input;
+use Contao\System;
 use Contao\User;
 use Exception;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Exception\AccessDeniedException;
-
-//deprecated
 
 class PersonalDataManagerAction
 {
@@ -46,11 +46,11 @@ class PersonalDataManagerAction
     /**
      * Process AJAX actions.
      *
-     * @return string - Ajax response, as String or JSON
+     * @return string|null - Ajax response, as String or JSON
      */
-    public function processAjaxRequest(): string
+    public function processAjaxRequest(): ?string
     {
-        $returnHttpCode = 200;
+        $returnHttpCode = Response::HTTP_OK;
         // Catch AJAX Requests
         if (Input::post('TL_WEM_AJAX') && 'be_pdm' === Input::post('wem_module')) {
             try {
@@ -77,16 +77,16 @@ class PersonalDataManagerAction
                         $arrResponse = $this->showFileSinglePersonalData();
                     break;
                     case 'download_file_single_personal_data':
-                        $arrResponse = $this->downloadFileSinglePersonalData();
+                        $arrResponse = $this->downloadFileSinglePersonalData(); // TODO: return only void
                     break;
                     default:
                         throw new Exception('Unknown route');
                 }
             } catch (AccessDeniedException $e) {
-                $returnHttpCode = 401;
+                $returnHttpCode = Response::HTTP_UNAUTHORIZED;
                 $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
             } catch (Exception $e) {
-                $returnHttpCode = 400;
+                $returnHttpCode = Response::HTTP_BAD_REQUEST;
                 $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
             }
 
@@ -101,6 +101,7 @@ class PersonalDataManagerAction
 
     /**
      * @throws AccessDeniedException
+     * @throws Exception
      */
     protected function anonymizeSinglePersonalData(): array
     {
@@ -133,6 +134,7 @@ class PersonalDataManagerAction
 
     /**
      * @throws AccessDeniedException
+     * @throws Exception
      */
     protected function anonymizeSingleItem(): array
     {
@@ -161,6 +163,7 @@ class PersonalDataManagerAction
 
     /**
      * @throws AccessDeniedException
+     * @throws Exception
      */
     protected function anonymizeAllPersonalData(): array
     {
@@ -201,7 +204,7 @@ class PersonalDataManagerAction
         $zipName = $this->manager->exportByPidAndPtableAndEmail((int) Input::post('pid'), Input::post('ptable'), Input::post('email'));
         $zipContent = file_get_contents($zipName);
         unlink($zipName);
-        (new Response($zipContent, 200, [
+        (new Response($zipContent, Response::HTTP_OK, [
             'Content-Type' => ' application/zip',
             'Content-Disposition' => 'attachment',
             'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.zip',
@@ -211,6 +214,7 @@ class PersonalDataManagerAction
 
     /**
      * @throws AccessDeniedException
+     * @throws Exception
      */
     protected function exportAllPersonalData(): void
     {
@@ -223,7 +227,7 @@ class PersonalDataManagerAction
         $zipName = $this->manager->exportByEmail(Input::post('email'));
         $zipContent = file_get_contents($zipName);
         unlink($zipName);
-        (new Response($zipContent, 200, [
+        (new Response($zipContent, Response::HTTP_OK, [
             'Content-Type' => ' application/zip',
             'Content-Disposition' => 'attachment',
             'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.zip',
@@ -265,6 +269,7 @@ class PersonalDataManagerAction
 
     /**
      * @throws AccessDeniedException
+     * @throws Exception
      */
     protected function showFileSinglePersonalData(): array
     {
@@ -288,22 +293,23 @@ class PersonalDataManagerAction
 
         $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
 
-        $content = $objFile ? sprintf(
+        $content = $objFile instanceof File ? sprintf(
             'data:%s;base64,%s',
             $objFile->mime,
             base64_encode($objFile->getContent())
         ) : '';
 
         return [
-            'status' => $objFile ? 'success' : 'error',
+            'status' => $objFile instanceof File ? 'success' : 'error',
             'msg' => '',
             'content' => $content,
-            'name' => $objFile ? $objFile->name : '',
+            'name' => $objFile instanceof File ? $objFile->name : '',
         ];
     }
 
     /**
      * @throws AccessDeniedException
+     * @throws Exception
      */
     protected function downloadFileSinglePersonalData(): void
     {
@@ -333,7 +339,7 @@ class PersonalDataManagerAction
         //     base64_encode($objFile->getContent())
         // ) : '';
 
-        (new Response($objFile->getContent(), 200, [
+        (new Response($objFile->getContent(), Response::HTTP_OK, [
             'Content-Type' => $objFile->mime,
             'Content-Disposition' => 'attachment',
             'filename' => $objFile->name,
@@ -341,6 +347,10 @@ class PersonalDataManagerAction
         exit();
     }
 
+    /**
+     * @throws AccessDeniedException
+     * @throws Exception
+     */
     protected function checkAccess(): void
     {
         $this->user = BackendUser::getInstance();

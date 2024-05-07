@@ -25,8 +25,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Terminal42\ServiceAnnotationBundle\Annotation\ServiceTag;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi;
 
-// use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
 /**
  * @Route("%contao.backend.route_prefix%/wem-personal-data-manager",
  *     name=BackendController::class,
@@ -38,15 +36,13 @@ class PersonalDataManagerController extends Controller
 {
     /**
      * Template.
-     *
-     * @var string
      */
     protected string $strTemplate = 'be_wem_personal_data_manager';
 
     protected User $user;
 
-    public function __construct(
-        ?DataContainer $dc
+    public function __construct( // TODO : Missing parent call ?
+        ?DataContainer $dc // TODO : useless var ?
     ) {
         $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/pdm.css';
         $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/wempersonaldatamanager/js/pdm-modal.js';

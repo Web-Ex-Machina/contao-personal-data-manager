@@ -371,7 +371,7 @@ class PersonalDataManager
     public function getUnecryptedValueByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?string
     {
         $personalData = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
-        if (!$personalData) {
+        if (!$personalData instanceof Model) {
             return null;
         }
 
@@ -504,7 +504,7 @@ class PersonalDataManager
         }
 
         // here we should anonymize the file if pdm linked to one
-        if ($objFile instanceof File) {
+        if ($objFile instanceof File) { //TODO : TL_ROOT exist ?
             $objFileDeletedTplContent = file_get_contents(TL_ROOT.'/public/bundles/wempersonaldatamanager/images/file_deleted.jpg');
 
             $objFile->write($objFileDeletedTplContent);
@@ -534,7 +534,7 @@ class PersonalDataManager
     public function getFileByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?File
     {
         $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
-        if (!$pdm) {
+        if (!$pdm instanceof Model) {
             throw new Exception('Unable to find personal data');
         }
 
@@ -593,6 +593,7 @@ class PersonalDataManager
      * @param string $token The token
      *
      * @return bool True if valid
+     * @throws Exception
      */
     public function isEmailTokenCoupleValid(string $email, string $token): bool
     {

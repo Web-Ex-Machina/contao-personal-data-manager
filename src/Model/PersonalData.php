@@ -32,7 +32,6 @@ class PersonalData extends Model
      *
      * @param string $ptable The ptable
      *
-     * @return Collection|null
      * @throws Exception
      */
     public static function findByPtable(string $ptable): ?Collection
@@ -46,7 +45,6 @@ class PersonalData extends Model
      * @param int $pid The pid
      * @param string $ptable The ptable
      *
-     * @return Collection|null
      * @throws Exception
      */
     public static function findByPidAndPtable(int $pid, string $ptable): ?Collection
@@ -61,7 +59,6 @@ class PersonalData extends Model
      * @param string $ptable The ptable
      * @param string $field The field
      *
-     * @return Collection|null
      * @throws Exception
      */
     public static function findOneByPidAndPtableAndField(int $pid, string $ptable, string $field): ?Collection
@@ -76,7 +73,6 @@ class PersonalData extends Model
      * @param string $ptable The ptable
      * @param string $email The email
      *
-     * @return Collection|null
      * @throws Exception
      */
     public static function findByPidAndPtableAndEmail(int $pid, string $ptable, string $email): ?Collection
@@ -91,7 +87,6 @@ class PersonalData extends Model
      * @param string $ptable The ptable
      * @param string $email The email
      *
-     * @return \Contao\Model|null
      * @throws Exception
      */
     public static function findOneByPidAndPtableAndEmail(int $pid, string $ptable, string $email): ?\Contao\Model
@@ -109,7 +104,6 @@ class PersonalData extends Model
      * @param string $email The email
      * @param string $field The field
      *
-     * @return \Contao\Model|null
      * @throws Exception
      */
     public static function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?\Contao\Model
@@ -127,7 +121,6 @@ class PersonalData extends Model
      * @param int|null $offset The offset
      * @param array|null $options The options
      *
-     * @return Collection|null
      * @throws Exception
      */
     public static function findByEmail(string $email, ?int $limit = 0, ?int $offset = 0, ?array $options = []): ?Collection
@@ -147,7 +140,7 @@ class PersonalData extends Model
     {
         $ids = [];
         $items = self::findByPtable($ptable);
-        if ($items) {
+        if ($items instanceof Collection) {
             while ($items->next()) {
                 $ids[] = $items->id;
                 $items->delete();
@@ -170,7 +163,7 @@ class PersonalData extends Model
     {
         $ids = [];
         $items = self::findByPidAndPtable($pid, $ptable);
-        if ($items) {
+        if ($items instanceof Collection) {
             while ($items->next()) {
                 $ids[] = $items->id;
                 $items->delete();
@@ -192,7 +185,7 @@ class PersonalData extends Model
     {
         $ids = [];
         $items = self::findByEmail($email);
-        if ($items) {
+        if ($items instanceof Collection) {
             while ($items->next()) {
                 $ids[] = $items->id;
                 $items->delete();
@@ -216,7 +209,7 @@ class PersonalData extends Model
     {
         $ids = [];
         $items = self::findByPidAndPtableAndEmail($pid, $ptable, $email);
-        if ($items) {
+        if ($items instanceof Collection) {
             while ($items->next()) {
                 $ids[] = $items->id;
                 $items->delete();
@@ -241,7 +234,7 @@ class PersonalData extends Model
     {
         $ids = [];
         $item = self::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
-        if ($item) {
+        if ($item instanceof \Contao\Model) {
             $ids[] = $item->id;
             $item->delete();
         }
