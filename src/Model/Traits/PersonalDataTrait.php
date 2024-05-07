@@ -173,7 +173,7 @@ trait PersonalDataTrait
      *
      * @return static The model or null if the result is empty
      */
-    public static function findByPk($varValue, array $arrOptions = []): PersonalDataTrait
+    public static function findByPk($varValue, array $arrOptions = [])
     {
         $obj = parent::findByPk($varValue, $arrOptions);
 
@@ -198,7 +198,7 @@ trait PersonalDataTrait
      *
      * @return static The model or null if the result is empty
      */
-    public static function findByIdOrAlias($varId, array $arrOptions = []): PersonalDataTrait
+    public static function findByIdOrAlias($varId, array $arrOptions = [])
     {
         $obj = parent::findByIdOrAlias($varId, $arrOptions);
 
@@ -252,7 +252,7 @@ trait PersonalDataTrait
      *
      * @return static The model
      */
-    protected static function createModelFromDbResult(Result $objResult): PersonalDataTrait
+    protected static function createModelFromDbResult(Result $objResult)
     {
         $model = parent::createModelFromDbResult($objResult);
 
@@ -388,7 +388,7 @@ trait PersonalDataTrait
         if (is_a($obj, Collection::class)) {
             $detached = false;
             while ($obj->next()) {
-                if (!$obj->current() instanceof self::class) {
+                if (!$obj->current() instanceof PersonalDataTrait::class) {
                     $obj->current()->detach(false);
                     $detached = true;
                 }
