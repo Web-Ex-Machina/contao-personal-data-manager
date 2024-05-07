@@ -46,9 +46,9 @@ class PersonalDataManagerAction
     /**
      * Process AJAX actions.
      *
-     * @return string|null - Ajax response, as String or JSON
+     * @return void - Ajax response, as String or JSON
      */
-    public function processAjaxRequest(): ?string
+    public function processAjaxRequest(): void
     {
         $returnHttpCode = Response::HTTP_OK;
         // Catch AJAX Requests
@@ -77,7 +77,7 @@ class PersonalDataManagerAction
                         $arrResponse = $this->showFileSinglePersonalData();
                     break;
                     case 'download_file_single_personal_data':
-                        $arrResponse = $this->downloadFileSinglePersonalData(); // TODO: return only void
+                        $arrResponse = $this->downloadFileSinglePersonalData();
                     break;
                     default:
                         throw new Exception('Unknown route');
@@ -97,7 +97,7 @@ class PersonalDataManagerAction
 
             exit;
         }
-    } // TODO : missing return ??
+    }
 
     /**
      * @throws AccessDeniedException

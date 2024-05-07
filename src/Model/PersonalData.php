@@ -16,10 +16,13 @@ namespace WEM\PersonalDataManagerBundle\Model;
 
 use Contao\Model\Collection;
 use Exception;
+use WEM\PersonalDataManagerBundle\Model\Traits\PersonalDataTrait;
 use WEM\UtilsBundle\Model\Model;
 
 class PersonalData extends Model
 {
+    use PersonalDataTrait;
+
     public const DELETED = 'deleted';
 
     /**

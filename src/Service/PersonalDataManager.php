@@ -504,8 +504,8 @@ class PersonalDataManager
         }
 
         // here we should anonymize the file if pdm linked to one
-        if ($objFile instanceof File) { //TODO : TL_ROOT exist ?
-            $objFileDeletedTplContent = file_get_contents(TL_ROOT.'/public/bundles/wempersonaldatamanager/images/file_deleted.jpg');
+        if ($objFile instanceof File) {
+            $objFileDeletedTplContent = file_get_contents(System::getContainer()->getParameter('kernel.project_dir') . '/public/bundles/wempersonaldatamanager/images/file_deleted.jpg');
 
             $objFile->write($objFileDeletedTplContent);
             $objFile->renameTo(str_replace($objFile->name, sprintf('file_deleted_%s.jpg', time()), $objFile->path));

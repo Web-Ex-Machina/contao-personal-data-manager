@@ -388,7 +388,7 @@ trait PersonalDataTrait
         if (is_a($obj, Collection::class)) {
             $detached = false;
             while ($obj->next()) {
-                if (!$obj->current() instanceof PersonalDataTrait) {
+                if (!$obj->current() instanceof self::class) {
                     $obj->current()->detach(false);
                     $detached = true;
                 }

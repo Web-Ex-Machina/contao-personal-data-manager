@@ -16,7 +16,6 @@ namespace WEM\PersonalDataManagerBundle\Dca\Field\Callback;
 
 use Contao\DataContainer;
 use Contao\FrontendUser;
-use Contao\Model;
 use Contao\ModulePersonalData;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
 use function func_get_args;
@@ -58,46 +57,31 @@ class Save
     public function invokeBackend($value, DataContainer $dc)
     {
         return $value;
-        // TODO : dead code ??
-        if (!$dc->id) {
-            return $value;
-        }
-
-        $returnValue = $value;
-
-        $modelClassName = Model::getClassFromTable($dc->table);
-        $model = new $modelClassName();
-        $model->setRow($dc->activeRecord->row());
-
-        if (empty($model->getPersonalDataEmailFieldValue())) {
-            return $value;
-        }
-
-        $pdm = $this->personalDataManager->insertOrUpdateForPidAndPtableAndEmailAndField(
-            $model->getPersonalDataPidFieldValue(),
-            $model->getPersonalDataPtable(),
-            $model->getPersonalDataEmailFieldValue(),
-            $dc->inputName,
-            $value
-        );
-
-        $returnValue = $pdm->value;
-
-        // \WEM\SmartgearBundle\Classes\Util::log('=====');
-        // \WEM\SmartgearBundle\Classes\Util::log('invokeBackend');
-        // \WEM\SmartgearBundle\Classes\Util::log(print_r($dc->activeRecord->row(), true));
-
-        // // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataPidFieldValue());
-        // // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataPtable());
-        // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataEmailField());
-        // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataEmailFieldValue());
-
-        // \WEM\SmartgearBundle\Classes\Util::log($dc->inputName);
-        // \WEM\SmartgearBundle\Classes\Util::log($value);
-        // \WEM\SmartgearBundle\Classes\Util::log($pdm->value);
-        // \WEM\SmartgearBundle\Classes\Util::log($model->getPersonalDataFieldsDefaultValueForField($dc->inputName));
-
-        return $model->getPersonalDataFieldsDefaultValueForField($dc->inputName);
+//      commented 7 may 2024  all the other code are already commented from 2022
+//        if (!$dc->id) {
+//            return $value;
+//        }
+//
+//        $returnValue = $value;
+//
+//        $modelClassName = Model::getClassFromTable($dc->table);
+//        $model = new $modelClassName();
+//        $model->setRow($dc->activeRecord->row());
+//
+//        if (empty($model->getPersonalDataEmailFieldValue())) {
+//            return $value;
+//        }
+//
+//        $pdm = $this->personalDataManager->insertOrUpdateForPidAndPtableAndEmailAndField(
+//            $model->getPersonalDataPidFieldValue(),
+//            $model->getPersonalDataPtable(),
+//            $model->getPersonalDataEmailFieldValue(),
+//            $dc->inputName,
+//            $value
+//        );
+//
+//        $returnValue = $pdm->value;
+//        return $model->getPersonalDataFieldsDefaultValueForField($dc->inputName);
     }
 
     public function invokeFrontend($value, FrontendUser $user, ModulePersonalData $module)

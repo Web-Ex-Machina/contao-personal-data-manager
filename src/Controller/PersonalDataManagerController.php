@@ -16,7 +16,6 @@ namespace WEM\PersonalDataManagerBundle\Controller;
 
 use Contao\BackendTemplate;
 use Contao\Controller;
-use Contao\DataContainer;
 use Contao\Environment;
 use Contao\Input;
 use Contao\System;
@@ -41,9 +40,9 @@ class PersonalDataManagerController extends Controller
 
     protected User $user;
 
-    public function __construct( // TODO : Missing parent call ?
-        ?DataContainer $dc // TODO : useless var ?
+    public function __construct(
     ) {
+        parent::__construct();
         $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/pdm.css';
         $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/wempersonaldatamanager/js/pdm-modal.js';
         $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/pdm-modal.css';

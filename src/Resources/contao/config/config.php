@@ -12,26 +12,32 @@ declare(strict_types=1);
  * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
 
+use WEM\PersonalDataManagerBundle\Controller\PersonalDataManagerController;
+use WEM\PersonalDataManagerBundle\Model\PersonalData;
+use WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken;
+use WEM\PersonalDataManagerBundle\Module\PersonalDataManager;
+
 // Load icon in Contao 4.2 backend
-if ('BE' === TL_MODE) {
+
+if (defined('TL_MODE') && 'BE' === TL_MODE) {
     $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/backend.css';
 }
 
-array_insert($GLOBALS['BE_MOD']['wem_pdm'], 0, [
+Contao\ArrayUtil::arrayInsert($GLOBALS['BE_MOD']['wem_pdm'], 0, [
     'wem-personal-data-manager' => [
-        'callback' => \WEM\PersonalDataManagerBundle\Controller\PersonalDataManagerController::class,
+        'callback' => PersonalDataManagerController::class,
     ],
 ]);
 
-$GLOBALS['TL_MODELS'][\WEM\PersonalDataManagerBundle\Model\PersonalData::getTable()] = \WEM\PersonalDataManagerBundle\Model\PersonalData::class;
-$GLOBALS['TL_MODELS'][\WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken::getTable()] = \WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken::class;
+$GLOBALS['TL_MODELS'][PersonalData::getTable()] = PersonalData::class;
+$GLOBALS['TL_MODELS'][PersonalDataAccessToken::getTable()] = PersonalDataAccessToken::class;
 
 /*
  * Frontend modules
  */
-array_insert($GLOBALS['FE_MOD'], 2, [
+Contao\ArrayUtil::arrayInsert($GLOBALS['FE_MOD'], 2, [
     'wem-personal-data-manager' => [
-        'wem_personaldatamanager' => \WEM\PersonalDataManagerBundle\Module\PersonalDataManager::class,
+        'wem_personaldatamanager' => PersonalDataManager::class,
     ],
 ]);
 
