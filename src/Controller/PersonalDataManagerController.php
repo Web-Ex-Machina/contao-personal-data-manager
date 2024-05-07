@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace WEM\PersonalDataManagerBundle\Controller;
 
-use Contao\Ajax;
 use Contao\BackendTemplate;
 use Contao\Controller;
 use Contao\DataContainer;
@@ -22,10 +21,11 @@ use Contao\Environment;
 use Contao\Input;
 use Contao\RequestToken;
 use Contao\System;
-// use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Terminal42\ServiceAnnotationBundle\Annotation\ServiceTag;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi;
+
+// use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("%contao.backend.route_prefix%/wem-personal-data-manager",
@@ -42,6 +42,7 @@ class PersonalDataManagerController extends Controller
      * @var string
      */
     protected $strTemplate = 'be_wem_personal_data_manager';
+
     protected $user;
 
     public function __construct(
@@ -52,7 +53,7 @@ class PersonalDataManagerController extends Controller
         $GLOBALS['TL_CSS'][] = 'bundles/wempersonaldatamanager/css/pdm-modal.css';
     }
 
-    public function generate()
+    public function generate(): string
     {
         // Handle ajax request
         if (Input::post('TL_WEM_AJAX')) {

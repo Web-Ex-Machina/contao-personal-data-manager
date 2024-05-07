@@ -16,21 +16,24 @@ namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\FrontendTemplate;
 use Contao\Model;
+use Contao\System;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Model\PersonalData;
+use function array_key_exists;
+use function is_array;
 
 class PersonalDataManagerUiFormatter
 {
     /** @var TranslatorInterface */
     private $translator;
+
     /** @var string */
-    private $url;
+    private $url = '#';
 
     public function __construct(
         TranslatorInterface $translator
     ) {
         $this->translator = $translator;
-        $this->url = '#'; //;
     }
 
     public function getUrl(): ?string
@@ -47,7 +50,6 @@ class PersonalDataManagerUiFormatter
 
     public function renderListButtons(string $email, int $nbRows): string
     {
-        $str = '';
         $tpl = new FrontendTemplate('wem_personal_data_manager_list_buttons');
         $tpl->email = $email;
         $tpl->anonymize = 0 === $nbRows ? '' : $this->renderListButtonAnonymize($email);
@@ -171,6 +173,7 @@ class PersonalDataManagerUiFormatter
         foreach ($row as $field => $value) {
             $items[] = $this->renderSingleItemBodyOriginalModelSingle($pid, $ptable, $field, $value, $personalDatas, $originalModel);
         }
+
         $tpl->items = $items;
 
         return $tpl->parse();
@@ -208,6 +211,7 @@ class PersonalDataManagerUiFormatter
         foreach ($personalDatas as $personalData) {
             $items[] = $this->renderSingleItemBodyPersonalDataSingle($pid, $ptable, $personalData, $personalDatas, $originalModel);
         }
+
         $tpl->items = $items;
 
         return $tpl->parse();
@@ -259,8 +263,8 @@ class PersonalDataManagerUiFormatter
 
     public function getFieldLabelTranslated(string $ptable, string $field): string
     {
-        if (\array_key_exists($field, $GLOBALS['TL_LANG'][$ptable])) {
-            if (\is_array($GLOBALS['TL_LANG'][$ptable][$field])) {
+        if (array_key_exists($field, $GLOBALS['TL_LANG'][$ptable])) {
+            if (is_array($GLOBALS['TL_LANG'][$ptable][$field])) {
                 return $this->translator->trans(sprintf('%s.%s', $ptable, $field).'.0', [], 'contao_default') ?? $field;
             }
 
@@ -272,7 +276,7 @@ class PersonalDataManagerUiFormatter
 
     protected function unencrypt($value)
     {
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+        $encryptionService = System::getContainer()->get('plenta.encryption');
 
         return $encryptionService->decrypt($value);
     }

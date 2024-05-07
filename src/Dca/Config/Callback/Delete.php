@@ -16,22 +16,28 @@ namespace WEM\PersonalDataManagerBundle\Dca\Config\Callback;
 
 use Contao\DataContainer;
 use Contao\Model;
+use Exception;
+use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
 
 class Delete
 {
-    protected $personalDataManager;
+    protected PersonalDataManager $personalDataManager;
 
     public function __construct(
-        \WEM\PersonalDataManagerBundle\Service\PersonalDataManager $personalDataManager
+        PersonalDataManager $personalDataManager
     ) {
         $this->personalDataManager = $personalDataManager;
     }
 
+    /**
+     * @throws Exception
+     */
     public function __invoke(DataContainer $dc, int $undoId): void
     {
         if (!$dc->id) {
             return;
         }
+
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
 

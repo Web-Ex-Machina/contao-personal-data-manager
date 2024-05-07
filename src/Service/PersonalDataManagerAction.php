@@ -14,23 +14,28 @@ declare(strict_types=1);
 
 namespace WEM\PersonalDataManagerBundle\Service;
 
+use Contao\BackendUser;
+use Contao\FrontendUser;
 use Contao\Input;
 use Contao\Request;
 use Contao\RequestToken;
+use Contao\User;
 use Exception;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Exception\AccessDeniedException;
 
+//deprecated
+
 class PersonalDataManagerAction
 {
-    /** @var TranslatorInterface */
-    private $translator;
-    /** @var PersonalDataManager */
-    private $manager;
-    /** @var \Contao\User */
-    private $user;
+
+    private TranslatorInterface $translator;
+
+    private PersonalDataManager $manager;
+
+    private User $user;
 
     public function __construct(
         TranslatorInterface $translator,
@@ -45,7 +50,7 @@ class PersonalDataManagerAction
      *
      * @return string - Ajax response, as String or JSON
      */
-    public function processAjaxRequest()
+    public function processAjaxRequest(): string
     {
         $returnHttpCode = 200;
         // Catch AJAX Requests
@@ -94,8 +99,11 @@ class PersonalDataManagerAction
 
             exit;
         }
-    }
+    } // TODO : missing return ??
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function anonymizeSinglePersonalData(): array
     {
         if (empty(Input::post('pid'))) {
@@ -113,6 +121,7 @@ class PersonalDataManagerAction
         if (empty(Input::post('field'))) {
             throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.fieldEmpty', [], 'contao_default'));
         }
+
         $this->checkAccess();
 
         $anonymizeValue = $this->manager->anonymizeByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
@@ -124,6 +133,9 @@ class PersonalDataManagerAction
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function anonymizeSingleItem(): array
     {
         if (empty(Input::post('pid'))) {
@@ -149,6 +161,9 @@ class PersonalDataManagerAction
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function anonymizeAllPersonalData(): array
     {
         if (empty(Input::post('email'))) {
@@ -166,6 +181,9 @@ class PersonalDataManagerAction
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function exportSingleItem(): void
     {
         if (empty(Input::post('pid'))) {
@@ -193,6 +211,9 @@ class PersonalDataManagerAction
         exit();
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function exportAllPersonalData(): void
     {
         if (empty(Input::post('email'))) {
@@ -212,6 +233,9 @@ class PersonalDataManagerAction
         exit();
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function showSingleItem(): array
     {
         if (empty(Input::post('pid'))) {
@@ -241,6 +265,9 @@ class PersonalDataManagerAction
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function showFileSinglePersonalData(): array
     {
         if (empty(Input::post('pid'))) {
@@ -277,6 +304,9 @@ class PersonalDataManagerAction
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function downloadFileSinglePersonalData(): void
     {
         if (empty(Input::post('pid'))) {
@@ -315,13 +345,13 @@ class PersonalDataManagerAction
 
     protected function checkAccess(): void
     {
-        $this->user = \Contao\BackendUser::getInstance();
+        $this->user = BackendUser::getInstance();
 
         if ($this->user->isAdmin) {
             return;
         }
 
-        $this->user = \Contao\FrontendUser::getInstance();
+        $this->user = FrontendUser::getInstance();
         // if (!$this->user->id) {
         //     throw new AccessDeniedException($this->translator->trans('WEM.PEDAMA.DEFAULT.accessDenied',[],'contao_default'));
         // }
@@ -329,6 +359,7 @@ class PersonalDataManagerAction
             $this->manager->clearTokenInSession();
             throw new AccessDeniedException($this->translator->trans('WEM.PEDAMA.DEFAULT.accessDenied', [], 'contao_default'));
         }
+
         $this->manager->updateTokenExpiration($this->manager->getTokenInSession());
     }
 }

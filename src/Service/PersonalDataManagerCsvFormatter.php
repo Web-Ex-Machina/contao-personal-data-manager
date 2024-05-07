@@ -18,6 +18,7 @@ use Contao\Model\Collection;
 use Contao\System;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
+use function is_array;
 
 class PersonalDataManagerCsvFormatter
 {
@@ -48,7 +49,7 @@ class PersonalDataManagerCsvFormatter
             $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymized', [], 'contao_default'),
         ];
 
-        if (isset($GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport']) && \is_array($GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport']) && is_array($GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport'])) {
             foreach ($GLOBALS['WEM_HOOKS']['formatHeaderForCsvExport'] as $callback) {
                 $row = System::importStatic($callback[0])->{$callback[1]}($row);
             }
@@ -60,7 +61,7 @@ class PersonalDataManagerCsvFormatter
     protected function formatAll(?Collection $personalData, array $header): array
     {
         $csv = [];
-        if ($personalData) {
+        if ($personalData instanceof Collection) {
             while ($personalData->next()) {
                 $row = $this->formatSingle($personalData->current(), $header);
                 $csv[] = implode(';', $row);
@@ -72,7 +73,7 @@ class PersonalDataManagerCsvFormatter
 
     protected function formatSingle(PersonalDataModel $personalData, array $header): array
     {
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+        $encryptionService = System::getContainer()->get('plenta.encryption');
         $row = [
             $personalData->ptable,
             $personalData->email,
@@ -80,7 +81,7 @@ class PersonalDataManagerCsvFormatter
             $personalData->anonymized ? $personalData->value : '"'.$encryptionService->decrypt($personalData->value).'"',
             $personalData->anonymized ? $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymizedValueYes', [], 'contao_default') : $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymizedValueNo', [], 'contao_default'),
         ];
-        if (isset($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport']) && \is_array($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport']) && is_array($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'])) {
             foreach ($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'] as $callback) {
                 $row = System::importStatic($callback[0])->{$callback[1]}($personalData, $header, $row);
             }

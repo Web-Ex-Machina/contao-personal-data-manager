@@ -21,7 +21,8 @@
         "php": "^7.4 || ^8.2",
         "contao/core-bundle": "^4.13 || ^5.0",
         "webexmachina/contao-utils": "^1.0 || dev-php-8-2-preparation",
-        "plenta/contao-encryption": "^2.1 || dev-master"
+        "plenta/contao-encryption": "^2.1 || dev-master",
+        "ext-zip": "*"
     },
     "require-dev":
     {

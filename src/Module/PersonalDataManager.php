@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace WEM\PersonalDataManagerBundle\Module;
 
 use Contao\BackendTemplate;
+use Contao\Email;
 use Contao\Environment;
 use Contao\Input;
 use Contao\Message;
@@ -24,6 +25,8 @@ use Contao\RequestToken;
 use Contao\StringUtil;
 use Contao\System;
 use Exception;
+
+//deprecated
 
 class PersonalDataManager extends Module
 {
@@ -39,7 +42,7 @@ class PersonalDataManager extends Module
      *
      * @return string
      */
-    public function generate()
+    public function generate(): string
     {
         $request = System::getContainer()->get('request_stack')->getCurrentRequest();
 
@@ -54,9 +57,7 @@ class PersonalDataManager extends Module
             return $objTemplate->parse();
         }
 
-        $strBuffer = parent::generate();
-
-        return $strBuffer;
+        return parent::generate();
     }
 
     /**
@@ -86,7 +87,7 @@ class PersonalDataManager extends Module
             // send email
             $html = file_get_contents('bundles/wempersonaldatamanager/email/'.($objPage->language ?? 'fr').'/email.html5');
             $html = str_replace('[[url]]', $objPage->getAbsoluteUrl().'?pdm_token='.$obj->token, $html);
-            $email = new \Contao\Email();
+            $email = new Email();
             $email->subject = $GLOBALS['TL_LANG']['WEM']['PEDAMA']['EMAIL']['subject'];
             $email->html = $html;
             try {
@@ -137,6 +138,7 @@ class PersonalDataManager extends Module
     {
         $pdmUi = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager_ui');
         $pdmUi->setUrl(Environment::get('request'));
+
         $this->Template->content = $pdmUi->listForEmail($email);
     }
 }

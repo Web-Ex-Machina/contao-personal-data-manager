@@ -14,15 +14,16 @@ declare(strict_types=1);
 
 namespace WEM\PersonalDataManagerBundle\Model;
 
+use Contao\Model\Collection;
+use Exception;
 use WEM\UtilsBundle\Model\Model;
 
 class PersonalData extends Model
 {
     public const DELETED = 'deleted';
+
     /**
      * Table name.
-     *
-     * @var string
      */
     protected static $strTable = 'tl_wem_personal_data';
 
@@ -31,9 +32,10 @@ class PersonalData extends Model
      *
      * @param string $ptable The ptable
      *
-     * @return \Contao\Collection|null
+     * @return Collection|null
+     * @throws Exception
      */
-    public static function findByPtable(string $ptable)
+    public static function findByPtable(string $ptable): ?Collection
     {
         return static::findItems(['ptable' => $ptable]);
     }
@@ -41,12 +43,13 @@ class PersonalData extends Model
     /**
      * Find records by pid and ptable.
      *
-     * @param int    $pid    The pid
+     * @param int $pid The pid
      * @param string $ptable The ptable
      *
-     * @return \Contao\Collection|null
+     * @return Collection|null
+     * @throws Exception
      */
-    public static function findByPidAndPtable(int $pid, string $ptable)
+    public static function findByPidAndPtable(int $pid, string $ptable): ?Collection
     {
         return static::findItems(['pid' => $pid, 'ptable' => $ptable]);
     }
@@ -54,13 +57,14 @@ class PersonalData extends Model
     /**
      * Find record by pid, ptable and field.
      *
-     * @param int    $pid    The pid
+     * @param int $pid The pid
      * @param string $ptable The ptable
-     * @param string $field  The field
+     * @param string $field The field
      *
-     * @return self|null
+     * @return Collection|null
+     * @throws Exception
      */
-    public static function findOneByPidAndPtableAndField(int $pid, string $ptable, string $field)
+    public static function findOneByPidAndPtableAndField(int $pid, string $ptable, string $field): ?Collection
     {
         return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'field' => $field], 1);
     }
@@ -68,13 +72,14 @@ class PersonalData extends Model
     /**
      * Find records by pid, ptable and email.
      *
-     * @param int    $pid    The pid
+     * @param int $pid The pid
      * @param string $ptable The ptable
-     * @param string $email  The email
+     * @param string $email The email
      *
-     * @return \Contao\Model\Collection|null
+     * @return Collection|null
+     * @throws Exception
      */
-    public static function findByPidAndPtableAndEmail(int $pid, string $ptable, string $email)
+    public static function findByPidAndPtableAndEmail(int $pid, string $ptable, string $email): ?Collection
     {
         return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email]);
     }
@@ -82,47 +87,50 @@ class PersonalData extends Model
     /**
      * Find one record by pid, ptable and email.
      *
-     * @param int    $pid    The pid
+     * @param int $pid The pid
      * @param string $ptable The ptable
-     * @param string $email  The email
+     * @param string $email The email
      *
-     * @return self|null
+     * @return \Contao\Model|null
+     * @throws Exception
      */
-    public static function findOneByPidAndPtableAndEmail(int $pid, string $ptable, string $email)
+    public static function findOneByPidAndPtableAndEmail(int $pid, string $ptable, string $email): ?\Contao\Model
     {
         $collection = static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email], 1);
 
-        return !$collection ? null : $collection->current();
+        return $collection ? $collection->current() : null;
     }
 
     /**
      * Find record by pid, ptable and field.
      *
-     * @param int    $pid    The pid
+     * @param int $pid The pid
      * @param string $ptable The ptable
-     * @param string $email  The email
-     * @param string $field  The field
+     * @param string $email The email
+     * @param string $field The field
      *
-     * @return self|null
+     * @return \Contao\Model|null
+     * @throws Exception
      */
-    public static function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field)
+    public static function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?\Contao\Model
     {
         $collection = static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email, 'field' => $field], 1);
 
-        return !$collection ? null : $collection->current();
+        return $collection ? $collection->current() : null;
     }
 
     /**
      * Find records by email.
      *
-     * @param string     $email   The email
-     * @param int|null   $limit   The limit
-     * @param int|null   $offset  The offset
+     * @param string $email The email
+     * @param int|null $limit The limit
+     * @param int|null $offset The offset
      * @param array|null $options The options
      *
-     * @return \Contao\Collection|null
+     * @return Collection|null
+     * @throws Exception
      */
-    public static function findByEmail(string $email, ?int $limit = 0, ?int $offset = 0, ?array $options = [])
+    public static function findByEmail(string $email, ?int $limit = 0, ?int $offset = 0, ?array $options = []): ?Collection
     {
         return static::findItems(['email' => $email], $limit, $offset, $options);
     }
@@ -133,6 +141,7 @@ class PersonalData extends Model
      * @param string $ptable The ptable
      *
      * @return array The array of deleted ids
+     * @throws Exception
      */
     public static function deleteByPtable(string $ptable): array
     {
@@ -151,10 +160,11 @@ class PersonalData extends Model
     /**
      * Delete rows by pid and ptable.
      *
-     * @param int    $pid    The pid
+     * @param int $pid The pid
      * @param string $ptable The ptable
      *
      * @return array The array of deleted ids
+     * @throws Exception
      */
     public static function deleteByPidAndPtable(int $pid, string $ptable): array
     {
@@ -176,6 +186,7 @@ class PersonalData extends Model
      * @param string $email The email
      *
      * @return array The array of deleted ids
+     * @throws Exception
      */
     public static function deleteByEmail(string $email): array
     {
@@ -194,11 +205,12 @@ class PersonalData extends Model
     /**
      * Delete rows by pid, ptable and email.
      *
-     * @param int    $pid    The pid
+     * @param int $pid The pid
      * @param string $ptable The ptable
-     * @param string $email  The email
+     * @param string $email The email
      *
      * @return array The array of deleted ids
+     * @throws Exception
      */
     public static function deleteByPidAndPtableAndEmail(int $pid, string $ptable, string $email): array
     {
@@ -217,12 +229,13 @@ class PersonalData extends Model
     /**
      * Delete rows by pid, ptable and email.
      *
-     * @param int    $pid    The pid
+     * @param int $pid The pid
      * @param string $ptable The ptable
-     * @param string $email  The email
-     * @param string $field  The field
+     * @param string $email The email
+     * @param string $field The field
      *
      * @return array The array of deleted ids
+     * @throws Exception
      */
     public static function deleteByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): array
     {

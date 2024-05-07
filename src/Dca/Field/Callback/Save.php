@@ -15,17 +15,23 @@ declare(strict_types=1);
 namespace WEM\PersonalDataManagerBundle\Dca\Field\Callback;
 
 use Contao\DataContainer;
+use Contao\FrontendUser;
 use Contao\Model;
+use Contao\ModulePersonalData;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
+use function func_get_args;
+use function func_num_args;
 
 class Save
 {
     /** @var PersonalDataManager */
-    protected $personalDataManager;
+    protected PersonalDataManager $personalDataManager;
+
     /** @var string */
-    protected $frontendField;
+    protected string $frontendField;
+
     /** @var string */
-    protected $table;
+    protected string $table;
 
     public function __construct(
         PersonalDataManager $personalDataManager,
@@ -39,21 +45,23 @@ class Save
 
     public function __invoke()
     {
-        if (1 === \func_num_args()
-        || (2 === \func_num_args() && null === func_get_arg(1))
+        if (1 === func_num_args()
+        || (2 === func_num_args() && null === func_get_arg(1))
         ) {
-            return $this->invokeFrontendRegistration(...\func_get_args());
-        }
-        if (2 === \func_num_args()) {
-            return $this->invokeBackend(...\func_get_args());
+            return $this->invokeFrontendRegistration(...func_get_args());
         }
 
-        return $this->invokeFrontend(...\func_get_args());
+        if (2 === func_num_args()) {
+            return $this->invokeBackend(...func_get_args());
+        }
+
+        return $this->invokeFrontend(...func_get_args());
     }
 
     public function invokeBackend($value, DataContainer $dc)
     {
         return $value;
+        // todo : dead code ??
         if (!$dc->id) {
             return $value;
         }
@@ -95,7 +103,7 @@ class Save
         return $model->getPersonalDataFieldsDefaultValueForField($dc->inputName);
     }
 
-    public function invokeFrontend($value, \Contao\FrontendUser $user, \Contao\ModulePersonalData $module)
+    public function invokeFrontend($value, FrontendUser $user, ModulePersonalData $module)
     {
         // the model's postSave method will handle this
         return $value;

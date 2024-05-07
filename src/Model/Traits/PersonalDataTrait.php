@@ -24,12 +24,16 @@ namespace WEM\PersonalDataManagerBundle\Model\Traits;
  *
  * @see     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
+
 use Contao\Database\Result;
 use Contao\Model;
+use Contao\Model\Collection;
+use Contao\System;
+use function in_array;
 
 trait PersonalDataTrait
 {
-    protected static $personalDataFieldsValues = [];
+    protected static array $personalDataFieldsValues = [];
 
     public function shouldManagePersonalData(): bool
     {
@@ -45,7 +49,7 @@ trait PersonalDataTrait
     {
         // delete associated personal data
         if ($this->shouldManagePersonalData()) {
-            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
             $manager->deleteByPidAndPtable(
                 (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable()
@@ -73,8 +77,8 @@ trait PersonalDataTrait
     {
         if ($this->shouldManagePersonalData()) {
             // re-find personal data
-            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-            $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $encryptionService = System::getContainer()->get('plenta.encryption');
 
             $personalDatas = $manager->findByPidAndPtable(
                 (int) $this->getPersonalDataPidFieldValue(),
@@ -96,7 +100,7 @@ trait PersonalDataTrait
     {
         if ($this->shouldManagePersonalData()) {
             // re-find personal data
-            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
             $manager->anonymizeByPidAndPtableAndEmail(
                 (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable(),
@@ -133,7 +137,7 @@ trait PersonalDataTrait
 
     public function isFieldInPersonalDataFieldsNames(string $field): bool
     {
-        return \in_array($field, $this->getPersonalDataFieldsNames(), true);
+        return in_array($field, $this->getPersonalDataFieldsNames(), true);
     }
 
     public function getPersonalDataPidField(): string
@@ -158,7 +162,7 @@ trait PersonalDataTrait
 
     public function getPersonalDataEmailFieldValue(): string
     {
-        return null !== $this->{$this->getPersonalDataEmailField()} ? $this->{$this->getPersonalDataEmailField()} : '';
+        return $this->{$this->getPersonalDataEmailField()} ?? '';
     }
 
     /**
@@ -169,13 +173,14 @@ trait PersonalDataTrait
      *
      * @return static The model or null if the result is empty
      */
-    public static function findByPk($varValue, array $arrOptions = [])
+    public static function findByPk($varValue, array $arrOptions = []): PersonalDataTrait
     {
         $obj = parent::findByPk($varValue, $arrOptions);
 
         if (!$obj) {
             return $obj;
         }
+
         if (!is_a($obj, self::class)) {
             $obj->detach(false);
 
@@ -193,13 +198,14 @@ trait PersonalDataTrait
      *
      * @return static The model or null if the result is empty
      */
-    public static function findByIdOrAlias($varId, array $arrOptions = [])
+    public static function findByIdOrAlias($varId, array $arrOptions = []): PersonalDataTrait
     {
         $obj = parent::findByIdOrAlias($varId, $arrOptions);
 
         if (!$obj) {
             return $obj;
         }
+
         if (!is_a($obj, self::class)) {
             $obj->detach(false);
 
@@ -217,7 +223,7 @@ trait PersonalDataTrait
      *
      * @return Collection|null The model collection or null if there are no records
      */
-    public static function findMultipleByIds($arrIds, array $arrOptions = [])
+    public static function findMultipleByIds(array $arrIds, array $arrOptions = []): ?Collection
     {
         $obj = parent::findMultipleByIds($arrIds, $arrOptions);
         if ($obj) {
@@ -232,6 +238,7 @@ trait PersonalDataTrait
             if ($detached) {
                 return static::findMultipleByIds($arrIds, $arrOptions);
             }
+
             $obj->reset();
         }
 
@@ -245,7 +252,7 @@ trait PersonalDataTrait
      *
      * @return static The model
      */
-    protected static function createModelFromDbResult(Result $objResult)
+    protected static function createModelFromDbResult(Result $objResult): PersonalDataTrait
     {
         $model = parent::createModelFromDbResult($objResult);
 
@@ -264,7 +271,7 @@ trait PersonalDataTrait
      *
      * @return Collection The Collection object
      */
-    protected static function createCollection(array $arrModels, $strTable)
+    protected static function createCollection(array $arrModels, string $strTable): Collection
     {
         $collection = parent::createCollection($arrModels, $strTable);
         while ($collection->next()) {
@@ -284,7 +291,7 @@ trait PersonalDataTrait
      *
      * @return Collection The model collection
      */
-    protected static function createCollectionFromDbResult(Result $objResult, $strTable)
+    protected static function createCollectionFromDbResult(Result $objResult, string $strTable): Collection
     {
         $collection = parent::createCollectionFromDbResult($objResult, $strTable);
 
@@ -331,10 +338,10 @@ trait PersonalDataTrait
      *
      * @param int $intType The query type (Model::INSERT or Model::UPDATE)
      */
-    protected function postSave($intType): void
+    protected function postSave(int $intType): void
     {
         if ($this->shouldManagePersonalData()) {
-            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
 
             $manager->insertOrUpdateForPidAndPtableAndEmail(
                 (int) $this->getPersonalDataPidFieldValue(),
@@ -344,6 +351,7 @@ trait PersonalDataTrait
             );
             self::$personalDataFieldsValues = [];
         }
+
         parent::postSave($intType);
     }
 
@@ -370,22 +378,26 @@ trait PersonalDataTrait
         if (!$obj) {
             return $obj;
         }
-        if (!is_a($obj, self::class) && !is_a($obj, \Contao\Model\Collection::class)) {
+
+        if (!is_a($obj, self::class) && !is_a($obj, Collection::class)) {
             $obj->detach(false);
 
             return static::find($arrOptions);
         }
-        if (is_a($obj, \Contao\Model\Collection::class)) {
+
+        if (is_a($obj, Collection::class)) {
             $detached = false;
             while ($obj->next()) {
-                if (!is_a($obj->current(), self::class)) {
+                if (!$obj->current() instanceof PersonalDataTrait) {
                     $obj->current()->detach(false);
                     $detached = true;
                 }
             }
+
             if ($detached) {
                 return static::find($arrOptions);
             }
+
             $obj->reset();
         }
 

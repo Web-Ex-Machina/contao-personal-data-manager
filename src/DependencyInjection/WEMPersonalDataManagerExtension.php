@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace WEM\PersonalDataManagerBundle\DependencyInjection;
 
+use Contao\Config;
+use Exception;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -28,6 +30,7 @@ class WEMPersonalDataManagerExtension extends Extension
 {
     /**
      * {@inheritdoc}
+     * @throws Exception
      */
     public function load(array $mergedConfig, ContainerBuilder $container): void
     {
@@ -45,8 +48,9 @@ class WEMPersonalDataManagerExtension extends Extension
             if (file_exists($projectDir.'/system/config/localconfig.php')) {
                 include $projectDir.'/system/config/localconfig.php';
             }
-            if (null !== \Contao\Config::get('wem_pdm_encryption_key')) {
-                $container->setParameter('plenta_contao_encryption.encryption_key', \Contao\Config::get('wem_pdm_encryption_key'));
+
+            if (null !== Config::get('wem_pdm_encryption_key')) {
+                $container->setParameter('plenta_contao_encryption.encryption_key', Config::get('wem_pdm_encryption_key'));
             }
         }
     }
