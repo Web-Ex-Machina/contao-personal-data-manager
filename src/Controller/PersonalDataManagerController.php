@@ -53,7 +53,7 @@ class PersonalDataManagerController extends Controller
     {
         // Handle ajax request
         if (Input::post('TL_WEM_AJAX')) {
-            /** @var PersonalDataManagerUi */
+            /** @var PersonalDataManagerUi $pdmAction */
             $pdmAction = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager_action');
             $pdmAction->processAjaxRequest();
         }
@@ -66,7 +66,7 @@ class PersonalDataManagerController extends Controller
         if (empty($tpl->email)) {
             $tpl->content = $GLOBALS['TL_LANG']['WEM']['PEDAMA']['DEFAULT']['PleaseFillEmail'];
         } else {
-            /** @var PersonalDataManagerUi */
+            /** @var PersonalDataManagerUi $pdmUi */
             $pdmUi = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager_ui');
             $pdmUi->setUrl(System::getContainer()->getParameter('contao.backend.route_prefix').'?do=wem-personal-data-manager');
             $tpl->content = $pdmUi->listForEmail($tpl->email);
