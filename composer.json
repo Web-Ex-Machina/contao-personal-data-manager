@@ -18,10 +18,10 @@
     },
     "require":
     {
-        "php": "^7.4 || ^8.0",
-        "contao/core-bundle": "~4.13",
-        "webexmachina/contao-utils": "^1.0",
-        "plenta/contao-encryption": "^2.1"
+        "php": "^7.4 || ^8.2",
+        "contao/core-bundle": "^4.13 || ^5.0",
+        "webexmachina/contao-utils": "^1.0 || dev-php-8-2-preparation",
+        "plenta/contao-encryption": "^2.1 || dev-master"
     },
     "require-dev":
     {
@@ -30,7 +30,12 @@
         "codeception/module-phpbrowser": "^1.0.0",
         "codeception/module-asserts": "^1.0.0",
         "codeception/module-webdriver": "^2.0",
-        "contao/test-case":"~4"
+        "contao/test-case": "~4",
+        "rector/rector": "^1.0",
+        "contao/manager-plugin": "^2.0"
+    },
+    "conflict": {
+        "contao/manager-plugin": "<2.0 || >=3.0"
     },
     "autoload":
     {
@@ -57,7 +62,8 @@
             "contao-components/installer": true,
             "contao/manager-plugin": true,
             "composer/package-versions-deprecated": true,
-            "contao-community-alliance/composer-plugin": true
+            "contao-community-alliance/composer-plugin": true,
+            "php-http/discovery": true
         }
     }
 }
