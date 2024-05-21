@@ -25,6 +25,7 @@ use Exception;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Classes\FileUtil;
 use WEM\PersonalDataManagerBundle\Model\PersonalData;
+use WEM\UtilsBundle\Classes\Encryption;
 use function array_key_exists;
 use function count;
 use function is_array;
@@ -35,12 +36,16 @@ class PersonalDataManagerUi
 
     private PersonalDataManager $manager;
 
+    private Encryption $encryption;
+
     private string $url = '#';
 
     public function __construct(
         TranslatorInterface $translator,
-        PersonalDataManager $manager
+        PersonalDataManager $manager,
+        Encryption          $encryption
     ) {
+        $this->encryption = $encryption;
         $this->translator = $translator;
         $this->manager = $manager;
     }
@@ -315,7 +320,7 @@ class PersonalDataManagerUi
     public function formatSingleItemBodyPersonalDataSingleFieldValue(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
         // here we could check if the data is linked to a file and display its name
-        return $personalData->anonymized ? ($personalData->value ?? '') : $this->unencrypt($personalData->value);
+        return $personalData->anonymized ? ($personalData->value ?? '') : $this->encryption->decrypt($personalData->value);
     }
 
     public function formatSingleItemBodyPersonalDataSingleButtons(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
@@ -705,10 +710,4 @@ class PersonalDataManagerUi
         return sprintf('%s.%s.0', $ptable, $field);
     }
 
-    protected function unencrypt($value)
-    {
-        $encryptionService = System::getContainer()->get('plenta.encryption');
-
-        return $encryptionService->decrypt($value);
-    }
 }

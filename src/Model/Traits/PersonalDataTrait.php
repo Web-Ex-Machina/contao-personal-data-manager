@@ -29,11 +29,19 @@ use Contao\Database\Result;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\System;
+use WEM\UtilsBundle\Classes\Encryption;
 use function in_array;
 
 trait PersonalDataTrait
 {
     protected static array $personalDataFieldsValues = [];
+
+    protected Encryption $encryption;
+
+    public function __construct(Encryption $encryption)
+    {
+        $this->encryption = $encryption;
+    }
 
     public function shouldManagePersonalData(): bool
     {
@@ -78,7 +86,7 @@ trait PersonalDataTrait
         if ($this->shouldManagePersonalData()) {
             // re-find personal data
             $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-            $encryptionService = System::getContainer()->get('plenta.encryption');
+
 
             $personalDatas = $manager->findByPidAndPtable(
                 (int) $this->getPersonalDataPidFieldValue(),
@@ -87,7 +95,7 @@ trait PersonalDataTrait
 
             if ($personalDatas) {
                 while ($personalDatas->next()) {
-                    $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
+                    $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $this->encryption->decrypt($personalDatas->value);
                 }
             }
         }

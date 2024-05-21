@@ -24,6 +24,7 @@ use InvalidArgumentException;
 use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
 use WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken as PersonalDataAccessTokenModel;
 use WEM\PersonalDataManagerBundle\Model\Traits\PersonalDataTrait;
+use WEM\UtilsBundle\Classes\Encryption;
 use WEM\UtilsBundle\Classes\StringUtil;
 use ZipArchive;
 use function array_key_exists;
@@ -33,10 +34,13 @@ use function is_array;
 class PersonalDataManager
 {
     private PersonalDataManagerCsvFormatter $csvFormatter;
+    private Encryption $encryption;
 
     public function __construct(
-        PersonalDataManagerCsvFormatter $csvFormatter
+        PersonalDataManagerCsvFormatter $csvFormatter,
+        Encryption                      $encryption
     ) {
+        $this->encryption = $encryption;
         $this->csvFormatter = $csvFormatter;
     }
 
@@ -375,9 +379,7 @@ class PersonalDataManager
             return null;
         }
 
-        $encryptionService = System::getContainer()->get('plenta.encryption');
-
-        return $personalData->anonymized ? $personalData->value : $encryptionService->decrypt($personalData->value);
+        return $personalData->anonymized ? $personalData->value : $this->encryption->decrypt($personalData->value);
     }
 
     /**
@@ -409,9 +411,9 @@ class PersonalDataManager
      */
     public function applyPersonalDataTo($object, Collection $personalDatas)
     {
-        $encryptionService = System::getContainer()->get('plenta.encryption');
+
         while ($personalDatas->next()) {
-            $object->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
+            $object->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $this->encryption->decrypt($personalDatas->value);
         }
 
         return $object;
@@ -452,8 +454,8 @@ class PersonalDataManager
      */
     public function insertOrUpdateForPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field, $value): PersonalDataModel
     {
-        $encryptionService = System::getContainer()->get('plenta.encryption');
-        $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field) ?? new PersonalDataModel();
+
+        $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field) ?? new PersonalDataModel($this->encryption);
         $pdm->pid = $pid;
         $pdm->ptable = $ptable;
         $pdm->email = $email;
@@ -462,7 +464,7 @@ class PersonalDataManager
             // if pdm anonymized and values are equals, do nothing
         } else {
             // else, save the value and de-anonymize data
-            $pdm->value = $encryptionService->encrypt($value);
+            $pdm->value = $this->encryption->encrypt($value);
             $pdm->anonymized = '';
             $pdm->anonymizedAt = '';
         }
@@ -479,7 +481,7 @@ class PersonalDataManager
      */
     public function anonymize(PersonalDataModel $personalData): ?string
     {
-        $encryptionService = System::getContainer()->get('plenta.encryption');
+
 
         $originalModel = Model::getClassFromTable($personalData->ptable);
 
@@ -490,7 +492,7 @@ class PersonalDataManager
 
         $obj = new $originalModel();
         $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
-        $value = $encryptionService->decrypt($personalData->value);
+        $value = $this->encryption->decrypt($personalData->value);
         $personalData->value = $anonymizedValue;
 
         $personalData->anonymized = true;
@@ -542,9 +544,7 @@ class PersonalDataManager
             throw new Exception('Personal data not linked to a file');
         }
 
-        $encryptionService = System::getContainer()->get('plenta.encryption');
-
-        $value = $encryptionService->decrypt($pdm->value);
+        $value = $this->encryption->decrypt($pdm->value);
         $objFileModel = null;
 
         if (FilesModel::getTable() === $ptable) {

@@ -16,23 +16,25 @@ namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\FrontendTemplate;
 use Contao\Model;
-use Contao\System;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Model\PersonalData;
+use WEM\UtilsBundle\Classes\Encryption;
 use function array_key_exists;
 use function is_array;
 
 class PersonalDataManagerUiFormatter
 {
     /** @var TranslatorInterface */
-    private $translator;
+    private TranslatorInterface $translator;
 
     /** @var string */
-    private $url = '#';
+    private string $url = '#';
+    private Encryption $encryption;
 
     public function __construct(
-        TranslatorInterface $translator
+        TranslatorInterface $translator, Encryption $encryption
     ) {
+        $this->encryption = $encryption;
         $this->translator = $translator;
     }
 
@@ -276,8 +278,7 @@ class PersonalDataManagerUiFormatter
 
     protected function unencrypt($value)
     {
-        $encryptionService = System::getContainer()->get('plenta.encryption');
 
-        return $encryptionService->decrypt($value);
+        return $this->encryption->decrypt($value);
     }
 }

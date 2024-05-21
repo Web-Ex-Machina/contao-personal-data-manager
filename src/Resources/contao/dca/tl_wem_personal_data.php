@@ -55,10 +55,10 @@ $GLOBALS['TL_DCA']['tl_wem_personal_data'] = [
             'label' => ['value'],
             'sql' => "TEXT NOT NULL DEFAULT ''",
             'load_callback' => [
-                ['plenta.encryption', 'decrypt'],
+                ['wem.encryption', 'decrypt'],
             ],
             'save_callback' => [
-                ['plenta.encryption', 'encrypt'],
+                ['wem.encryption', 'encrypt'],
             ],
         ],
         'createdAt' => [

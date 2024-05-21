@@ -18,16 +18,20 @@ use Contao\Model\Collection;
 use Contao\System;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
+use WEM\UtilsBundle\Classes\Encryption;
 use function is_array;
 
 class PersonalDataManagerCsvFormatter
 {
-    /** @var TranslatorInterface */
-    private $translator;
+    private TranslatorInterface $translator;
+
+    private Encryption $encryption;
 
     public function __construct(
-        TranslatorInterface $translator
+        TranslatorInterface $translator,
+        Encryption          $encryption
     ) {
+        $this->encryption = $encryption;
         $this->translator = $translator;
     }
 
@@ -73,12 +77,12 @@ class PersonalDataManagerCsvFormatter
 
     protected function formatSingle(PersonalDataModel $personalData, array $header): array
     {
-        $encryptionService = System::getContainer()->get('plenta.encryption');
+
         $row = [
             $personalData->ptable,
             $personalData->email,
             $GLOBALS['TL_DCA'][$personalData->ptable]['fields'][$personalData->field]['label'] ?? $personalData->field,
-            $personalData->anonymized ? $personalData->value : '"'.$encryptionService->decrypt($personalData->value).'"',
+            $personalData->anonymized ? $personalData->value : '"' . $this->encryption->decrypt($personalData->value) . '"',
             $personalData->anonymized ? $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymizedValueYes', [], 'contao_default') : $this->translator->trans('WEM.PEDAMA.CSV.columnAnonymizedValueNo', [], 'contao_default'),
         ];
         if (isset($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport']) && is_array($GLOBALS['WEM_HOOKS']['formatSinglePersonalDataForCsvExport'])) {
