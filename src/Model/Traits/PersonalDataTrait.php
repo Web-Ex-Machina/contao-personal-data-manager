@@ -231,7 +231,7 @@ trait PersonalDataTrait
      *
      * @return Collection|null The model collection or null if there are no records
      */
-    public static function findMultipleByIds(array $arrIds, array $arrOptions = []): ?Collection
+    public static function findMultipleByIds($arrIds, array $arrOptions = [])
     {
         $obj = parent::findMultipleByIds($arrIds, $arrOptions);
         if ($obj) {
@@ -279,7 +279,7 @@ trait PersonalDataTrait
      *
      * @return Collection The Collection object
      */
-    protected static function createCollection(array $arrModels, string $strTable): Collection
+    protected static function createCollection(array $arrModels, $strTable)
     {
         $collection = parent::createCollection($arrModels, $strTable);
         while ($collection->next()) {
@@ -299,7 +299,7 @@ trait PersonalDataTrait
      *
      * @return Collection The model collection
      */
-    protected static function createCollectionFromDbResult(Result $objResult, string $strTable): Collection
+    protected static function createCollectionFromDbResult(Result $objResult, $strTable)
     {
         $collection = parent::createCollectionFromDbResult($objResult, $strTable);
 
@@ -319,7 +319,7 @@ trait PersonalDataTrait
      *
      * @return array The modified data array
      */
-    protected function preSave(array $arrSet): array
+    protected function preSave(array $arrSet)
     {
         $arrSet = parent::preSave($arrSet);
 
@@ -346,7 +346,7 @@ trait PersonalDataTrait
      *
      * @param int $intType The query type (Model::INSERT or Model::UPDATE)
      */
-    protected function postSave(int $intType): void
+    protected function postSave($intType)
     {
         if ($this->shouldManagePersonalData()) {
             $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
@@ -396,7 +396,7 @@ trait PersonalDataTrait
         if (is_a($obj, Collection::class)) {
             $detached = false;
             while ($obj->next()) {
-                if (!$obj->current() instanceof PersonalDataTrait::class) {
+                if (!$obj->current() !== null) {
                     $obj->current()->detach(false);
                     $detached = true;
                 }
