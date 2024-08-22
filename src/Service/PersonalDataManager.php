@@ -352,9 +352,8 @@ class PersonalDataManager
         if (!$personalData) {
             return null;
         }
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
-        return $personalData->anonymized ? $personalData->value : $encryptionService->decrypt($personalData->value);
+        return $this->getCleanValue($personalData);
     }
 
     /**
@@ -385,9 +384,8 @@ class PersonalDataManager
      */
     public function applyPersonalDataTo($object, Collection $personalDatas)
     {
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
         while ($personalDatas->next()) {
-            $object->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
+            $object->{$personalDatas->field} = $this->getCleanValue($personalDatas->current());
         }
 
         return $object;
@@ -440,7 +438,7 @@ class PersonalDataManager
                 $value->altered = "serialized";
                 $value = serialize($value);
             }
-            
+
             $pdm->value = $encryptionService->encrypt($value);
             $pdm->anonymized = '';
             $pdm->anonymizedAt = '';
@@ -454,8 +452,6 @@ class PersonalDataManager
 
     public function anonymize(PersonalDataModel $personalData): ?string
     {
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
-
         $originalModel = Model::getClassFromTable($personalData->ptable);
 
         $objFile = null;
@@ -465,7 +461,7 @@ class PersonalDataManager
 
         $obj = new $originalModel();
         $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
-        $value = $encryptionService->decrypt($personalData->value);
+        $value = $this->getCleanValue($personalData);
         $personalData->value = $anonymizedValue;
         $personalData->anonymized = true;
         $personalData->anonymizedAt = time();
@@ -512,9 +508,7 @@ class PersonalDataManager
             throw new Exception('Personal data not linked to a file');
         }
 
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
-
-        $value = $encryptionService->decrypt($pdm->value);
+        $value = $this->getCleanValue($pdm);
         $objFileModel = null;
 
         if (FilesModel::getTable() === $ptable) {
