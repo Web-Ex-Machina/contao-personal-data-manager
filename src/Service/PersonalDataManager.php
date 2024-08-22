@@ -436,6 +436,11 @@ class PersonalDataManager
             // if pdm anonymized and values are equals, do nothing
         } else {
             // else, save the value and de-anonymize data
+            if (is_array($value)) {
+                $value->altered = "serialized";
+                $value = serialize($value);
+            }
+            
             $pdm->value = $encryptionService->encrypt($value);
             $pdm->anonymized = '';
             $pdm->anonymizedAt = '';
