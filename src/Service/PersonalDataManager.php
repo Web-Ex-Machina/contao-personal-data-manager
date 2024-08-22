@@ -642,6 +642,31 @@ class PersonalDataManager
         }
     }
 
+    /**
+     * Return the data decrypted and formated depending
+     * on altered column
+     * 
+     * @param PersonalData $data
+     * 
+     * @return mixed
+     */
+    protected function getCleanValue($data)
+    {
+        if ($data->anonymized) {
+            return $data->value;
+        }
+
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+
+        $value = $encryptionService->decrypt($data->value);
+
+        if ("serialized" === $data->altered) {
+            return unserialize($value);
+        }
+
+        return $value;
+    }
+
     protected function addAllLinkedFilesToZipArchive(ZipArchive $zip, $pdms): ZipArchive
     {
         $pdms->reset();
