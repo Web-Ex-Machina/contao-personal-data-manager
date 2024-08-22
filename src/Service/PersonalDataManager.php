@@ -435,7 +435,7 @@ class PersonalDataManager
         } else {
             // else, save the value and de-anonymize data
             if (is_array($value)) {
-                $value->altered = "serialized";
+                $pdm->altered = "serialized";
                 $value = serialize($value);
             }
 
