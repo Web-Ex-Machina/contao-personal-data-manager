@@ -352,9 +352,8 @@ class PersonalDataManager
         if (!$personalData) {
             return null;
         }
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
 
-        return $personalData->anonymized ? $personalData->value : $encryptionService->decrypt($personalData->value);
+        return $this->getCleanValue($personalData);
     }
 
     /**
@@ -385,9 +384,8 @@ class PersonalDataManager
      */
     public function applyPersonalDataTo($object, Collection $personalDatas)
     {
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
         while ($personalDatas->next()) {
-            $object->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
+            $object->{$personalDatas->field} = $this->getCleanValue($personalDatas->current());
         }
 
         return $object;
@@ -436,6 +434,11 @@ class PersonalDataManager
             // if pdm anonymized and values are equals, do nothing
         } else {
             // else, save the value and de-anonymize data
+            if (is_array($value)) {
+                $pdm->altered = "serialized";
+                $value = serialize($value);
+            }
+
             $pdm->value = $encryptionService->encrypt($value);
             $pdm->anonymized = '';
             $pdm->anonymizedAt = '';
@@ -449,8 +452,6 @@ class PersonalDataManager
 
     public function anonymize(PersonalDataModel $personalData): ?string
     {
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
-
         $originalModel = Model::getClassFromTable($personalData->ptable);
 
         $objFile = null;
@@ -460,7 +461,7 @@ class PersonalDataManager
 
         $obj = new $originalModel();
         $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
-        $value = $encryptionService->decrypt($personalData->value);
+        $value = $this->getCleanValue($personalData);
         $personalData->value = $anonymizedValue;
         $personalData->anonymized = true;
         $personalData->anonymizedAt = time();
@@ -507,9 +508,7 @@ class PersonalDataManager
             throw new Exception('Personal data not linked to a file');
         }
 
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
-
-        $value = $encryptionService->decrypt($pdm->value);
+        $value = $this->getCleanValue($pdm);
         $objFileModel = null;
 
         if (FilesModel::getTable() === $ptable) {
@@ -635,6 +634,31 @@ class PersonalDataManager
         if (!\in_array('WEM\PersonalDataManagerBundle\Model\Trait\PersonalDataTrait', class_uses($object), true)) {
             throw new InvalidArgumentException('The object does not use the "PersonalDataTrait".');
         }
+    }
+
+    /**
+     * Return the data decrypted and formated depending
+     * on altered column
+     * 
+     * @param PersonalData $data
+     * 
+     * @return mixed
+     */
+    protected function getCleanValue($data)
+    {
+        if ($data->anonymized) {
+            return $data->value;
+        }
+
+        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+
+        $value = $encryptionService->decrypt($data->value);
+
+        if ("serialized" === $data->altered) {
+            return unserialize($value);
+        }
+
+        return $value;
     }
 
     protected function addAllLinkedFilesToZipArchive(ZipArchive $zip, $pdms): ZipArchive

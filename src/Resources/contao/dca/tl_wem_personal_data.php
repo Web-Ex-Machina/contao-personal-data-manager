@@ -61,6 +61,10 @@ $GLOBALS['TL_DCA']['tl_wem_personal_data'] = [
                 ['plenta.encryption', 'encrypt'],
             ],
         ],
+        'altered' => [
+            'label' => ['altered'],
+            'sql' => "varchar(255) NOT NULL DEFAULT ''",
+        ],
         'createdAt' => [
             'default' => time(),
             'flag' => 8,
