@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace WEM\PersonalDataManagerBundle\DependencyInjection;
 
 use Contao\Config;
-use Exception;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -30,7 +29,8 @@ class WEMPersonalDataManagerExtension extends Extension
 {
     /**
      * {@inheritdoc}
-     * @throws Exception
+     *
+     * @throws \Exception
      */
     public function load(array $mergedConfig, ContainerBuilder $container): void
     {
@@ -43,7 +43,7 @@ class WEMPersonalDataManagerExtension extends Extension
         $loader->load('controllers.yml');
         $loader->load('routing.yml');
 
-        if (null === $container->getParameter('wem_contao_encryption.encryption_key')) {
+        if (!$container->hasParameter('wem_contao_encryption.encryption_key') || null === $container->getParameter('wem_contao_encryption.encryption_key')) {
             $projectDir = $container->getParameter('kernel.project_dir');
             if (file_exists($projectDir.'/system/config/localconfig.php')) {
                 include $projectDir.'/system/config/localconfig.php';
