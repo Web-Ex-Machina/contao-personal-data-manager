@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -30,7 +30,6 @@ use Contao\Model;
 use Contao\Model\Collection;
 use Contao\System;
 use WEM\UtilsBundle\Classes\Encryption;
-use function in_array;
 
 trait PersonalDataTrait
 {
@@ -38,9 +37,10 @@ trait PersonalDataTrait
 
     protected Encryption $encryption;
 
-    public function __construct(Encryption $encryption)
+    public function __construct()
     {
-        $this->encryption = $encryption;
+        // $this->encryption = $encryption;
+        $this->encryption = System::getContainer()->get('wem.encryption_util');
     }
 
     public function shouldManagePersonalData(): bool
@@ -86,7 +86,6 @@ trait PersonalDataTrait
         if ($this->shouldManagePersonalData()) {
             // re-find personal data
             $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-
 
             $personalDatas = $manager->findByPidAndPtable(
                 (int) $this->getPersonalDataPidFieldValue(),
@@ -145,7 +144,7 @@ trait PersonalDataTrait
 
     public function isFieldInPersonalDataFieldsNames(string $field): bool
     {
-        return in_array($field, $this->getPersonalDataFieldsNames(), true);
+        return \in_array($field, $this->getPersonalDataFieldsNames(), true);
     }
 
     public function getPersonalDataPidField(): string
@@ -327,7 +326,7 @@ trait PersonalDataTrait
             foreach ($this->getPersonalDataFieldsNames() as $personalDataFieldName) {
                 // here check if the data has been modifier or not
                 // field not present in $arrSet && field not modified ? Do not apply the default behaviour, let it be
-                if(array_key_exists($personalDataFieldName,$this->arrModified)){
+                if (\array_key_exists($personalDataFieldName, $this->arrModified)) {
                     self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
                     if ($this->isFieldInPersonalDataFieldsNames($personalDataFieldName)) {
                         $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
@@ -346,7 +345,7 @@ trait PersonalDataTrait
      *
      * @param int $intType The query type (Model::INSERT or Model::UPDATE)
      */
-    protected function postSave($intType)
+    protected function postSave($intType): void
     {
         if ($this->shouldManagePersonalData()) {
             $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
@@ -396,7 +395,7 @@ trait PersonalDataTrait
         if (is_a($obj, Collection::class)) {
             $detached = false;
             while ($obj->next()) {
-                if (!$obj->current() !== null) {
+                if (null !== !$obj->current()) {
                     $obj->current()->detach(false);
                     $detached = true;
                 }
