@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -19,15 +19,11 @@ use Contao\Model;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Model\PersonalData;
 use WEM\UtilsBundle\Classes\Encryption;
-use function array_key_exists;
-use function is_array;
 
 class PersonalDataManagerUiFormatter
 {
-    /** @var TranslatorInterface */
     private TranslatorInterface $translator;
 
-    /** @var string */
     private string $url = '#';
     private Encryption $encryption;
 
@@ -62,7 +58,7 @@ class PersonalDataManagerUiFormatter
 
     public function renderListButtonAnonymize(string $email): string
     {
-        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-list__button_anonymize">%s</a>',
+        return \sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-list__button_anonymize">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonAnonymizeConfirm', [], 'contao_default'),
@@ -72,7 +68,7 @@ class PersonalDataManagerUiFormatter
 
     public function renderListButtonExport(string $email): string
     {
-        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-list__button_export">%s</a>',
+        return \sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-list__button_export">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExportTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.LIST.buttonExport', [], 'contao_default')
@@ -126,7 +122,7 @@ class PersonalDataManagerUiFormatter
 
     public function renderSingleItemButtonAnonymize(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__button_anonymize_all">%s</a>',
+        return \sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__button_anonymize_all">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeAllConfirm', [], 'contao_default'),
@@ -136,7 +132,7 @@ class PersonalDataManagerUiFormatter
 
     public function renderSingleItemButtonExport(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-item__button_export">%s</a>',
+        return \sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_export pdm-item__button_export">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonExportTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonExport', [], 'contao_default')
@@ -145,7 +141,7 @@ class PersonalDataManagerUiFormatter
 
     public function renderSingleItemButtonShow(int $pid, string $ptable, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_show pdm-item__button_show">%s</a>',
+        return \sprintf('<a href="%s" title="%s" class="pdm-button pdm-button_show pdm-item__button_show">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonShowTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonShow', [], 'contao_default')
@@ -255,7 +251,7 @@ class PersonalDataManagerUiFormatter
 
     public function renderSingleItemBodyPersonalDataSingleButtonAnonymize(int $pid, string $ptable, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
-        return sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__personal_data_single__button_anonymize">%s</a>',
+        return \sprintf('<a href="%s" title="%s" data-confirm="%s" class="pdm-button pdm-button_anonymize pdm-item__personal_data_single__button_anonymize">%s</a>',
             $this->url,
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeTitle', [], 'contao_default'),
             $this->translator->trans('WEM.PEDAMA.ITEM.buttonAnonymizeConfirm', [], 'contao_default'),
@@ -265,20 +261,19 @@ class PersonalDataManagerUiFormatter
 
     public function getFieldLabelTranslated(string $ptable, string $field): string
     {
-        if (array_key_exists($field, $GLOBALS['TL_LANG'][$ptable])) {
-            if (is_array($GLOBALS['TL_LANG'][$ptable][$field])) {
-                return $this->translator->trans(sprintf('%s.%s', $ptable, $field).'.0', [], 'contao_default') ?? $field;
+        if (\array_key_exists($field, $GLOBALS['TL_LANG'][$ptable])) {
+            if (\is_array($GLOBALS['TL_LANG'][$ptable][$field])) {
+                return $this->translator->trans(\sprintf('%s.%s', $ptable, $field).'.0', [], 'contao_default') ?? $field;
             }
 
-            return $this->translator->trans(sprintf('%s.%s', $ptable, $field), [], 'contao_default') ?? $field;
+            return $this->translator->trans(\sprintf('%s.%s', $ptable, $field), [], 'contao_default') ?? $field;
         }
 
-        return sprintf('%s.%s', $ptable, $field).'.0';
+        return \sprintf('%s.%s', $ptable, $field).'.0';
     }
 
     protected function unencrypt($value)
     {
-
-        return $this->encryption->decrypt($value);
+        return $this->encryption->decrypt_b64($value);
     }
 }

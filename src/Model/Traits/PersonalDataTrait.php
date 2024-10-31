@@ -35,13 +35,48 @@ trait PersonalDataTrait
 {
     protected static array $personalDataFieldsValues = [];
 
-    protected Encryption $encryption;
+    // protected static $personalDataFieldsNames = [];
+    // protected static $personalDataFieldsDefaultValues = [
+    //     'firstname' => 'managed_by_pdm',
+    //     'lastname' => 'managed_by_pdm',
+    //     'dateOfBirth' => '0',
+    //     'gender' => 'managed_by_pdm',
+    //     'company' => 'managed_by_pdm',
+    //     'street' => 'managed_by_pdm',
+    //     'postal' => 'managed_by_pdm',
+    //     'city' => 'managed_by_pdm',
+    //     'state' => 'managed_by_pdm',
+    //     'country' => '00',
+    //     'phone' => 'managed_by_pdm',
+    //     'mobile' => 'managed_by_pdm',
+    //     'fax' => 'managed_by_pdm',
+    // ];
+    // protected static $personalDataFieldsAnonymizedValues = [
+    //     'firstname' => 'anonymized',
+    //     'lastname' => 'anonymized',
+    //     'dateOfBirth' => '',
+    //     'gender' => '',
+    //     'company' => '',
+    //     'street' => '',
+    //     'postal' => '',
+    //     'city' => '',
+    //     'state' => '',
+    //     'country' => '',
+    //     'phone' => '',
+    //     'mobile' => '',
+    //     'fax' => '',
+    // ];
+    // protected static $personalDataPidField = 'id';
+    // protected static $personalDataEmailField = 'email';
+    // protected static $personalDataPtable = 'tl_member';
 
-    public function __construct()
-    {
-        // $this->encryption = $encryption;
-        $this->encryption = System::getContainer()->get('wem.encryption_util');
-    }
+    // protected Encryption $encryption;
+
+    // public function __construct()
+    // {
+    //     // $this->encryption = $encryption;
+    //     $this->encryption = System::getContainer()->get('wem.encryption_util');
+    // }
 
     public function shouldManagePersonalData(): bool
     {
@@ -91,10 +126,12 @@ trait PersonalDataTrait
                 (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable()
             );
+            /** @var Encryption */
+            $encryptionService = System::getContainer()->get('wem.encryption_util');
 
             if ($personalDatas) {
                 while ($personalDatas->next()) {
-                    $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $this->encryption->decrypt($personalDatas->value);
+                    $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt_b64($personalDatas->value);
                 }
             }
         }
@@ -119,7 +156,8 @@ trait PersonalDataTrait
 
     public function getPersonalDataFieldsDefaultValues(): array
     {
-        return self::$personalDataFieldsDefaultValues;
+        return static::$personalDataFieldsDefaultValues;
+        // return self::$personalDataFieldsDefaultValues;
     }
 
     public function getPersonalDataFieldsDefaultValueForField(string $field): string
@@ -129,7 +167,8 @@ trait PersonalDataTrait
 
     public function getPersonalDataFieldsAnonymizedValues(): array
     {
-        return self::$personalDataFieldsAnonymizedValues;
+        return static::$personalDataFieldsAnonymizedValues;
+        // return self::$personalDataFieldsAnonymizedValues;
     }
 
     public function getPersonalDataFieldsAnonymizedValueForField(string $field): string
@@ -139,7 +178,8 @@ trait PersonalDataTrait
 
     public function getPersonalDataFieldsNames(): array
     {
-        return self::$personalDataFieldsNames;
+        return static::$personalDataFieldsNames;
+        // return self::$personalDataFieldsNames;
     }
 
     public function isFieldInPersonalDataFieldsNames(string $field): bool
@@ -149,17 +189,20 @@ trait PersonalDataTrait
 
     public function getPersonalDataPidField(): string
     {
-        return self::$personalDataPidField;
+        return static::$personalDataPidField;
+        // return self::$personalDataPidField;
     }
 
     public function getPersonalDataEmailField(): string
     {
-        return self::$personalDataEmailField;
+        return static::$personalDataEmailField;
+        // return self::$personalDataEmailField;
     }
 
     public function getPersonalDataPtable(): string
     {
-        return self::$personalDataPtable;
+        return static::$personalDataPtable;
+        // return self::$personalDataPtable;
     }
 
     public function getPersonalDataPidFieldValue(): int
@@ -329,7 +372,8 @@ trait PersonalDataTrait
                 if (\array_key_exists($personalDataFieldName, $this->arrModified)) {
                     self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
                     if ($this->isFieldInPersonalDataFieldsNames($personalDataFieldName)) {
-                        $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
+                        // $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
+                        $arrSet[$personalDataFieldName] = static::$personalDataFieldsDefaultValues[$personalDataFieldName];
                     } else {
                         unset($arrSet[$personalDataFieldName]);
                     }

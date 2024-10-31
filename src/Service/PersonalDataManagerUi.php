@@ -320,7 +320,7 @@ class PersonalDataManagerUi
     public function formatSingleItemBodyPersonalDataSingleFieldValue(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
         // here we could check if the data is linked to a file and display its name
-        return $personalData->anonymized ? ($personalData->value ?? '') : $this->encryption->decrypt($personalData->value);
+        return $personalData->anonymized ? ($personalData->value ?? '') : $this->encryption->decrypt_b64($personalData->value);
     }
 
     public function formatSingleItemBodyPersonalDataSingleButtons(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
