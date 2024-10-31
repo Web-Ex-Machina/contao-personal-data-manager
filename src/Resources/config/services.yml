@@ -3,12 +3,14 @@ services:
     class: WEM\PersonalDataManagerBundle\Service\PersonalDataManager
     arguments:
       $csvFormatter: '@wem.personal_data_manager.service.personal_data_manager_csv_formatter'
+      $encryption: '@wem_util.encryption'
     public: true
 
   wem.personal_data_manager.service.personal_data_manager_csv_formatter:
     class: WEM\PersonalDataManagerBundle\Service\PersonalDataManagerCsvFormatter
     arguments:
       $translator: '@contao.translation.translator'
+      $encryption: '@wem_util.encryption'
     public: true
 
   wem.personal_data_manager.service.personal_data_manager_ui:
@@ -16,6 +18,7 @@ services:
     arguments:
       $translator: '@contao.translation.translator'
       $manager: '@wem.personal_data_manager.service.personal_data_manager'
+      $encryption: '@wem_util.encryption'
     public: true
 
   wem.personal_data_manager.service.personal_data_manager_action:
