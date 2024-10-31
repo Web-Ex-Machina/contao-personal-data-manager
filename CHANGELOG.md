@@ -1,6 +1,18 @@
 Personal Data Manager bundle for Contao Open Source CMS
 ======================
 
+v1.3.0 - 2024-10-XX
+- Feat : PHP 8.2 compatibility
+- Feat : `webexmachina/contao-utils` ^2.0 version required
+
+v1.2.0 - 2024-08-22
+- Feat : Add a new column "altered" to allow specific values format
+- Feat : Arrays can now be stored and marked as serialized
+- Feat : Serialized values are properly deserialized when fetching them through Models
+
+v1.1.0 - 2024-08-05
+- feat: expand contao-utils compatibility to version 2.0
+
 v1.0.6 - 2024-01-29
 - FIXED : Do not try to manage PDM data referencing an unexisting source model
 

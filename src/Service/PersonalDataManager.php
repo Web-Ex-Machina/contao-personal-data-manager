@@ -389,7 +389,8 @@ class PersonalDataManager
             return null;
         }
 
-        return $personalData->anonymized ? $personalData->value : $this->encryption->decrypt_b64($personalData->value);
+        // return $personalData->anonymized ? $personalData->value : $this->encryption->decrypt_b64($personalData->value);
+        return $this->getCleanValue($personalData);
     }
 
     /**
@@ -423,7 +424,8 @@ class PersonalDataManager
     public function applyPersonalDataTo($object, Collection $personalDatas)
     {
         while ($personalDatas->next()) {
-            $object->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $this->encryption->decrypt_b64($personalDatas->value);
+            // $object->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $this->encryption->decrypt_b64($personalDatas->value);
+            $object->{$personalDatas->field} = $this->getCleanValue($personalDatas->current());
         }
 
         return $object;
@@ -475,6 +477,10 @@ class PersonalDataManager
             // if pdm anonymized and values are equals, do nothing
         } else {
             // else, save the value and de-anonymize data
+            if (\is_array($value)) {
+                $pdm->altered = 'serialized';
+                $value = serialize($value);
+            }
             $pdm->value = $this->encryption->encrypt_b64($value);
             $pdm->anonymized = '';
             $pdm->anonymizedAt = '';
@@ -501,7 +507,8 @@ class PersonalDataManager
 
         $obj = new $originalModel();
         $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
-        $value = $this->encryption->decrypt_b64($personalData->value);
+        // $value = $this->encryption->decrypt_b64($personalData->value);
+        $value = $this->getCleanValue($personalData);
         $personalData->value = $anonymizedValue;
 
         $personalData->anonymized = true;
@@ -553,7 +560,8 @@ class PersonalDataManager
             throw new \Exception('Personal data not linked to a file');
         }
 
-        $value = $this->encryption->decrypt_b64($pdm->value);
+        // $value = $this->encryption->decrypt_b64($pdm->value);
+        $value = $this->getCleanValue($pdm);
         $objFileModel = null;
 
         if (FilesModel::getTable() === $ptable) {
@@ -684,6 +692,26 @@ class PersonalDataManager
         if (!\in_array('WEM\PersonalDataManagerBundle\Model\Trait\PersonalDataTrait', class_uses($object), true)) {
             throw new \InvalidArgumentException('The object does not use the "PersonalDataTrait".');
         }
+    }
+
+    /**
+     * Return the data decrypted and formated depending
+     * on altered column.
+     *
+     * @param PersonalData $data
+     */
+    protected function getCleanValue($data)
+    {
+        if ($data->anonymized) {
+            return $data->value;
+        }
+
+        $value = $this->encryption->decrypt_b64($data->value);
+        if ('serialized' === $data->altered) {
+            return unserialize($value);
+        }
+
+        return $value;
     }
 
     /**
