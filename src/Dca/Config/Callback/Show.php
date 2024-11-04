@@ -16,13 +16,14 @@ namespace WEM\PersonalDataManagerBundle\Dca\Config\Callback;
 
 use Contao\DataContainer;
 use Contao\Model;
+use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
 
 class Show
 {
-    protected $personalDataManager;
+    protected PersonalDataManager $personalDataManager;
 
     public function __construct(
-        \WEM\PersonalDataManagerBundle\Service\PersonalDataManager $personalDataManager
+        PersonalDataManager $personalDataManager
     ) {
         $this->personalDataManager = $personalDataManager;
     }
@@ -32,6 +33,7 @@ class Show
         if (!$dc->id) {
             return $modalData;
         }
+
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
         foreach ($modalData as $table => $rows) {

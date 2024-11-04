@@ -18,23 +18,26 @@ use Contao\DataContainer;
 use Contao\FrontendUser;
 use Contao\Model;
 use Contao\ModulePersonalData;
+use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
+use function func_get_args;
+use function func_num_args;
 
 class Submit
 {
-    protected $personalDataManager;
+    protected PersonalDataManager $personalDataManager;
 
     public function __construct(
-        \WEM\PersonalDataManagerBundle\Service\PersonalDataManager $personalDataManager
+        PersonalDataManager $personalDataManager
     ) {
         $this->personalDataManager = $personalDataManager;
     }
 
     public function __invoke(): void
     {
-        if (2 === \func_num_args()) {
-            $this->invokeFrontend(...\func_get_args());
+        if (2 === func_num_args()) {
+            $this->invokeFrontend(...func_get_args());
         } else {
-            $this->invokeBackend(...\func_get_args());
+            $this->invokeBackend(...func_get_args());
         }
     }
 
@@ -49,6 +52,7 @@ class Submit
         if (!$dc->id) {
             return;
         }
+
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = $modelClassName::findByPk($dc->id);
 
@@ -59,6 +63,7 @@ class Submit
             ) {
                 continue;
             }
+
             $model->{$key} = $value;
             $model->markModified($key);
         }

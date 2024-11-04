@@ -14,9 +14,12 @@ declare(strict_types=1);
 
 namespace WEM\PersonalDataManagerBundle\Service;
 
+use Contao\BackendUser;
+use Contao\File;
+use Contao\FrontendUser;
 use Contao\Input;
-use Contao\Request;
-use Contao\RequestToken;
+use Contao\System;
+use Contao\User;
 use Exception;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,12 +28,12 @@ use WEM\PersonalDataManagerBundle\Exception\AccessDeniedException;
 
 class PersonalDataManagerAction
 {
-    /** @var TranslatorInterface */
-    private $translator;
-    /** @var PersonalDataManager */
-    private $manager;
-    /** @var \Contao\User */
-    private $user;
+
+    private TranslatorInterface $translator;
+
+    private PersonalDataManager $manager;
+
+    private User $user;
 
     public function __construct(
         TranslatorInterface $translator,
@@ -43,11 +46,11 @@ class PersonalDataManagerAction
     /**
      * Process AJAX actions.
      *
-     * @return string - Ajax response, as String or JSON
+     * @return void - Ajax response, as String or JSON
      */
-    public function processAjaxRequest()
+    public function processAjaxRequest(): void
     {
-        $returnHttpCode = 200;
+        $returnHttpCode = Response::HTTP_OK;
         // Catch AJAX Requests
         if (Input::post('TL_WEM_AJAX') && 'be_pdm' === Input::post('wem_module')) {
             try {
@@ -80,15 +83,15 @@ class PersonalDataManagerAction
                         throw new Exception('Unknown route');
                 }
             } catch (AccessDeniedException $e) {
-                $returnHttpCode = 401;
+                $returnHttpCode = Response::HTTP_UNAUTHORIZED;
                 $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
             } catch (Exception $e) {
-                $returnHttpCode = 400;
+                $returnHttpCode = Response::HTTP_BAD_REQUEST;
                 $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
             }
 
             // Add Request Token to JSON answer and return
-            $arrResponse['rt'] = RequestToken::get();
+            $arrResponse['rt'] = System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue();
             $response = new Response(json_encode($arrResponse), $returnHttpCode);
             $response->send();
 
@@ -96,23 +99,18 @@ class PersonalDataManagerAction
         }
     }
 
+    /**
+     * @throws AccessDeniedException
+     * @throws Exception
+     */
     protected function anonymizeSinglePersonalData(): array
     {
+
         if (empty(Input::post('pid'))) {
             throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.PleaseFillEmail', [], 'contao_default'));
         }
+        $this->check_list(['ptable', 'email', 'field']);
 
-        if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('field'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.fieldEmpty', [], 'contao_default'));
-        }
         $this->checkAccess();
 
         $anonymizeValue = $this->manager->anonymizeByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
@@ -124,19 +122,13 @@ class PersonalDataManagerAction
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     * @throws Exception
+     */
     protected function anonymizeSingleItem(): array
     {
-        if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.PleaseFillEmail', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
-        }
+        $this->check_list(['pid', 'ptable', 'email']);
 
         $this->checkAccess();
 
@@ -149,11 +141,13 @@ class PersonalDataManagerAction
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     * @throws Exception
+     */
     protected function anonymizeAllPersonalData(): array
     {
-        if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
-        }
+        $this->check_list(['email']);
 
         $this->checkAccess();
 
@@ -166,26 +160,19 @@ class PersonalDataManagerAction
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function exportSingleItem(): void
     {
-        if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.PleaseFillEmail', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
-        }
+        $this->check_list(['pid', 'ptable', 'email']);
 
         $this->checkAccess();
 
         $zipName = $this->manager->exportByPidAndPtableAndEmail((int) Input::post('pid'), Input::post('ptable'), Input::post('email'));
         $zipContent = file_get_contents($zipName);
         unlink($zipName);
-        (new Response($zipContent, 200, [
+        (new Response($zipContent, Response::HTTP_OK, [
             'Content-Type' => ' application/zip',
             'Content-Disposition' => 'attachment',
             'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.zip',
@@ -193,18 +180,20 @@ class PersonalDataManagerAction
         exit();
     }
 
+    /**
+     * @throws AccessDeniedException
+     * @throws Exception
+     */
     protected function exportAllPersonalData(): void
     {
-        if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
-        }
+        $this->check_list(['email']);
 
         $this->checkAccess();
 
         $zipName = $this->manager->exportByEmail(Input::post('email'));
         $zipContent = file_get_contents($zipName);
         unlink($zipName);
-        (new Response($zipContent, 200, [
+        (new Response($zipContent, Response::HTTP_OK, [
             'Content-Type' => ' application/zip',
             'Content-Disposition' => 'attachment',
             'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.zip',
@@ -212,19 +201,12 @@ class PersonalDataManagerAction
         exit();
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
     protected function showSingleItem(): array
     {
-        if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.pidEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
-        }
+        $this->check_list(['pid', 'ptable', 'email']);
 
         $this->checkAccess();
 
@@ -241,59 +223,39 @@ class PersonalDataManagerAction
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     * @throws Exception
+     */
     protected function showFileSinglePersonalData(): array
     {
-        if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.pidEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('field'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.fieldEmpty', [], 'contao_default'));
-        }
+        $this->check_list(['pid', 'ptable', 'email', 'field']);
 
         $this->checkAccess();
 
         $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
 
-        $content = $objFile ? sprintf(
+        $content = $objFile instanceof File ? sprintf(
             'data:%s;base64,%s',
             $objFile->mime,
             base64_encode($objFile->getContent())
         ) : '';
 
         return [
-            'status' => $objFile ? 'success' : 'error',
+            'status' => $objFile instanceof File ? 'success' : 'error',
             'msg' => '',
             'content' => $content,
-            'name' => $objFile ? $objFile->name : '',
+            'name' => $objFile instanceof File ? $objFile->name : '',
         ];
     }
 
+    /**
+     * @throws AccessDeniedException
+     * @throws Exception
+     */
     protected function downloadFileSinglePersonalData(): void
     {
-        if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.pidEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('ptable'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.ptableEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('email'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.emailEmpty', [], 'contao_default'));
-        }
-
-        if (empty(Input::post('field'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.fieldEmpty', [], 'contao_default'));
-        }
+        $this->check_list(['pid', 'ptable', 'email', 'field']);
 
         $this->checkAccess();
 
@@ -305,7 +267,7 @@ class PersonalDataManagerAction
         //     base64_encode($objFile->getContent())
         // ) : '';
 
-        (new Response($objFile->getContent(), 200, [
+        (new Response($objFile->getContent(), Response::HTTP_OK, [
             'Content-Type' => $objFile->mime,
             'Content-Disposition' => 'attachment',
             'filename' => $objFile->name,
@@ -313,22 +275,34 @@ class PersonalDataManagerAction
         exit();
     }
 
+    /**
+     * @throws AccessDeniedException
+     * @throws Exception
+     */
     protected function checkAccess(): void
     {
-        $this->user = \Contao\BackendUser::getInstance();
+        $this->user = BackendUser::getInstance();
 
         if ($this->user->isAdmin) {
             return;
         }
 
-        $this->user = \Contao\FrontendUser::getInstance();
-        // if (!$this->user->id) {
-        //     throw new AccessDeniedException($this->translator->trans('WEM.PEDAMA.DEFAULT.accessDenied',[],'contao_default'));
-        // }
+        $this->user = FrontendUser::getInstance();
+
         if (!$this->manager->isEmailTokenCoupleValid(Input::post('email'), $this->manager->getTokenInSession())) {
             $this->manager->clearTokenInSession();
             throw new AccessDeniedException($this->translator->trans('WEM.PEDAMA.DEFAULT.accessDenied', [], 'contao_default'));
         }
+
         $this->manager->updateTokenExpiration($this->manager->getTokenInSession());
+    }
+
+    private function check_list(array $list): void
+    {
+        foreach ($list as $item) {
+            if (empty(Input::post($item))) {
+                throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.' . $item . 'Empty', [], 'contao_default'));
+            }
+        }
     }
 }

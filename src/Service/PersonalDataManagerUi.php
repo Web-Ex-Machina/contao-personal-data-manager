@@ -20,29 +20,34 @@ use Contao\File;
 use Contao\FrontendTemplate;
 use Contao\Model;
 use Contao\Model\Collection;
-use Contao\RequestToken;
 use Contao\System;
 use Exception;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Classes\FileUtil;
 use WEM\PersonalDataManagerBundle\Model\PersonalData;
+use WEM\UtilsBundle\Classes\Encryption;
+use function array_key_exists;
+use function count;
+use function is_array;
 
 class PersonalDataManagerUi
 {
-    /** @var TranslatorInterface */
-    private $translator;
-    /** @var PersonalDataManager */
-    private $manager;
-    /** @var string */
-    private $url;
+    private TranslatorInterface $translator;
+
+    private PersonalDataManager $manager;
+
+    private Encryption $encryption;
+
+    private string $url = '#';
 
     public function __construct(
         TranslatorInterface $translator,
-        PersonalDataManager $manager
+        PersonalDataManager $manager,
+        Encryption          $encryption
     ) {
+        $this->encryption = $encryption;
         $this->translator = $translator;
         $this->manager = $manager;
-        $this->url = '#'; //;
     }
 
     public function listForEmail(string $email): string
@@ -61,16 +66,18 @@ class PersonalDataManagerUi
                 if (null === $singleItemData['originalModel']) {
                     continue;
                 }
+
                 $renderedItem = $this->renderSingleItem((int) $pid, $ptable, $email, $singleItemData['personalDatas'], $singleItemData['originalModel']);
                 if (!empty($renderedItem)) {
                     $renderedItems[] = $renderedItem;
                 }
             }
         }
+
         $tpl->items = $renderedItems;
         $tpl->request = Environment::get('request');
-        $tpl->token = RequestToken::get();
-        $tpl->buttons = $this->renderListButtons($email, \count($data));
+        $tpl->token = System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue();
+        $tpl->buttons = $this->renderListButtons($email, count($data));
 
         return $tpl->parse();
     }
@@ -103,7 +110,7 @@ class PersonalDataManagerUi
         $buttons['anonymize'] = 0 === $nbRows ? '' : $this->renderListButtonAnonymize($email);
         $buttons['export'] = 0 === $nbRows ? '' : $this->renderListButtonExport($email);
 
-        if (isset($GLOBALS['WEM_HOOKS']['buildListButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildListButtons'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['buildListButtons']) && is_array($GLOBALS['WEM_HOOKS']['buildListButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['buildListButtons'] as $callback) {
                 $buttons = System::importStatic($callback[0])->{$callback[1]}($email, $nbRows, $buttons);
             }
@@ -183,7 +190,7 @@ class PersonalDataManagerUi
         $buttons['anonymize'] = $this->renderSingleItemButtonAnonymize($pid, $ptable, $email, $personalDatas, $originalModel);
         $buttons['export'] = $this->renderSingleItemButtonExport($pid, $ptable, $email, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemButtons']) && is_array($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['buildSingleItemButtons'] as $callback) {
                 $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $buttons);
             }
@@ -246,6 +253,7 @@ class PersonalDataManagerUi
         foreach ($row as $field => $value) {
             $items[] = $this->renderSingleItemBodyOriginalModelSingle($pid, $ptable, $email, $field, $value, $personalDatas, $originalModel);
         }
+
         $tpl->items = $items;
 
         return $tpl->parse();
@@ -284,6 +292,7 @@ class PersonalDataManagerUi
         foreach ($personalDatas as $personalData) {
             $items[] = $this->renderSingleItemBodyPersonalDataSingle($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
         }
+
         $tpl->items = $items;
 
         return $tpl->parse();
@@ -311,7 +320,7 @@ class PersonalDataManagerUi
     public function formatSingleItemBodyPersonalDataSingleFieldValue(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
         // here we could check if the data is linked to a file and display its name
-        return $personalData->anonymized ? ($personalData->value ?? '') : $this->unencrypt($personalData->value);
+        return $personalData->anonymized ? ($personalData->value ?? '') : $this->encryption->decrypt_b64($personalData->value);
     }
 
     public function formatSingleItemBodyPersonalDataSingleButtons(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
@@ -339,13 +348,14 @@ class PersonalDataManagerUi
                 if (FileUtil::isDisplayableInBrowser($objFile)) {
                     $buttons['show'] = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonShowFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $objFile);
                 }
+
                 $buttons['download'] = $personalData->anonymized ? '' : $this->renderSingleItemBodyPersonalDataSingleButtonDownloadFile($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $objFile);
             } catch (Exception $e) {
                 // do nothing
             }
         }
 
-        if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons']) && is_array($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['buildSingleItemBodyPersonalDataSingleButtons'] as $callback) {
                 $buttons = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $objFile, $buttons);
             }
@@ -388,27 +398,30 @@ class PersonalDataManagerUi
     protected function sortData(?Collection $personalDatas): array
     {
         $sorted = [];
-        if ($personalDatas) {
+        if ($personalDatas instanceof Collection) {
             while ($personalDatas->next()) {
-                if (!\array_key_exists($personalDatas->ptable, $sorted)) {
+                if (!array_key_exists($personalDatas->ptable, $sorted)) {
                     $sorted[$personalDatas->ptable] = [];
                 }
-                if (!\array_key_exists($personalDatas->pid, $sorted[$personalDatas->ptable])) {
+
+                if (!array_key_exists($personalDatas->pid, $sorted[$personalDatas->ptable])) {
                     $sorted[$personalDatas->ptable][$personalDatas->pid] = [
                         'originalModel' => $this->getOriginalObject((int) $personalDatas->pid, $personalDatas->ptable),
                         'personalDatas' => [],
                     ];
                 }
+
                 $sorted[$personalDatas->ptable][$personalDatas->pid]['personalDatas'][] = $personalDatas->current();
             }
         }
+
         ksort($sorted);
         foreach ($sorted as $ptable => $pids) {
             ksort($pids);
             $sorted[$ptable] = $pids;
         }
 
-        if (isset($GLOBALS['WEM_HOOKS']['sortData']) && \is_array($GLOBALS['WEM_HOOKS']['sortData'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['sortData']) && is_array($GLOBALS['WEM_HOOKS']['sortData'])) {
             foreach ($GLOBALS['WEM_HOOKS']['sortData'] as $callback) {
                 $sorted = System::importStatic($callback[0])->{$callback[1]}($sorted, $personalDatas);
             }
@@ -421,7 +434,7 @@ class PersonalDataManagerUi
     {
         foreach ($data as $ptable => $arrPids) {
             foreach ($arrPids as $pid => $singleItemData) {
-                $nbPersonalData = \count($singleItemData['personalDatas']);
+                $nbPersonalData = count($singleItemData['personalDatas']);
                 $nbPersonalDataAnonymised = 0;
                 foreach ($singleItemData['personalDatas'] as $personalData) {
                     if ($personalData->anonymized) {
@@ -433,7 +446,8 @@ class PersonalDataManagerUi
                     unset($data[$ptable][$pid]);
                 }
             }
-            if (0 === \count($data[$ptable])) {
+
+            if (0 === count($data[$ptable])) {
                 unset($data[$ptable]);
             }
         }
@@ -445,7 +459,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatListButtons($email, $nbRows);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderListButtons']) && \is_array($GLOBALS['WEM_HOOKS']['renderListButtons'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderListButtons']) && is_array($GLOBALS['WEM_HOOKS']['renderListButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderListButtons'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($email, $nbRows, $str);
             }
@@ -468,7 +482,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItem($pid, $ptable, $email, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItem']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItem'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItem']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItem'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItem'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $str);
             }
@@ -481,7 +495,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemHeader($pid, $ptable, $email, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemHeader']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemHeader'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemHeader']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemHeader'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemHeader'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $str);
             }
@@ -494,7 +508,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemTitle($pid, $ptable, $email, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemTitle']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemTitle'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemTitle']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemTitle'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemTitle'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $str);
             }
@@ -507,7 +521,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemButtons($pid, $ptable, $email, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemButtons']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemButtons'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemButtons']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemButtons'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $str);
             }
@@ -535,7 +549,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemBody($pid, $ptable, $email, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBody']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBody'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBody']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBody'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBody'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $str);
             }
@@ -548,7 +562,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemBodyOriginalModel($pid, $ptable, $email, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModel'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $str);
             }
@@ -561,7 +575,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemBodyOriginalModelSingle($pid, $ptable, $email, $field, $value, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingle'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $field, $value, $personalDatas, $originalModel, $str);
             }
@@ -574,7 +588,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemBodyOriginalModelSingleFieldLabel($pid, $ptable, $email, $field, $value, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldLabel'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $field, $value, $personalDatas, $originalModel, $str);
             }
@@ -587,7 +601,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemBodyOriginalModelSingleFieldValue($pid, $ptable, $email, $field, $value, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyOriginalModelSingleFieldValue'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $field, $value, $personalDatas, $originalModel, $str);
             }
@@ -600,7 +614,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemBodyPersonalData($pid, $ptable, $email, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalData'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalDatas, $originalModel, $str);
             }
@@ -613,7 +627,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemBodyPersonalDataSingle($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingle'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $str);
             }
@@ -625,7 +639,7 @@ class PersonalDataManagerUi
     protected function renderSingleItemBodyPersonalDataSingleFieldLabel(int $pid, string $ptable, string $email, PersonalData $personalData, array $personalDatas, Model $originalModel): string
     {
         $str = $this->formatSingleItemBodyPersonalDataSingleFieldLabel($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldLabel'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $str);
             }
@@ -638,7 +652,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemBodyPersonalDataSingleFieldValue($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleFieldValue'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $str);
             }
@@ -651,7 +665,7 @@ class PersonalDataManagerUi
     {
         $str = $this->formatSingleItemBodyPersonalDataSingleButtons($pid, $ptable, $email, $personalData, $personalDatas, $originalModel);
 
-        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons']) && \is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons'])) {
+        if (isset($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons']) && is_array($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['renderSingleItemBodyPersonalDataSingleButtons'] as $callback) {
                 $str = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $personalData, $personalDatas, $originalModel, $str);
             }
@@ -685,8 +699,8 @@ class PersonalDataManagerUi
     protected function getFieldLabelTranslated(string $ptable, string $field): string
     {
         System::loadLanguageFile($ptable);
-        if (\array_key_exists($field, $GLOBALS['TL_LANG'][$ptable])) {
-            if (\is_array($GLOBALS['TL_LANG'][$ptable][$field])) {
+        if (array_key_exists($field, $GLOBALS['TL_LANG'][$ptable])) {
+            if (is_array($GLOBALS['TL_LANG'][$ptable][$field])) {
                 return $this->translator->trans(sprintf('%s.%s.0', $ptable, $field), [], 'contao_default') ?? $field;
             }
 
@@ -696,10 +710,4 @@ class PersonalDataManagerUi
         return sprintf('%s.%s.0', $ptable, $field);
     }
 
-    protected function unencrypt($value)
-    {
-        $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
-
-        return $encryptionService->decrypt($value);
-    }
 }

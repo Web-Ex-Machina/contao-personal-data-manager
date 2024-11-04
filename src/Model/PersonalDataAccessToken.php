@@ -14,11 +14,13 @@ declare(strict_types=1);
 
 namespace WEM\PersonalDataManagerBundle\Model;
 
+use Exception;
 use WEM\UtilsBundle\Model\Model;
 
 class PersonalDataAccessToken extends Model
 {
     public const EXPIRE_DURATION = 300;
+
     /**
      * Table name.
      *
@@ -33,17 +35,12 @@ class PersonalDataAccessToken extends Model
      * @param string $token The token
      *
      * @return bool True if valid
+     * @throws Exception
      */
     public static function isEmailTokenCoupleValid(string $email, string $token): bool
     {
         $obj = static::findItems(['email' => $email, 'token' => $token], 1);
-        if (!$obj
-        || !$obj->current()->isValid()
-        ) {
-            return false;
-        }
-
-        return true;
+        return $obj && $obj->current()->isValid();
     }
 
     /**
@@ -56,7 +53,7 @@ class PersonalDataAccessToken extends Model
         $obj = new self();
         $obj->email = $email;
         $obj->token = sha1($email.time().random_int(1, 1000));
-        $obj->expiresAt = time() + (int) self::EXPIRE_DURATION;
+        $obj->expiresAt = time() + self::EXPIRE_DURATION;
         $obj->tstamp = time();
         $obj->save();
 
@@ -65,7 +62,7 @@ class PersonalDataAccessToken extends Model
 
     public function updateExpiration(): self
     {
-        $this->expiresAt = time() + (int) self::EXPIRE_DURATION;
+        $this->expiresAt = time() + self::EXPIRE_DURATION;
         $this->save();
 
         return $this;

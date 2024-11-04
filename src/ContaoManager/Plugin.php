@@ -19,6 +19,7 @@ use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 use Contao\ManagerPlugin\Routing\RoutingPluginInterface;
+use Exception;
 use Symfony\Component\Config\Loader\LoaderResolverInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use WEM\PersonalDataManagerBundle\WEMPersonalDataManagerBundle;
@@ -46,6 +47,7 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface
 
     /**
      * {@inheritdoc}
+     * @throws Exception
      */
     public function getRouteCollection(LoaderResolverInterface $resolver, KernelInterface $kernel)
     {

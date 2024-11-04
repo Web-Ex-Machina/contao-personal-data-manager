@@ -15,18 +15,21 @@ declare(strict_types=1);
 namespace WEM\PersonalDataManagerBundle\Dca\Field\Callback;
 
 use Contao\DataContainer;
+use Contao\FrontendUser;
 use Contao\Model;
+use Contao\ModulePersonalData;
 use Exception;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
+use function func_get_args;
+use function func_num_args;
 
 class Load
 {
-    /** @var PersonalDataManager */
-    protected $personalDataManager;
-    /** @var string */
-    protected $frontendField;
-    /** @var string */
-    protected $table;
+    protected PersonalDataManager $personalDataManager;
+
+    protected string $frontendField;
+
+    protected string $table;
 
     public function __construct(
         PersonalDataManager $personalDataManager,
@@ -38,15 +41,21 @@ class Load
         $this->table = $table;
     }
 
+    /**
+     * @throws Exception
+     */
     public function __invoke()
     {
-        if (2 === \func_num_args()) {
-            return $this->invokeBackend(...\func_get_args());
+        if (2 === func_num_args()) {
+            return $this->invokeBackend(...func_get_args());
         }
 
-        return $this->invokeFrontend(...\func_get_args());
+        return $this->invokeFrontend(...func_get_args());
     }
 
+    /**
+     * @throws Exception
+     */
     public function invokeBackend($value, DataContainer $dc)
     {
         if (!$dc->id) {
@@ -65,11 +74,15 @@ class Load
         ) ?? $value;
     }
 
-    public function invokeFrontend($value, \Contao\FrontendUser $user, \Contao\ModulePersonalData $module)
+    /**
+     * @throws Exception
+     */
+    public function invokeFrontend($value, FrontendUser $user, ModulePersonalData $module): string
     {
         if (empty($this->frontendField)) {
             throw new Exception('No frontend field configured');
         }
+
         if (empty($this->table)) {
             throw new Exception('No table configured');
         }

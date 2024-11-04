@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -55,10 +55,10 @@ $GLOBALS['TL_DCA']['tl_wem_personal_data'] = [
             'label' => ['value'],
             'sql' => "TEXT NOT NULL DEFAULT ''",
             'load_callback' => [
-                ['plenta.encryption', 'decrypt'],
+                ['wem.encryption_util', 'decrypt_b64'],
             ],
             'save_callback' => [
-                ['plenta.encryption', 'encrypt'],
+                ['wem.encryption_util', 'encrypt_b64'],
             ],
         ],
         'altered' => [

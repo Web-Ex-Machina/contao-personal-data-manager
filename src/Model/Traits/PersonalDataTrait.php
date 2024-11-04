@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
+ * Copyright (c) 2015-2024 Web ex Machina
  *
  * @category ContaoBundle
  * @package  Web-Ex-Machina/contao-smartgear
@@ -24,12 +24,16 @@ namespace WEM\PersonalDataManagerBundle\Model\Traits;
  *
  * @see     https://github.com/Web-Ex-Machina/personal-data-manager/
  */
+
 use Contao\Database\Result;
 use Contao\Model;
+use Contao\Model\Collection;
+use Contao\System;
+use WEM\UtilsBundle\Classes\Encryption;
 
 trait PersonalDataTrait
 {
-    protected static $personalDataFieldsValues = [];
+    protected static array $personalDataFieldsValues = [];
 
     public function shouldManagePersonalData(): bool
     {
@@ -45,7 +49,7 @@ trait PersonalDataTrait
     {
         // delete associated personal data
         if ($this->shouldManagePersonalData()) {
-            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
             $manager->deleteByPidAndPtable(
                 (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable()
@@ -73,17 +77,18 @@ trait PersonalDataTrait
     {
         if ($this->shouldManagePersonalData()) {
             // re-find personal data
-            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-            $encryptionService = \Contao\System::getContainer()->get('plenta.encryption');
+            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
 
             $personalDatas = $manager->findByPidAndPtable(
                 (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable()
             );
+            /** @var Encryption */
+            $encryptionService = System::getContainer()->get('wem.encryption_util');
 
             if ($personalDatas) {
                 while ($personalDatas->next()) {
-                    $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt($personalDatas->value);
+                    $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt_b64($personalDatas->value);
                 }
             }
         }
@@ -96,7 +101,7 @@ trait PersonalDataTrait
     {
         if ($this->shouldManagePersonalData()) {
             // re-find personal data
-            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
             $manager->anonymizeByPidAndPtableAndEmail(
                 (int) $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable(),
@@ -158,7 +163,7 @@ trait PersonalDataTrait
 
     public function getPersonalDataEmailFieldValue(): string
     {
-        return null !== $this->{$this->getPersonalDataEmailField()} ? $this->{$this->getPersonalDataEmailField()} : '';
+        return $this->{$this->getPersonalDataEmailField()} ?? '';
     }
 
     /**
@@ -176,6 +181,7 @@ trait PersonalDataTrait
         if (!$obj) {
             return $obj;
         }
+
         if (!is_a($obj, self::class)) {
             $obj->detach(false);
 
@@ -200,6 +206,7 @@ trait PersonalDataTrait
         if (!$obj) {
             return $obj;
         }
+
         if (!is_a($obj, self::class)) {
             $obj->detach(false);
 
@@ -232,6 +239,7 @@ trait PersonalDataTrait
             if ($detached) {
                 return static::findMultipleByIds($arrIds, $arrOptions);
             }
+
             $obj->reset();
         }
 
@@ -304,7 +312,7 @@ trait PersonalDataTrait
      *
      * @return array The modified data array
      */
-    protected function preSave(array $arrSet): array
+    protected function preSave(array $arrSet)
     {
         $arrSet = parent::preSave($arrSet);
 
@@ -312,7 +320,7 @@ trait PersonalDataTrait
             foreach ($this->getPersonalDataFieldsNames() as $personalDataFieldName) {
                 // here check if the data has been modifier or not
                 // field not present in $arrSet && field not modified ? Do not apply the default behaviour, let it be
-                if(array_key_exists($personalDataFieldName,$this->arrModified)){
+                if (\array_key_exists($personalDataFieldName, $this->arrModified)) {
                     self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
                     if ($this->isFieldInPersonalDataFieldsNames($personalDataFieldName)) {
                         $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
@@ -334,7 +342,7 @@ trait PersonalDataTrait
     protected function postSave($intType): void
     {
         if ($this->shouldManagePersonalData()) {
-            $manager = \Contao\System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
 
             $manager->insertOrUpdateForPidAndPtableAndEmail(
                 (int) $this->getPersonalDataPidFieldValue(),
@@ -344,6 +352,7 @@ trait PersonalDataTrait
             );
             self::$personalDataFieldsValues = [];
         }
+
         parent::postSave($intType);
     }
 
@@ -370,22 +379,26 @@ trait PersonalDataTrait
         if (!$obj) {
             return $obj;
         }
-        if (!is_a($obj, self::class) && !is_a($obj, \Contao\Model\Collection::class)) {
+
+        if (!is_a($obj, self::class) && !is_a($obj, Collection::class)) {
             $obj->detach(false);
 
             return static::find($arrOptions);
         }
-        if (is_a($obj, \Contao\Model\Collection::class)) {
+
+        if (is_a($obj, Collection::class)) {
             $detached = false;
             while ($obj->next()) {
-                if (!is_a($obj->current(), self::class)) {
+                if (null !== !$obj->current()) {
                     $obj->current()->detach(false);
                     $detached = true;
                 }
             }
+
             if ($detached) {
                 return static::find($arrOptions);
             }
+
             $obj->reset();
         }
 
