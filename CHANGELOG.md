@@ -1,7 +1,7 @@
 Personal Data Manager bundle for Contao Open Source CMS
 ======================
 
-v1.3.0 - 2024-10-XX
+v1.3.0 - 2024-11-04
 - Feat : PHP 8.2 compatibility
 - Feat : `webexmachina/contao-utils` ^2.0 version required
 
