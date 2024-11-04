@@ -388,8 +388,7 @@ class PersonalDataManager
         if (!$personalData instanceof Model) {
             return null;
         }
-
-        // return $personalData->anonymized ? $personalData->value : $this->encryption->decrypt_b64($personalData->value);
+      
         return $this->getCleanValue($personalData);
     }
 
@@ -424,7 +423,6 @@ class PersonalDataManager
     public function applyPersonalDataTo($object, Collection $personalDatas)
     {
         while ($personalDatas->next()) {
-            // $object->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $this->encryption->decrypt_b64($personalDatas->value);
             $object->{$personalDatas->field} = $this->getCleanValue($personalDatas->current());
         }
 
@@ -507,7 +505,6 @@ class PersonalDataManager
 
         $obj = new $originalModel();
         $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
-        // $value = $this->encryption->decrypt_b64($personalData->value);
         $value = $this->getCleanValue($personalData);
         $personalData->value = $anonymizedValue;
 
@@ -560,7 +557,6 @@ class PersonalDataManager
             throw new \Exception('Personal data not linked to a file');
         }
 
-        // $value = $this->encryption->decrypt_b64($pdm->value);
         $value = $this->getCleanValue($pdm);
         $objFileModel = null;
 
