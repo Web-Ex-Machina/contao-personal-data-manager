@@ -32,7 +32,7 @@ class PersonalDataManager
 
     public function __construct(
         PersonalDataManagerCsvFormatter $csvFormatter,
-        Encryption $encryption
+        Encryption $encryption,
     ) {
         $this->encryption = $encryption;
         $this->csvFormatter = $csvFormatter;
@@ -388,7 +388,7 @@ class PersonalDataManager
         if (!$personalData instanceof Model) {
             return null;
         }
-      
+
         return $this->getCleanValue($personalData);
     }
 
@@ -479,7 +479,7 @@ class PersonalDataManager
                 $pdm->altered = 'serialized';
                 $value = serialize($value);
             }
-            $pdm->value = $this->encryption->encrypt_b64($value);
+            $pdm->value = (string) $this->encryption->encrypt_b64($value);
             $pdm->anonymized = '';
             $pdm->anonymizedAt = '';
         }
@@ -506,7 +506,7 @@ class PersonalDataManager
         $obj = new $originalModel();
         $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
         $value = $this->getCleanValue($personalData);
-        $personalData->value = $anonymizedValue;
+        $personalData->value = (string) $anonymizedValue;
 
         $personalData->anonymized = true;
         $personalData->anonymizedAt = time();
