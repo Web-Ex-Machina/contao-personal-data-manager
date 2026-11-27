@@ -1,0 +1,16 @@
+{% extends '@Contao/be_main.html.twig' %}
+{% trans_default_domain 'contao_default' %}
+
+{% block main_content %}
+    <div class="tl_formbody_edit">
+        {{ include('@Contao/personal_data_manager/_email_form.html.twig') }}
+    </div>
+
+    <div class="pdm-content">
+        {% if content %}
+            {{ content|raw }}
+        {% else %}
+            <p class="tl_info">{{ 'WEM.PEDAMA.DEFAULT.PleaseFillEmail'|trans }}</p>
+        {% endif %}
+    </div>
+{% endblock %}

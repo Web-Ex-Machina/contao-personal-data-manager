@@ -22,7 +22,8 @@ Functionnalities
 System requirements
 -------------------
 
- * Contao 4.13
+ * PHP 8.4+
+ * Contao 5.7+
 
 Installation
 ------------
@@ -38,9 +39,16 @@ Then, models (and their associated DCA) need to be adjusted.
 
 ### Encryption key
 
-As this bundle uses [`plenta/contao-encryption`][4], an encryption key needs to be set. When the bundle is loaded, it checks wether the encryption key `plenta_contao_encryption.encryption_key` is set or not.
+The personal data are encrypted with [`webexmachina/contao-utils`][4]'s encryption utility, configured in your `config/config.yaml`:
 
-If not, it will look for ours, named `wem_pdm_encryption_key`, in the `/system/config/localconfig.php` file. And apply it to the `plenta_contao_encryption.encryption_key` container parameter.
+```yaml
+wem_utils:
+    encryption_key: '%env(PDM_ENCRYPTION_KEY)%'
+```
+
+When no key is configured, the utility falls back on `%kernel.secret%`.
+
+:warning: Installations upgraded from a previous version: if `wem_pdm_encryption_key` is defined in `system/config/localconfig.php`, it is still used (unless `wem_utils.encryption_key` is configured), so the personal data already stored remain readable. Changing the key makes them unreadable.
 
 ### Model
 
@@ -160,14 +168,16 @@ class Load
         $this->pdmCallback->setFrontendField($this->frontendField)->setTable($this->table);
     }
 
-    public function __invoke()
+    public function __invoke(mixed $value, mixed ...$args): mixed
     {
-        return $this->pdmCallback->__invoke(...\func_get_args());
+        return $this->pdmCallback->__invoke($value, ...$args);
     }
 }
 ```
 
-**YAML config file** (like `your/bundle/src/Resources/contao/config/services.yml`)
+**YAML config file** (like `your/bundle/config/services.yaml`)
+
+The `wem.personal_data_manager.dca.field.callback.load` service is not shared: each service receives its own instance.
 ```yaml
 services:
     your.bundle.dca.field.callback.load.tl_my_table.my_field:
@@ -191,11 +201,11 @@ Both a back-end entry and a front-end module are provided to allow admin and use
 
 ### Back-end
 
-The user can enter an email address and all associated personal data are displayed. From there, the user can show, export or anonymize them.
+The "Personal Data" back end module (route `/contao/wem-personal-data-manager`) is available to the users allowed to access it. The user can enter an email address and all associated personal data are displayed. From there, the user can show, export or anonymize them.
 
 ### Front-end
 
-The front-end module needs to be registered in your theme.
+The "Personal Data Manager" front-end module needs to be registered in your theme. Its template is `frontend_module/wem_personal_data_manager`, the email sent is rendered with `personal_data_manager/email` (both can be overridden like any Contao Twig template). The sender is the website root's administrator email.
 
 The user has to enter an email address in the displayed form. An email containing a link to the current page with a token will be sent to the email address filled in the form. The token is valid for 5 minutes upon its creation. By clicking on the link provided in the email, the user will be redirected to the page where the front-end module lies, with the token as a GET parameter. From there, the user can show, export or anonymize their personal data.
 
@@ -212,6 +222,16 @@ Documentation
 
  * [Change log][1]
  * [Git repository][2]
+
+Development
+-----------
+
+```shell
+composer install
+vendor/bin/ecs check --fix
+vendor/bin/rector process
+vendor/bin/phpstan analyse
+```
 
 License
 -------
@@ -234,6 +254,6 @@ You can get the extension with this repository URL : [Github][2]
 [1]: CHANGELOG.md
 [2]: https://github.com/webexmachina/personal-data-manager
 [3]: https://www.webexmachina.fr/
-[4]: https://github.com/plenta/contao-encryption
+[4]: https://github.com/Web-Ex-Machina/contao-utils
 [5]: docs/HOOKS.md
 [6]: docs/examples/members_and_newsletters/example.md

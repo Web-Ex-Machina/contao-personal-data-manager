@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2024 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
  */
 
 namespace WEM\PersonalDataManagerBundle\Service;
@@ -19,6 +16,9 @@ use Contao\FilesModel;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\System;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Filesystem\Path;
+use Symfony\Component\HttpFoundation\RequestStack;
 use WEM\PersonalDataManagerBundle\Model\PersonalData as PersonalDataModel;
 use WEM\PersonalDataManagerBundle\Model\PersonalDataAccessToken as PersonalDataAccessTokenModel;
 use WEM\PersonalDataManagerBundle\Model\Traits\PersonalDataTrait;
@@ -27,27 +27,25 @@ use WEM\UtilsBundle\Classes\StringUtil;
 
 class PersonalDataManager
 {
-    private PersonalDataManagerCsvFormatter $csvFormatter;
-    private Encryption $encryption;
+    public const string SESSION_EMAIL = 'wem_pdm_email';
+
+    public const string SESSION_TOKEN = 'wem_pdm_token';
 
     public function __construct(
-        PersonalDataManagerCsvFormatter $csvFormatter,
-        Encryption $encryption,
+        private readonly PersonalDataManagerCsvFormatter $csvFormatter,
+        private readonly Encryption $encryption,
+        private readonly RequestStack $requestStack,
+        #[Autowire(param: 'kernel.project_dir')]
+        private readonly string $projectDir,
     ) {
-        $this->encryption = $encryption;
-        $this->csvFormatter = $csvFormatter;
     }
 
     /**
      * Retrieves personal data linked to the object.
      *
-     * @param PersonalDataTrait $object The object
-     *
      * @throws \Exception
-     *
-     * @return Collection|null The associated personal data
      */
-    public function findForObject(PersonalDataTrait $object): ?Collection
+    public function findForObject(Model $object): Collection|null
     {
         $this->validateObject($object);
 
@@ -60,13 +58,9 @@ class PersonalDataManager
     /**
      * Retrieves personal data linked to a ptable.
      *
-     * @param string $ptable The ptable
-     *
      * @throws \Exception
-     *
-     * @return Collection|null The associated personal data
      */
-    public function findByPtable(string $ptable): ?Collection
+    public function findByPtable(string $ptable): Collection|null
     {
         return PersonalDataModel::findByPtable($ptable);
     }
@@ -74,11 +68,9 @@ class PersonalDataManager
     /**
      * Delete personal data linked to a ptable.
      *
-     * @param string $ptable The ptable
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The deleted ids
      */
     public function deleteByPtable(string $ptable): array
     {
@@ -88,14 +80,9 @@ class PersonalDataManager
     /**
      * Retrieves personal data linked to a pid and a ptable.
      *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     *
      * @throws \Exception
-     *
-     * @return Collection|null The associated personal data
      */
-    public function findByPidAndPtable(int $pid, string $ptable): ?Collection
+    public function findByPidAndPtable(int $pid, string $ptable): Collection|null
     {
         return PersonalDataModel::findByPidAndPtable($pid, $ptable);
     }
@@ -103,12 +90,9 @@ class PersonalDataManager
     /**
      * Delete personal data linked to a pid and a ptable.
      *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The deleted ids
      */
     public function deleteByPidAndPtable(int $pid, string $ptable): array
     {
@@ -118,13 +102,9 @@ class PersonalDataManager
     /**
      * Retrieves personal data linked to an email.
      *
-     * @param string $email The email
-     *
      * @throws \Exception
-     *
-     * @return Collection|null The associated personal data
      */
-    public function findByEmail(string $email): ?Collection
+    public function findByEmail(string $email): Collection|null
     {
         return PersonalDataModel::findByEmail($email);
     }
@@ -132,11 +112,9 @@ class PersonalDataManager
     /**
      * Delete personal data linked to an email.
      *
-     * @param string $email The email
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The deleted ids
      */
     public function deleteByEmail(string $email): array
     {
@@ -146,44 +124,23 @@ class PersonalDataManager
     /**
      * Anonymize personal data linked to an email.
      *
-     * @param string $email The email
-     *
      * @throws \Exception
      */
-    public function anonymizeByEmail(string $email): ?array
+    public function anonymizeByEmail(string $email): array|null
     {
-        $anonymized = [];
         $pdms = PersonalDataModel::findByEmail($email);
 
-        if (isset($GLOBALS['WEM_HOOKS']['anonymizeByEmail']) && \is_array($GLOBALS['WEM_HOOKS']['anonymizeByEmail'])) {
-            foreach ($GLOBALS['WEM_HOOKS']['anonymizeByEmail'] as $callback) {
-                $pdms = System::importStatic($callback[0])->{$callback[1]}($email, $pdms);
-            }
+        foreach ($GLOBALS['WEM_HOOKS']['anonymizeByEmail'] ?? [] as $callback) {
+            $pdms = System::importStatic($callback[0])->{$callback[1]}($email, $pdms);
         }
 
-        if (!$pdms) {
-            return null;
-        }
-
-        while ($pdms->next()) {
-            if (!\array_key_exists($pdms->ptable, $anonymized)) {
-                $anonymized[$pdms->ptable] = [];
-            }
-
-            if (!\array_key_exists($pdms->pid, $anonymized[$pdms->ptable])) {
-                $anonymized[$pdms->ptable][$pdms->pid] = [];
-            }
-
-            $anonymized[$pdms->ptable][$pdms->pid][$pdms->field] = $this->anonymize($pdms->current());
-        }
-
-        return $anonymized;
+        return $this->anonymizeCollection($pdms);
     }
 
     /**
      * Export personal data linked to an email.
      *
-     * @param string $email The email
+     * @return string The path to the generated zip archive
      *
      * @throws \Exception
      */
@@ -191,42 +148,19 @@ class PersonalDataManager
     {
         $pdms = PersonalDataModel::findByEmail($email);
 
-        if (isset($GLOBALS['WEM_HOOKS']['exportByEmail']) && \is_array($GLOBALS['WEM_HOOKS']['exportByEmail'])) {
-            foreach ($GLOBALS['WEM_HOOKS']['exportByEmail'] as $callback) {
-                $pdms = System::importStatic($callback[0])->{$callback[1]}($email, $pdms);
-            }
+        foreach ($GLOBALS['WEM_HOOKS']['exportByEmail'] ?? [] as $callback) {
+            $pdms = System::importStatic($callback[0])->{$callback[1]}($email, $pdms);
         }
 
-        $csvContent = $this->csvFormatter->formatPersonalDataForCsv($pdms);
-
-        $zipName = $email.'.zip';
-        $zip = new \ZipArchive();
-        $res = $zip->open($zipName, \ZipArchive::CREATE);
-
-        if (!$res) {
-            throw new \Exception('Unable to create zip archive');
-        }
-
-        $zip->addFromString('data.csv', mb_convert_encoding(StringUtil::decodeEntities($csvContent), 'UTF-16LE', 'UTF-8'));
-        if ($pdms) {
-            $zip = $this->addAllLinkedFilesToZipArchive($zip, $pdms);
-        }
-
-        $zip->close();
-
-        return $zipName;
+        return $this->createZipArchive($pdms);
     }
 
     /**
      * Delete personal data linked to a pid, a ptable and an email.
      *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The deleted ids
      */
     public function deleteByPidAndPtableAndEmail(int $pid, string $ptable, string $email): array
     {
@@ -236,48 +170,23 @@ class PersonalDataManager
     /**
      * Anonymize personal data linked to a pid, a ptable and an email.
      *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
-     *
      * @throws \Exception
      */
-    public function anonymizeByPidAndPtableAndEmail(int $pid, string $ptable, string $email): ?array
+    public function anonymizeByPidAndPtableAndEmail(int $pid, string $ptable, string $email): array|null
     {
-        $anonymized = [];
         $pdms = PersonalDataModel::findByPidAndPtableAndEmail($pid, $ptable, $email);
 
-        if (isset($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail']) && \is_array($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail'])) {
-            foreach ($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail'] as $callback) {
-                $pdms = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdms);
-            }
+        foreach ($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmail'] ?? [] as $callback) {
+            $pdms = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdms);
         }
 
-        if (!$pdms) {
-            return null;
-        }
-
-        while ($pdms->next()) {
-            if (!\array_key_exists($pdms->ptable, $anonymized)) {
-                $anonymized[$pdms->ptable] = [];
-            }
-
-            if (!\array_key_exists($pdms->pid, $anonymized[$pdms->ptable])) {
-                $anonymized[$pdms->ptable][$pdms->pid] = [];
-            }
-
-            $anonymized[$pdms->ptable][$pdms->pid][$pdms->field] = $this->anonymize($pdms->current());
-        }
-
-        return $anonymized;
+        return $this->anonymizeCollection($pdms);
     }
 
     /**
      * Export personal data linked to a pid, a ptable and an email.
      *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
+     * @return string The path to the generated zip archive
      *
      * @throws \Exception
      */
@@ -285,59 +194,29 @@ class PersonalDataManager
     {
         $pdms = PersonalDataModel::findByPidAndPtableAndEmail($pid, $ptable, $email);
 
-        if (isset($GLOBALS['WEM_HOOKS']['exportByPidAndPtableAndEmail']) && \is_array($GLOBALS['WEM_HOOKS']['exportByPidAndPtableAndEmail'])) {
-            foreach ($GLOBALS['WEM_HOOKS']['exportByPidAndPtableAndEmail'] as $callback) {
-                $pdms = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdms);
-            }
+        foreach ($GLOBALS['WEM_HOOKS']['exportByPidAndPtableAndEmail'] ?? [] as $callback) {
+            $pdms = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdms);
         }
 
-        $csvContent = $this->csvFormatter->formatPersonalDataForCsv($pdms);
-
-        $zipName = $email.'-'.$ptable.'-'.$pid.'.zip';
-        $zip = new \ZipArchive();
-        $res = $zip->open($zipName, \ZipArchive::CREATE);
-
-        if (!$res) {
-            throw new \Exception('Unable to create zip archive');
-        }
-
-        $zip->addFromString('data.csv', mb_convert_encoding(StringUtil::decodeEntities($csvContent), 'UTF-16LE', 'UTF-8'));
-        if ($pdms) {
-            $zip = $this->addAllLinkedFilesToZipArchive($zip, $pdms);
-        }
-
-        $zip->close();
-
-        return $zipName;
+        return $this->createZipArchive($pdms);
     }
 
     /**
      * Retrieves a single personal data linked to a pid, a ptable, an email and a field.
      *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
-     * @param string $field  The field
-     *
      * @throws \Exception
-     *
-     * @return PersonalDataModel|null The associated personal data
      */
-    public function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?PersonalDataModel
+    public function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): PersonalDataModel|null
     {
         return PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
     }
 
     /**
-     * Delete personal data linked to a pid, a ptable and an email.
+     * Delete personal data linked to a pid, a ptable, an email and a field.
      *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The deleted ids
      */
     public function deleteByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): array
     {
@@ -345,47 +224,35 @@ class PersonalDataManager
     }
 
     /**
-     * Anonymize personal data linked to a pid, a ptable and an email.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
+     * Anonymize personal data linked to a pid, a ptable, an email and a field.
      *
      * @throws \Exception
      */
-    public function anonymizeByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?string
+    public function anonymizeByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): string|null
     {
         $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
 
-        if (isset($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField']) && \is_array($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField'])) {
-            foreach ($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField'] as $callback) {
-                $pdm = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdm);
-            }
+        foreach ($GLOBALS['WEM_HOOKS']['anonymizeByPidAndPtableAndEmailAndField'] ?? [] as $callback) {
+            $pdm = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdm);
         }
 
-        if (!$pdm) {
+        if (! $pdm instanceof PersonalDataModel) {
             return null;
         }
 
-        return $this->anonymize($pdm->current());
+        return $this->anonymize($pdm);
     }
 
     /**
-     * Retrieves a single personal data unecrypted value linked to a pid, a ptable, an email and a field.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
-     * @param string $field  The field
+     * Retrieves a single personal data unencrypted value linked to a pid, a ptable, an email and a field.
      *
      * @throws \Exception
-     *
-     * @return string|null The unencrypted associated personal data value
      */
-    public function getUnecryptedValueByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?string
+    public function getUnecryptedValueByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): mixed
     {
         $personalData = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
-        if (!$personalData instanceof Model) {
+
+        if (! $personalData instanceof PersonalDataModel) {
             return null;
         }
 
@@ -395,16 +262,12 @@ class PersonalDataManager
     /**
      * Retrieves personal data linked to the object and applies them.
      *
-     * @param PersonalDataTrait $object The object
-     *
      * @throws \Exception
-     *
-     * @return PersonalDataTrait The modified object
      */
-    public function findAndApplyForObject(PersonalDataTrait $object): PersonalDataTrait
+    public function findAndApplyForObject(Model $object): Model
     {
-        $this->validateObject($object);
         $personalDatas = $this->findForObject($object);
+
         if ($personalDatas instanceof Collection) {
             $object = $this->applyPersonalDataTo($object, $personalDatas);
         }
@@ -413,17 +276,12 @@ class PersonalDataManager
     }
 
     /**
-     * Retrieves personal data linked to the object and applies them.
-     *
-     * @param mixed      $object        The object
-     * @param Collection $personalDatas The personal data collection
-     *
-     * @return mixed The modified object
+     * Applies the personal data to the object.
      */
-    public function applyPersonalDataTo($object, Collection $personalDatas)
+    public function applyPersonalDataTo(object $object, Collection $personalDatas): object
     {
-        while ($personalDatas->next()) {
-            $object->{$personalDatas->field} = $this->getCleanValue($personalDatas->current());
+        foreach ($personalDatas as $personalData) {
+            $object->{$personalData->field} = $this->getCleanValue($personalData);
         }
 
         return $object;
@@ -432,18 +290,16 @@ class PersonalDataManager
     /**
      * Inserts (or update) personal data linked to a pid, a ptable and an email.
      *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
-     * @param array  $datas  Array of datas (['field'=>'value'])
+     * @param array<string, mixed> $datas Array of datas (['field'=>'value'])
+     *
+     * @return array<PersonalDataModel> The personal datas inserted (or updated)
      *
      * @throws \Exception
-     *
-     * @return array The personal datas inserted (or updated)
      */
     public function insertOrUpdateForPidAndPtableAndEmail(int $pid, string $ptable, string $email, array $datas): array
     {
         $pdms = [];
+
         foreach ($datas as $field => $value) {
             $pdms[] = $this->insertOrUpdateForPidAndPtableAndEmailAndField($pid, $ptable, $email, $field, $value);
         }
@@ -452,39 +308,31 @@ class PersonalDataManager
     }
 
     /**
-     * Inserts (or update) personal data linked to a pid, a ptabl, an email and a field.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
-     * @param string $field  The field
-     * @param mixed  $value  The value
+     * Inserts (or update) personal data linked to a pid, a ptable, an email and a field.
      *
      * @throws \Exception
-     *
-     * @return PersonalDataModel The personal data record
      */
-    public function insertOrUpdateForPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field, $value): PersonalDataModel
+    public function insertOrUpdateForPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field, mixed $value): PersonalDataModel
     {
         $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field) ?? new PersonalDataModel();
         $pdm->pid = $pid;
         $pdm->ptable = $ptable;
         $pdm->email = $email;
         $pdm->field = $field;
-        if ($pdm->anonymized && (string) $value === (string) $pdm->value) {
-            // if pdm anonymized and values are equals, do nothing
-        } else {
-            // else, save the value and de-anonymize data
+
+        // If the data is anonymized and the value did not change, keep it anonymized
+        if (! $pdm->anonymized || (string) $value !== (string) $pdm->value) {
             if (\is_array($value)) {
                 $pdm->altered = 'serialized';
                 $value = serialize($value);
             }
+
             $pdm->value = (string) $this->encryption->encrypt_b64($value);
             $pdm->anonymized = '';
             $pdm->anonymizedAt = '';
         }
 
-        $pdm->createdAt ??= time();
+        $pdm->createdAt = $pdm->createdAt ?: time();
         $pdm->tstamp = time();
         $pdm->save();
 
@@ -494,35 +342,31 @@ class PersonalDataManager
     /**
      * @throws \Exception
      */
-    public function anonymize(PersonalDataModel $personalData): ?string
+    public function anonymize(PersonalDataModel $personalData): string|null
     {
         $originalModel = Model::getClassFromTable($personalData->ptable);
 
         $objFile = null;
+
         if ($this->isPersonalDataLinkedToFile($personalData)) {
-            $objFile = $this->getFileByPidAndPtableAndEmailAndField($personalData->pid, $personalData->ptable, $personalData->email, $personalData->field);
+            $objFile = $this->getFileByPidAndPtableAndEmailAndField((int) $personalData->pid, $personalData->ptable, $personalData->email, $personalData->field);
         }
 
-        $obj = new $originalModel();
-        $anonymizedValue = $obj->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
+        $anonymizedValue = new $originalModel()->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
         $value = $this->getCleanValue($personalData);
-        $personalData->value = (string) $anonymizedValue;
 
+        $personalData->value = (string) $anonymizedValue;
         $personalData->anonymized = true;
         $personalData->anonymizedAt = time();
         $personalData->save();
 
-        if (isset($GLOBALS['WEM_HOOKS']['anonymize']) && \is_array($GLOBALS['WEM_HOOKS']['anonymize'])) {
-            foreach ($GLOBALS['WEM_HOOKS']['anonymize'] as $callback) {
-                System::importStatic($callback[0])->{$callback[1]}($personalData, $value, $objFile);
-            }
+        foreach ($GLOBALS['WEM_HOOKS']['anonymize'] ?? [] as $callback) {
+            System::importStatic($callback[0])->{$callback[1]}($personalData, $value, $objFile);
         }
 
-        // here we should anonymize the file if pdm linked to one
+        // Replace the file content if the personal data is linked to one
         if ($objFile instanceof File) {
-            $objFileDeletedTplContent = file_get_contents(System::getContainer()->getParameter('kernel.project_dir').'/public/bundles/wempersonaldatamanager/images/file_deleted.jpg');
-
-            $objFile->write($objFileDeletedTplContent);
+            $objFile->write((string) file_get_contents(Path::join($this->projectDir, 'public/bundles/wempersonaldatamanager/images/file_deleted.jpg')));
             $objFile->renameTo(str_replace($objFile->name, \sprintf('file_deleted_%s.jpg', time()), $objFile->path));
             $objFile->close();
         }
@@ -530,30 +374,29 @@ class PersonalDataManager
         return $anonymizedValue;
     }
 
-    public function getHrefByPidAndPtableAndEmail(int $pid, string $ptable, string $email)
+    public function getHrefByPidAndPtableAndEmail(int $pid, string $ptable, string $email): string
     {
         $href = '';
 
-        if (isset($GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail']) && \is_array($GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail'])) {
-            foreach ($GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail'] as $callback) {
-                $href = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $href);
-            }
+        foreach ($GLOBALS['WEM_HOOKS']['getHrefByPidAndPtableAndEmail'] ?? [] as $callback) {
+            $href = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $href);
         }
 
-        return $href;
+        return (string) $href;
     }
 
     /**
      * @throws \Exception
      */
-    public function getFileByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?File
+    public function getFileByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): File
     {
         $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
-        if (!$pdm instanceof Model) {
+
+        if (! $pdm instanceof PersonalDataModel) {
             throw new \Exception('Unable to find personal data');
         }
 
-        if (!$this->isPersonalDataLinkedToFile($pdm)) {
+        if (! $this->isPersonalDataLinkedToFile($pdm)) {
             throw new \Exception('Personal data not linked to a file');
         }
 
@@ -561,25 +404,18 @@ class PersonalDataManager
         $objFileModel = null;
 
         if (FilesModel::getTable() === $ptable) {
-            switch ($field) {
-                case 'id':
-                case 'name':
-                case 'path':
-                    $objFileModel = FilesModel::findOneBy($field, $value);
-                    break;
-                case 'uuid':
-                    $objFileModel = FilesModel::findByUuid($value);
-                    break;
-            }
+            $objFileModel = match ($field) {
+                'id', 'name', 'path' => FilesModel::findOneBy($field, $value),
+                'uuid' => FilesModel::findByUuid($value),
+                default => null,
+            };
         }
 
-        if (isset($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField']) && \is_array($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField'])) {
-            foreach ($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField'] as $callback) {
-                $objFileModel = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $field, $pdm, $value, $objFileModel);
-            }
+        foreach ($GLOBALS['WEM_HOOKS']['getFileByPidAndPtableAndEmailAndField'] ?? [] as $callback) {
+            $objFileModel = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $field, $pdm, $value, $objFileModel);
         }
 
-        if (!$objFileModel) {
+        if (! $objFileModel instanceof FilesModel) {
             throw new \Exception('Unable to find the file');
         }
 
@@ -590,24 +426,17 @@ class PersonalDataManager
     {
         $isLinkedToFile = FilesModel::getTable() === $pdm->ptable;
 
-        if (isset($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile']) && \is_array($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile'])) {
-            foreach ($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile'] as $callback) {
-                $isLinkedToFile = System::importStatic($callback[0])->{$callback[1]}($pdm, $isLinkedToFile);
-            }
+        foreach ($GLOBALS['WEM_HOOKS']['isPersonalDataLinkedToFile'] ?? [] as $callback) {
+            $isLinkedToFile = System::importStatic($callback[0])->{$callback[1]}($pdm, $isLinkedToFile);
         }
 
-        return $isLinkedToFile;
+        return (bool) $isLinkedToFile;
     }
 
     /**
      * Check if an email + token couple is valid.
      *
-     * @param string $email The email
-     * @param string $token The token
-     *
      * @throws \Exception
-     *
-     * @return bool True if valid
      */
     public function isEmailTokenCoupleValid(string $email, string $token): bool
     {
@@ -615,21 +444,14 @@ class PersonalDataManager
     }
 
     /**
-     * Inserts a row for an email.
-     *
-     * @param string $email The email
+     * Inserts an access token for an email, invalidating the previous ones.
      */
     public function insertForEmail(string $email): PersonalDataAccessTokenModel
     {
-        $pdmats = PersonalDataAccessTokenModel::findBy('email', $email);
-
-        if ($pdmats) {
-            while ($pdmats->next()) {
-                $pdmat = $pdmats->current();
-                if ($pdmat->isValid()) {
-                    $pdmat->expiresAt = time();
-                    $pdmat->save();
-                }
+        foreach (PersonalDataAccessTokenModel::findBy('email', $email) ?? [] as $pdmat) {
+            if ($pdmat->isValid()) {
+                $pdmat->expiresAt = time();
+                $pdmat->save();
             }
         }
 
@@ -637,95 +459,144 @@ class PersonalDataManager
     }
 
     /**
-     * update expiration date for an existing token.
+     * Update the expiration date of an existing token.
      *
      * @throws \Exception
      */
     public function updateTokenExpiration(string $token): PersonalDataAccessTokenModel
     {
         $obj = PersonalDataAccessTokenModel::findOneBy('token', $token);
-        if (!$obj
-        || !$obj->isValid()
-        ) {
+
+        if (! $obj instanceof PersonalDataAccessTokenModel || ! $obj->isValid()) {
             throw new \Exception('The token is invalid');
         }
 
-        $obj->updateExpiration();
+        return $obj->updateExpiration();
+    }
 
-        return $obj;
+    public function putEmailInSession(string $email): void
+    {
+        $this->requestStack->getSession()->set(self::SESSION_EMAIL, $email);
+    }
+
+    public function getEmailInSession(): string|null
+    {
+        return $this->requestStack->getSession()->get(self::SESSION_EMAIL);
     }
 
     public function putTokenInSession(string $token): void
     {
-        $session = System::getContainer()->get('session'); // Init session
-        $session->set('wem_pdm_token', $token);
+        $this->requestStack->getSession()->set(self::SESSION_TOKEN, $token);
     }
 
     public function clearTokenInSession(): void
     {
-        $session = System::getContainer()->get('session'); // Init session
-        $session->set('wem_pdm_token', '');
+        $this->requestStack->getSession()->set(self::SESSION_TOKEN, '');
     }
 
-    public function getTokenInSession(): ?string
+    public function getTokenInSession(): string|null
     {
-        $session = System::getContainer()->get('session'); // Init session
-
-        return $session->get('wem_pdm_token');
+        return $this->requestStack->getSession()->get(self::SESSION_TOKEN);
     }
 
     /**
      * Validate that an object can be manipulated by this service.
-     *
-     * @param mixed $object The object
      */
-    public function validateObject($object): void
+    public function validateObject(mixed $object): void
     {
-        if (!is_a($object, Model::class)) {
+        if (! $object instanceof Model) {
             throw new \InvalidArgumentException('The object is not a Contao Model.');
         }
 
-        if (!\in_array('WEM\PersonalDataManagerBundle\Model\Trait\PersonalDataTrait', class_uses($object), true)) {
+        if (! \in_array(PersonalDataTrait::class, class_uses($object), true)) {
             throw new \InvalidArgumentException('The object does not use the "PersonalDataTrait".');
         }
     }
 
     /**
-     * Return the data decrypted and formated depending
-     * on altered column.
-     *
-     * @param PersonalData $data
+     * Return the data decrypted and formatted depending on the "altered" column.
      */
-    protected function getCleanValue($data)
+    public function getCleanValue(PersonalDataModel $data): mixed
     {
         if ($data->anonymized) {
             return $data->value;
         }
 
         $value = $this->encryption->decrypt_b64($data->value);
-        if ('serialized' === $data->altered) {
-            return unserialize($value);
+
+        if ($data->altered === 'serialized') {
+            return unserialize($value, [
+                'allowed_classes' => false,
+            ]);
         }
 
         return $value;
     }
 
     /**
+     * @return array<string, array<int, array<string, string|null>>>|null
+     *
      * @throws \Exception
      */
-    protected function addAllLinkedFilesToZipArchive(\ZipArchive $zip, $pdms): \ZipArchive
+    private function anonymizeCollection(Collection|null $pdms): array|null
     {
-        $pdms->reset();
-        while ($pdms->next()) {
-            $pdm = $pdms->current();
-            if ($this->isPersonalDataLinkedToFile($pdm)) {
-                $objFile = $this->getFileByPidAndPtableAndEmailAndField($pdm->pid, $pdm->ptable, $pdm->email, $pdm->field);
-                if ($objFile instanceof File) {
-                    $zip->addFromString(\sprintf('%s/%s/%s', $pdm->ptable, $pdm->pid, $objFile->name), $objFile->getContent());
-                }
-            }
+        if (! $pdms instanceof Collection) {
+            return null;
         }
 
-        return $zip;
+        $anonymized = [];
+
+        foreach ($pdms as $pdm) {
+            $anonymized[$pdm->ptable][$pdm->pid][$pdm->field] = $this->anonymize($pdm);
+        }
+
+        return $anonymized;
+    }
+
+    /**
+     * Create a zip archive in the system temporary directory, containing a CSV
+     * export of the personal data and the files linked to them.
+     *
+     * @throws \Exception
+     */
+    private function createZipArchive(Collection|null $pdms): string
+    {
+        $zipName = tempnam(sys_get_temp_dir(), 'wem_pdm_');
+
+        if ($zipName === false) {
+            throw new \Exception('Unable to create zip archive');
+        }
+
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipName, \ZipArchive::OVERWRITE) !== true) {
+            throw new \Exception('Unable to create zip archive');
+        }
+
+        $csvContent = $this->csvFormatter->formatPersonalDataForCsv($pdms);
+        $zip->addFromString('data.csv', mb_convert_encoding(StringUtil::decodeEntities($csvContent), 'UTF-16LE', 'UTF-8'));
+
+        if ($pdms instanceof Collection) {
+            $this->addAllLinkedFilesToZipArchive($zip, $pdms);
+        }
+
+        $zip->close();
+
+        return $zipName;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function addAllLinkedFilesToZipArchive(\ZipArchive $zip, Collection $pdms): void
+    {
+        foreach ($pdms as $pdm) {
+            if (! $this->isPersonalDataLinkedToFile($pdm)) {
+                continue;
+            }
+
+            $objFile = $this->getFileByPidAndPtableAndEmailAndField((int) $pdm->pid, $pdm->ptable, $pdm->email, $pdm->field);
+            $zip->addFromString(\sprintf('%s/%s/%s', $pdm->ptable, $pdm->pid, $objFile->name), $objFile->getContent());
+        }
     }
 }

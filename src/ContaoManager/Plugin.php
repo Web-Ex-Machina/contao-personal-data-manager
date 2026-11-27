@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
  */
 
 namespace WEM\PersonalDataManagerBundle\ContaoManager;
@@ -19,41 +16,28 @@ use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 use Contao\ManagerPlugin\Routing\RoutingPluginInterface;
-use Exception;
 use Symfony\Component\Config\Loader\LoaderResolverInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Routing\RouteCollection;
 use WEM\PersonalDataManagerBundle\WEMPersonalDataManagerBundle;
+use WEM\UtilsBundle\UtilsBundle;
 
-/**
- * Plugin for the Contao Manager.
- *
- * @author Web ex Machina <https://www.webexmachina.fr>
- */
 class Plugin implements BundlePluginInterface, RoutingPluginInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getBundles(ParserInterface $parser)
+    public function getBundles(ParserInterface $parser): array
     {
         return [
             BundleConfig::create(WEMPersonalDataManagerBundle::class)
-                ->setLoadAfter([
-                    ContaoCoreBundle::class,
-                ])
+                ->setLoadAfter([ContaoCoreBundle::class, UtilsBundle::class])
                 ->setReplace(['wem-personal-data-manager']),
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     * @throws Exception
-     */
-    public function getRouteCollection(LoaderResolverInterface $resolver, KernelInterface $kernel)
+    public function getRouteCollection(LoaderResolverInterface $resolver, KernelInterface $kernel): RouteCollection|null
     {
         return $resolver
-            ->resolve(__DIR__.'/../Resources/config/routing.yml')
-            ->load(__DIR__.'/../Resources/config/routing.yml')
+            ->resolve(__DIR__ . '/../../config/routes.yaml')
+            ->load(__DIR__ . '/../../config/routes.yaml')
         ;
     }
 }

@@ -1,6 +1,0 @@
-<div>
-	<?php $this->insert('mod_personaldatamanager_emailform', $this->getData()); ?>
-</div>
-<div class="pdm-content">
-	<?php echo $this->content; ?>
-</div>

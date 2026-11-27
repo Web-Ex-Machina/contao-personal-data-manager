@@ -1,0 +1,61 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  WEM\PersonalDataManagerBundle\:
+    resource: ../src/
+    exclude: ../src/{ContaoManager,DependencyInjection,Dca/Driver,Exception,Model,WEMPersonalDataManagerBundle.php}
+
+  # The field callbacks are configured per table and field (see README), each
+  # injection must therefore receive its own instance
+  WEM\PersonalDataManagerBundle\Dca\Field\Callback\Load:
+    shared: false
+
+  WEM\PersonalDataManagerBundle\Dca\Field\Callback\Save:
+    shared: false
+
+  # Public aliases, used as service ids in the DCA callbacks of the managed tables
+  wem.personal_data_manager.service.personal_data_manager:
+    alias: WEM\PersonalDataManagerBundle\Service\PersonalDataManager
+    public: true
+
+  wem.personal_data_manager.service.personal_data_manager_csv_formatter:
+    alias: WEM\PersonalDataManagerBundle\Service\PersonalDataManagerCsvFormatter
+    public: true
+
+  wem.personal_data_manager.service.personal_data_manager_ui:
+    alias: WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi
+    public: true
+
+  wem.personal_data_manager.service.personal_data_manager_action:
+    alias: WEM\PersonalDataManagerBundle\Service\PersonalDataManagerAction
+    public: true
+
+  wem.personal_data_manager.dca.field.callback.load:
+    alias: WEM\PersonalDataManagerBundle\Dca\Field\Callback\Load
+    public: true
+
+  wem.personal_data_manager.dca.field.callback.save:
+    alias: WEM\PersonalDataManagerBundle\Dca\Field\Callback\Save
+    public: true
+
+  wem.personal_data_manager.dca.listing.callback.list_label_label_for_list:
+    alias: WEM\PersonalDataManagerBundle\Dca\Listing\Callback\ListLabelLabelForList
+    public: true
+
+  wem.personal_data_manager.dca.listing.callback.list_label_group:
+    alias: WEM\PersonalDataManagerBundle\Dca\Listing\Callback\ListLabelGroup
+    public: true
+
+  wem.personal_data_manager.dca.config.callback.delete:
+    alias: WEM\PersonalDataManagerBundle\Dca\Config\Callback\Delete
+    public: true
+
+  wem.personal_data_manager.dca.config.callback.show:
+    alias: WEM\PersonalDataManagerBundle\Dca\Config\Callback\Show
+    public: true
+
+  wem.personal_data_manager.dca.config.callback.submit:
+    alias: WEM\PersonalDataManagerBundle\Dca\Config\Callback\Submit
+    public: true

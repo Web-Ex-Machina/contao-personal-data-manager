@@ -4,248 +4,198 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2024 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
  */
 
 namespace WEM\PersonalDataManagerBundle\Model;
 
 use Contao\Model\Collection;
-// use WEM\PersonalDataManagerBundle\Model\Traits\PersonalDataTrait;
 use WEM\UtilsBundle\Model\Model;
 
+/**
+ * @property int        $id
+ * @property int        $tstamp
+ * @property int        $pid
+ * @property string     $ptable
+ * @property string     $email
+ * @property string     $field
+ * @property string     $value
+ * @property string     $altered
+ * @property int|string $createdAt
+ * @property bool|string $anonymized
+ * @property int|string $anonymizedAt
+ */
 class PersonalData extends Model
 {
-    // use PersonalDataTrait;
-
-    public const DELETED = 'deleted';
+    public const string DELETED = 'deleted';
 
     /**
      * Table name.
+     *
+     * @var string
      */
     protected static $strTable = 'tl_wem_personal_data';
 
     /**
-     * Find records by ptable.
-     *
-     * @param string $ptable The ptable
-     *
      * @throws \Exception
      */
-    public static function findByPtable(string $ptable): ?Collection
+    public static function findByPtable(string $ptable): Collection|null
     {
-        return static::findItems(['ptable' => $ptable]);
+        return static::findItems([
+            'ptable' => $ptable,
+        ]);
     }
 
     /**
-     * Find records by pid and ptable.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     *
      * @throws \Exception
      */
-    public static function findByPidAndPtable(int $pid, string $ptable): ?Collection
+    public static function findByPidAndPtable(int $pid, string $ptable): Collection|null
     {
-        return static::findItems(['pid' => $pid, 'ptable' => $ptable]);
+        return static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+        ]);
     }
 
     /**
-     * Find record by pid, ptable and field.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $field  The field
-     *
      * @throws \Exception
      */
-    public static function findOneByPidAndPtableAndField(int $pid, string $ptable, string $field): ?Collection
+    public static function findOneByPidAndPtableAndField(int $pid, string $ptable, string $field): self|null
     {
-        return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'field' => $field], 1);
+        return self::findOne(static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+            'field' => $field,
+        ], 1));
     }
 
     /**
-     * Find records by pid, ptable and email.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
-     *
      * @throws \Exception
      */
-    public static function findByPidAndPtableAndEmail(int $pid, string $ptable, string $email): ?Collection
+    public static function findByPidAndPtableAndEmail(int $pid, string $ptable, string $email): Collection|null
     {
-        return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email]);
+        return static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+            'email' => $email,
+        ]);
     }
 
     /**
-     * Find one record by pid, ptable and email.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
-     *
      * @throws \Exception
      */
-    public static function findOneByPidAndPtableAndEmail(int $pid, string $ptable, string $email): ?\Contao\Model
+    public static function findOneByPidAndPtableAndEmail(int $pid, string $ptable, string $email): self|null
     {
-        $collection = static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email], 1);
-
-        return $collection ? $collection->current() : null;
+        return self::findOne(static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+            'email' => $email,
+        ], 1));
     }
 
     /**
-     * Find record by pid, ptable and field.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
-     * @param string $field  The field
-     *
      * @throws \Exception
      */
-    public static function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): ?\Contao\Model
+    public static function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): self|null
     {
-        $collection = static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email, 'field' => $field], 1);
-
-        return $collection ? $collection->current() : null;
+        return self::findOne(static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+            'email' => $email,
+            'field' => $field,
+        ], 1));
     }
 
     /**
-     * Find records by email.
-     *
-     * @param string     $email   The email
-     * @param int|null   $limit   The limit
-     * @param int|null   $offset  The offset
-     * @param array|null $options The options
-     *
      * @throws \Exception
      */
-    public static function findByEmail(string $email, ?int $limit = 0, ?int $offset = 0, ?array $options = []): ?Collection
+    public static function findByEmail(string $email, int $limit = 0, int $offset = 0, array $options = []): Collection|null
     {
-        return static::findItems(['email' => $email], $limit, $offset, $options);
+        return static::findItems([
+            'email' => $email,
+        ], $limit, $offset, $options);
     }
 
     /**
-     * Delete rows by pid and ptable.
-     *
-     * @param string $ptable The ptable
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The array of deleted ids
      */
     public static function deleteByPtable(string $ptable): array
     {
-        $ids = [];
-        $items = self::findByPtable($ptable);
-        if ($items instanceof Collection) {
-            while ($items->next()) {
-                $ids[] = $items->id;
-                $items->delete();
-            }
-        }
-
-        return $ids;
+        return self::deleteCollection(self::findByPtable($ptable));
     }
 
     /**
-     * Delete rows by pid and ptable.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The array of deleted ids
      */
     public static function deleteByPidAndPtable(int $pid, string $ptable): array
     {
-        $ids = [];
-        $items = self::findByPidAndPtable($pid, $ptable);
-        if ($items instanceof Collection) {
-            while ($items->next()) {
-                $ids[] = $items->id;
-                $items->delete();
-            }
-        }
-
-        return $ids;
+        return self::deleteCollection(self::findByPidAndPtable($pid, $ptable));
     }
 
     /**
-     * Delete rows by email.
-     *
-     * @param string $email The email
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The array of deleted ids
      */
     public static function deleteByEmail(string $email): array
     {
-        $ids = [];
-        $items = self::findByEmail($email);
-        if ($items instanceof Collection) {
-            while ($items->next()) {
-                $ids[] = $items->id;
-                $items->delete();
-            }
-        }
-
-        return $ids;
+        return self::deleteCollection(self::findByEmail($email));
     }
 
     /**
-     * Delete rows by pid, ptable and email.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The array of deleted ids
      */
     public static function deleteByPidAndPtableAndEmail(int $pid, string $ptable, string $email): array
     {
-        $ids = [];
-        $items = self::findByPidAndPtableAndEmail($pid, $ptable, $email);
-        if ($items instanceof Collection) {
-            while ($items->next()) {
-                $ids[] = $items->id;
-                $items->delete();
-            }
-        }
-
-        return $ids;
+        return self::deleteCollection(self::findByPidAndPtableAndEmail($pid, $ptable, $email));
     }
 
     /**
-     * Delete rows by pid, ptable and email.
-     *
-     * @param int    $pid    The pid
-     * @param string $ptable The ptable
-     * @param string $email  The email
-     * @param string $field  The field
+     * @return array<int> The deleted ids
      *
      * @throws \Exception
-     *
-     * @return array The array of deleted ids
      */
     public static function deleteByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): array
     {
-        $ids = [];
         $item = self::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
-        if ($item instanceof \Contao\Model) {
-            $ids[] = $item->id;
+
+        if (! $item instanceof self) {
+            return [];
+        }
+
+        $id = (int) $item->id;
+        $item->delete();
+
+        return [$id];
+    }
+
+    /**
+     * @return array<int> The deleted ids
+     */
+    private static function deleteCollection(Collection|null $items): array
+    {
+        $ids = [];
+
+        foreach ($items ?? [] as $item) {
+            $ids[] = (int) $item->id;
             $item->delete();
         }
 
         return $ids;
+    }
+
+    private static function findOne(Collection|null $items): self|null
+    {
+        $item = $items?->current();
+
+        return $item instanceof self ? $item : null;
     }
 }

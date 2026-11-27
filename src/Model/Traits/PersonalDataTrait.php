@@ -4,33 +4,30 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2024 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
  */
 
 namespace WEM\PersonalDataManagerBundle\Model\Traits;
-
-/*
- * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina.
- *
- * @category ContaoBundle
- *
- * @author   Web ex Machina <contact@webexmachina.fr>
- *
- * @see     https://github.com/Web-Ex-Machina/personal-data-manager/
- */
 
 use Contao\Database\Result;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\System;
-use WEM\UtilsBundle\Classes\Encryption;
+use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
 
+/**
+ * To be used in a Contao Model. The using class must define the following
+ * static properties:
+ *
+ * - array  $personalDataFieldsNames            Fields managed by the Personal Data Manager
+ * - array  $personalDataFieldsDefaultValues    Values stored in the model table for those fields
+ * - array  $personalDataFieldsAnonymizedValues Values used for those fields when anonymized
+ * - string $personalDataPidField               Field used as pid
+ * - string $personalDataEmailField             Field used as email
+ * - string $personalDataPtable                 ptable to store the personal data with
+ */
 trait PersonalDataTrait
 {
     protected static array $personalDataFieldsValues = [];
@@ -42,16 +39,12 @@ trait PersonalDataTrait
 
     /**
      * Delete the current record and return the number of affected rows.
-     *
-     * @return int The number of affected rows
      */
     public function delete(): int
     {
-        // delete associated personal data
         if ($this->shouldManagePersonalData()) {
-            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-            $manager->deleteByPidAndPtable(
-                (int) $this->getPersonalDataPidFieldValue(),
+            self::getPersonalDataManager()->deleteByPidAndPtable(
+                $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable()
             );
         }
@@ -65,6 +58,7 @@ trait PersonalDataTrait
     public function refresh(): void
     {
         parent::refresh();
+
         if ($this->shouldManagePersonalData()) {
             $this->findAndApplyPersonalData();
         }
@@ -75,22 +69,15 @@ trait PersonalDataTrait
      */
     public function findAndApplyPersonalData(): void
     {
-        if ($this->shouldManagePersonalData()) {
-            // re-find personal data
-            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+        if (! $this->shouldManagePersonalData()) {
+            return;
+        }
 
-            $personalDatas = $manager->findByPidAndPtable(
-                (int) $this->getPersonalDataPidFieldValue(),
-                $this->getPersonalDataPtable()
-            );
-            /** @var Encryption */
-            $encryptionService = System::getContainer()->get('wem.encryption_util');
+        $manager = self::getPersonalDataManager();
+        $personalDatas = $manager->findByPidAndPtable($this->getPersonalDataPidFieldValue(), $this->getPersonalDataPtable());
 
-            if ($personalDatas) {
-                while ($personalDatas->next()) {
-                    $this->{$personalDatas->field} = $personalDatas->anonymized ? $personalDatas->value : $encryptionService->decrypt_b64($personalDatas->value);
-                }
-            }
+        if ($personalDatas instanceof Collection) {
+            $manager->applyPersonalDataTo($this, $personalDatas);
         }
     }
 
@@ -99,41 +86,42 @@ trait PersonalDataTrait
      */
     public function anonymize(): void
     {
-        if ($this->shouldManagePersonalData()) {
-            // re-find personal data
-            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-            $manager->anonymizeByPidAndPtableAndEmail(
-                (int) $this->getPersonalDataPidFieldValue(),
-                $this->getPersonalDataPtable(),
-                $this->getPersonalDataEmailFieldValue()
-            );
-            $this->refresh();
+        if (! $this->shouldManagePersonalData()) {
+            return;
         }
+
+        self::getPersonalDataManager()->anonymizeByPidAndPtableAndEmail(
+            $this->getPersonalDataPidFieldValue(),
+            $this->getPersonalDataPtable(),
+            $this->getPersonalDataEmailFieldValue()
+        );
+
+        $this->refresh();
     }
 
     public function getPersonalDataFieldsDefaultValues(): array
     {
-        return self::$personalDataFieldsDefaultValues;
+        return static::$personalDataFieldsDefaultValues;
     }
 
     public function getPersonalDataFieldsDefaultValueForField(string $field): string
     {
-        return $this->getPersonalDataFieldsDefaultValues()[$field];
+        return (string) $this->getPersonalDataFieldsDefaultValues()[$field];
     }
 
     public function getPersonalDataFieldsAnonymizedValues(): array
     {
-        return self::$personalDataFieldsAnonymizedValues;
+        return static::$personalDataFieldsAnonymizedValues;
     }
 
     public function getPersonalDataFieldsAnonymizedValueForField(string $field): string
     {
-        return $this->getPersonalDataFieldsAnonymizedValues()[$field];
+        return (string) $this->getPersonalDataFieldsAnonymizedValues()[$field];
     }
 
     public function getPersonalDataFieldsNames(): array
     {
-        return self::$personalDataFieldsNames;
+        return static::$personalDataFieldsNames;
     }
 
     public function isFieldInPersonalDataFieldsNames(string $field): bool
@@ -143,17 +131,17 @@ trait PersonalDataTrait
 
     public function getPersonalDataPidField(): string
     {
-        return self::$personalDataPidField;
+        return static::$personalDataPidField;
     }
 
     public function getPersonalDataEmailField(): string
     {
-        return self::$personalDataEmailField;
+        return static::$personalDataEmailField;
     }
 
     public function getPersonalDataPtable(): string
     {
-        return self::$personalDataPtable;
+        return static::$personalDataPtable;
     }
 
     public function getPersonalDataPidFieldValue(): int
@@ -163,26 +151,22 @@ trait PersonalDataTrait
 
     public function getPersonalDataEmailFieldValue(): string
     {
-        return $this->{$this->getPersonalDataEmailField()} ?? '';
+        return (string) ($this->{$this->getPersonalDataEmailField()} ?? '');
     }
 
     /**
      * Find a single record by its primary key.
      *
-     * @param mixed $varValue   The property value
-     * @param array $arrOptions An optional options array
+     * Models registered by another class for the same table are detached, so that
+     * the personal data are applied.
      *
-     * @return static The model or null if the result is empty
+     * @return static|null
      */
     public static function findByPk($varValue, array $arrOptions = [])
     {
         $obj = parent::findByPk($varValue, $arrOptions);
 
-        if (!$obj) {
-            return $obj;
-        }
-
-        if (!is_a($obj, self::class)) {
+        if ($obj instanceof Model && ! $obj instanceof self) {
             $obj->detach(false);
 
             return static::findByPk($varValue, $arrOptions);
@@ -194,20 +178,13 @@ trait PersonalDataTrait
     /**
      * Find a single record by its ID or alias.
      *
-     * @param mixed $varId      The ID or alias
-     * @param array $arrOptions An optional options array
-     *
-     * @return static The model or null if the result is empty
+     * @return static|null
      */
     public static function findByIdOrAlias($varId, array $arrOptions = [])
     {
         $obj = parent::findByIdOrAlias($varId, $arrOptions);
 
-        if (!$obj) {
-            return $obj;
-        }
-
-        if (!is_a($obj, self::class)) {
+        if ($obj instanceof Model && ! $obj instanceof self) {
             $obj->detach(false);
 
             return static::findByIdOrAlias($varId, $arrOptions);
@@ -218,29 +195,13 @@ trait PersonalDataTrait
 
     /**
      * Find multiple records by their IDs.
-     *
-     * @param array $arrIds     An array of IDs
-     * @param array $arrOptions An optional options array
-     *
-     * @return Collection|null The model collection or null if there are no records
      */
     public static function findMultipleByIds($arrIds, array $arrOptions = [])
     {
         $obj = parent::findMultipleByIds($arrIds, $arrOptions);
-        if ($obj) {
-            $detached = false;
-            while ($obj->next()) {
-                if (!is_a($obj->current(), self::class)) {
-                    $obj->current()->detach(false);
-                    $detached = true;
-                }
-            }
 
-            if ($detached) {
-                return static::findMultipleByIds($arrIds, $arrOptions);
-            }
-
-            $obj->reset();
+        if ($obj instanceof Collection && self::detachForeignModels($obj)) {
+            return static::findMultipleByIds($arrIds, $arrOptions);
         }
 
         return $obj;
@@ -249,107 +210,71 @@ trait PersonalDataTrait
     /**
      * Create a model from a database result.
      *
-     * @param Result $objResult The database result object
-     *
-     * @return static The model
+     * @return static
      */
     protected static function createModelFromDbResult(Result $objResult)
     {
         $model = parent::createModelFromDbResult($objResult);
-
-        if ($model) {
-            $model->findAndApplyPersonalData();
-        }
+        $model?->findAndApplyPersonalData();
 
         return $model;
     }
 
     /**
      * Create a Collection object.
-     *
-     * @param array  $arrModels An array of models
-     * @param string $strTable  The table name
-     *
-     * @return Collection The Collection object
      */
-    protected static function createCollection(array $arrModels, $strTable)
+    protected static function createCollection(array $arrModels, $strTable): \Contao\Model\Collection
     {
-        $collection = parent::createCollection($arrModels, $strTable);
-        while ($collection->next()) {
-            $model = $collection->current();
-            $model->findAndApplyPersonalData();
-            $collection->setRow($model->row());
-        }
-
-        return $collection;
+        return self::applyPersonalDataToCollection(parent::createCollection($arrModels, $strTable));
     }
 
     /**
      * Create a new collection from a database result.
-     *
-     * @param Result $objResult The database result object
-     * @param string $strTable  The table name
-     *
-     * @return Collection The model collection
      */
-    protected static function createCollectionFromDbResult(Result $objResult, $strTable)
+    protected static function createCollectionFromDbResult(Result $objResult, $strTable): \Contao\Model\Collection
     {
-        $collection = parent::createCollectionFromDbResult($objResult, $strTable);
-
-        while ($collection->next()) {
-            $model = $collection->current();
-            $model->findAndApplyPersonalData();
-            $collection->setRow($model->row());
-        }
-
-        return $collection;
+        return self::applyPersonalDataToCollection(parent::createCollectionFromDbResult($objResult, $strTable));
     }
 
     /**
-     * Modify the current row before it is stored in the database.
-     *
-     * @param array $arrSet The data array
-     *
-     * @return array The modified data array
+     * Modify the current row before it is stored in the database: the personal data
+     * are kept aside, and replaced by their default values.
      */
-    protected function preSave(array $arrSet)
+    protected function preSave(array $arrSet): array
     {
         $arrSet = parent::preSave($arrSet);
 
-        if ($this->shouldManagePersonalData()) {
-            foreach ($this->getPersonalDataFieldsNames() as $personalDataFieldName) {
-                // here check if the data has been modifier or not
-                // field not present in $arrSet && field not modified ? Do not apply the default behaviour, let it be
-                if (\array_key_exists($personalDataFieldName, $this->arrModified)) {
-                    self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
-                    if ($this->isFieldInPersonalDataFieldsNames($personalDataFieldName)) {
-                        $arrSet[$personalDataFieldName] = self::$personalDataFieldsDefaultValues[$personalDataFieldName];
-                    } else {
-                        unset($arrSet[$personalDataFieldName]);
-                    }
-                }
+        if (! $this->shouldManagePersonalData()) {
+            return $arrSet;
+        }
+
+        foreach ($this->getPersonalDataFieldsNames() as $personalDataFieldName) {
+            // Field not modified: do not apply the default behaviour, let it be
+            if (! \array_key_exists($personalDataFieldName, $this->arrModified)) {
+                continue;
             }
+
+            self::$personalDataFieldsValues[$personalDataFieldName] = $arrSet[$personalDataFieldName];
+            $arrSet[$personalDataFieldName] = $this->getPersonalDataFieldsDefaultValueForField($personalDataFieldName);
         }
 
         return $arrSet;
     }
 
     /**
-     * Modify the current row after it has been stored in the database.
-     *
-     * @param int $intType The query type (Model::INSERT or Model::UPDATE)
+     * Modify the current row after it has been stored in the database: the personal
+     * data kept aside are stored by the Personal Data Manager.
      */
     protected function postSave($intType): void
     {
         if ($this->shouldManagePersonalData()) {
-            $manager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-
-            $manager->insertOrUpdateForPidAndPtableAndEmail(
-                (int) $this->getPersonalDataPidFieldValue(),
+            self::getPersonalDataManager()->insertOrUpdateForPidAndPtableAndEmail(
+                $this->getPersonalDataPidFieldValue(),
                 $this->getPersonalDataPtable(),
                 $this->getPersonalDataEmailFieldValue(),
                 self::$personalDataFieldsValues
             );
+
             self::$personalDataFieldsValues = [];
         }
 
@@ -359,61 +284,56 @@ trait PersonalDataTrait
     /**
      * Find records and return the model or model collection.
      *
-     * Supported options:
-     *
-     * * column: the field name
-     * * value:  the field value
-     * * limit:  the maximum number of rows
-     * * offset: the number of rows to skip
-     * * order:  the sorting order
-     * * eager:  load all related records eagerly
-     *
-     * @param array $arrOptions The options array
-     *
-     * @return Model|Model[]|Collection|null A model, model collection or null if the result is empty
+     * @return Model|Model[]|Collection|null
      */
     protected static function find(array $arrOptions)
     {
         $obj = parent::find($arrOptions);
 
-        if (!$obj) {
-            return $obj;
+        if ($obj instanceof Collection) {
+            return self::detachForeignModels($obj) ? static::find($arrOptions) : $obj;
         }
 
-        if (!is_a($obj, self::class) && !is_a($obj, Collection::class)) {
+        if ($obj instanceof Model && ! $obj instanceof self) {
             $obj->detach(false);
 
             return static::find($arrOptions);
         }
 
-        if (is_a($obj, Collection::class)) {
-            $detached = false;
-            while ($obj->next()) {
-                if (null !== !$obj->current()) {
-                    $obj->current()->detach(false);
-                    $detached = true;
-                }
-            }
+        return $obj;
+    }
 
-            if ($detached) {
-                return static::find($arrOptions);
-            }
+    private static function getPersonalDataManager(): PersonalDataManager
+    {
+        return System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
+    }
 
-            $obj->reset();
+    /**
+     * Detach the models of the collection registered by another class for the same
+     * table.
+     *
+     * @return bool True if at least one model has been detached
+     */
+    private static function detachForeignModels(Collection $collection): bool
+    {
+        $detached = false;
+
+        foreach ($collection->getModels() as $model) {
+            if (! $model instanceof self) {
+                $model->detach(false);
+                $detached = true;
+            }
         }
 
-        // if (is_a($obj, self::class)) {
-        //     $obj->attach();
-        // }
+        return $detached;
+    }
 
-        // if (is_a($obj, \Contao\Model\Collection::class)) {
-        //     while ($obj->next()) {
-        //         if (is_a($obj->current(), self::class)) {
-        //             $obj->attach();
-        //         }
-        //     }
-        // }
+    private static function applyPersonalDataToCollection(Collection $collection): Collection
+    {
+        foreach ($collection->getModels() as $model) {
+            $model->findAndApplyPersonalData();
+        }
 
-        return $obj;
+        return $collection;
     }
 }

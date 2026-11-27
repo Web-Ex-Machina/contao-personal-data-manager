@@ -4,22 +4,26 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
  */
 
 namespace WEM\PersonalDataManagerBundle\Model;
 
-use Exception;
 use WEM\UtilsBundle\Model\Model;
 
+/**
+ * @property int        $id
+ * @property int|string $tstamp
+ * @property string     $email
+ * @property string     $token
+ * @property int|string $expiresAt
+ * @property int|string $createdAt
+ */
 class PersonalDataAccessToken extends Model
 {
-    public const EXPIRE_DURATION = 300;
+    public const int EXPIRE_DURATION = 300;
 
     /**
      * Table name.
@@ -31,29 +35,28 @@ class PersonalDataAccessToken extends Model
     /**
      * Check if an email + token couple is valid.
      *
-     * @param string $email The email
-     * @param string $token The token
-     *
-     * @return bool True if valid
-     * @throws Exception
+     * @throws \Exception
      */
     public static function isEmailTokenCoupleValid(string $email, string $token): bool
     {
-        $obj = static::findItems(['email' => $email, 'token' => $token], 1);
-        return $obj && $obj->current()->isValid();
+        $obj = static::findItems([
+            'email' => $email,
+            'token' => $token,
+        ], 1)?->current();
+
+        return $obj instanceof self && $obj->isValid();
     }
 
     /**
-     * Inserts a row for an email.
-     *
-     * @param string $email The email
+     * Inserts a token for an email.
      */
     public static function insertForEmail(string $email): self
     {
         $obj = new self();
         $obj->email = $email;
-        $obj->token = sha1($email.time().random_int(1, 1000));
+        $obj->token = bin2hex(random_bytes(32));
         $obj->expiresAt = time() + self::EXPIRE_DURATION;
+        $obj->createdAt = time();
         $obj->tstamp = time();
         $obj->save();
 

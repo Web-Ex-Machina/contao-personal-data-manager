@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
  */
 
 namespace WEM\PersonalDataManagerBundle\Dca\Field\Callback;
@@ -17,57 +14,49 @@ namespace WEM\PersonalDataManagerBundle\Dca\Field\Callback;
 use Contao\DataContainer;
 use Contao\FrontendUser;
 use Contao\Model;
-use Contao\ModulePersonalData;
-use Exception;
+use Contao\Module;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
-use function func_get_args;
-use function func_num_args;
 
+/**
+ * "load_callback" of a field managed by the Personal Data Manager, in the back end
+ * (DCA) and in the front end ("ModulePersonalData").
+ */
 class Load
 {
-    protected PersonalDataManager $personalDataManager;
-
-    protected string $frontendField;
-
-    protected string $table;
-
     public function __construct(
-        PersonalDataManager $personalDataManager,
-        string $frontendField,
-        string $table
+        private readonly PersonalDataManager $personalDataManager,
+        private string $frontendField = '',
+        private string $table = '',
     ) {
-        $this->personalDataManager = $personalDataManager;
-        $this->frontendField = $frontendField;
-        $this->table = $table;
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
-    public function __invoke()
+    public function __invoke(mixed $value, mixed ...$args): mixed
     {
-        if (2 === func_num_args()) {
-            return $this->invokeBackend(...func_get_args());
+        if (($args[0] ?? null) instanceof DataContainer) {
+            return $this->invokeBackend($value, $args[0]);
         }
 
-        return $this->invokeFrontend(...func_get_args());
+        return $this->invokeFrontend($value, ...$args);
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
-    public function invokeBackend($value, DataContainer $dc)
+    public function invokeBackend(mixed $value, DataContainer $dc): mixed
     {
-        if (!$dc->id) {
+        if (! $dc->id || null === $record = $dc->getCurrentRecord()) {
             return $value;
         }
 
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = new $modelClassName();
-        $model->setRow($dc->activeRecord->row());
+        $model->setRow($record);
 
         return $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
-            (int) $model->getPersonalDataPidFieldValue(),
+            $model->getPersonalDataPidFieldValue(),
             $model->getPersonalDataPtable(),
             $model->getPersonalDataEmailFieldValue(),
             $dc->inputName
@@ -75,16 +64,16 @@ class Load
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
-    public function invokeFrontend($value, FrontendUser $user, ModulePersonalData $module): string
+    public function invokeFrontend(mixed $value, FrontendUser $user, Module $module): mixed
     {
-        if (empty($this->frontendField)) {
-            throw new Exception('No frontend field configured');
+        if ($this->frontendField === '') {
+            throw new \Exception('No frontend field configured');
         }
 
-        if (empty($this->table)) {
-            throw new Exception('No table configured');
+        if ($this->table === '') {
+            throw new \Exception('No table configured');
         }
 
         $modelClassName = Model::getClassFromTable($this->table);
@@ -93,7 +82,7 @@ class Load
         return $this->personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
             (int) $user->{$model->getPersonalDataPidField()},
             $model->getPersonalDataPtable(),
-            $user->{$model->getPersonalDataEmailField()},
+            (string) $user->{$model->getPersonalDataEmailField()},
             $this->frontendField
         ) ?? $value;
     }

@@ -4,37 +4,33 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
  */
 
 namespace WEM\PersonalDataManagerBundle\Dca\Config\Callback;
 
 use Contao\DataContainer;
 use Contao\Model;
-use Exception;
 use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
 
+/**
+ * "config.ondelete_callback" of a table managed by the Personal Data Manager.
+ */
 class Delete
 {
-    protected PersonalDataManager $personalDataManager;
-
     public function __construct(
-        PersonalDataManager $personalDataManager
+        private readonly PersonalDataManager $personalDataManager,
     ) {
-        $this->personalDataManager = $personalDataManager;
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function __invoke(DataContainer $dc, int $undoId): void
     {
-        if (!$dc->id) {
+        if (! $dc->id || null === $record = $dc->getCurrentRecord()) {
             return;
         }
 
@@ -42,9 +38,9 @@ class Delete
         $model = new $modelClassName();
 
         $this->personalDataManager->deleteByPidAndPtableAndEmail(
-            (int) $dc->activeRecord->{$model->getPersonalDataPidField()},
+            (int) $record[$model->getPersonalDataPidField()],
             $model->getPersonalDataPtable(),
-            $dc->activeRecord->{$model->getPersonalDataEmailField()}
+            (string) $record[$model->getPersonalDataEmailField()]
         );
     }
 }

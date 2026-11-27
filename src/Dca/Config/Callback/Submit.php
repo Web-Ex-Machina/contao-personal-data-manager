@@ -4,62 +4,47 @@ declare(strict_types=1);
 
 /**
  * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
  */
 
 namespace WEM\PersonalDataManagerBundle\Dca\Config\Callback;
 
 use Contao\DataContainer;
-use Contao\FrontendUser;
 use Contao\Model;
-use Contao\ModulePersonalData;
-use WEM\PersonalDataManagerBundle\Service\PersonalDataManager;
-use function func_get_args;
-use function func_num_args;
 
+/**
+ * "config.onsubmit_callback" of a table managed by the Personal Data Manager, and
+ * "updatePersonalData" hook in the front end.
+ */
 class Submit
 {
-    protected PersonalDataManager $personalDataManager;
-
-    public function __construct(
-        PersonalDataManager $personalDataManager
-    ) {
-        $this->personalDataManager = $personalDataManager;
-    }
-
-    public function __invoke(): void
+    public function __invoke(mixed ...$args): void
     {
-        if (2 === func_num_args()) {
-            $this->invokeFrontend(...func_get_args());
-        } else {
-            $this->invokeBackend(...func_get_args());
+        // In the front end ("updatePersonalData" hook), the model has already been
+        // updated when the hook is called: nothing to do.
+        if (($args[0] ?? null) instanceof DataContainer) {
+            $this->invokeBackend($args[0]);
         }
-    }
-
-    protected function invokeFrontend(FrontendUser $user, ModulePersonalData $module): void
-    {
-        // nothing to do here
-        // when the hook is called, the Member object has already been updated
     }
 
     protected function invokeBackend(DataContainer $dc): void
     {
-        if (!$dc->id) {
+        if (! $dc->id || null === $record = $dc->getCurrentRecord()) {
             return;
         }
 
         $modelClassName = Model::getClassFromTable($dc->table);
         $model = $modelClassName::findByPk($dc->id);
 
-        // $model->setRow($dc->activeRecord->row());
-        foreach ($dc->activeRecord->row() as $key => $value) {
-            if (!$model->isFieldInPersonalDataFieldsNames($key)
-            || $value === $model->getPersonalDataFieldsDefaultValueForField($key)
+        if ($model === null) {
+            return;
+        }
+
+        foreach ($record as $key => $value) {
+            if (! $model->isFieldInPersonalDataFieldsNames($key)
+                || $value === $model->getPersonalDataFieldsDefaultValueForField($key)
             ) {
                 continue;
             }

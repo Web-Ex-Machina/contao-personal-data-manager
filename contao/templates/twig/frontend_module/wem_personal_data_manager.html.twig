@@ -1,0 +1,15 @@
+{% extends '@Contao/frontend_module/_base.html.twig' %}
+
+{% block content %}
+    {% for message in messages %}
+        <p class="tl_{{ message.type }}">{{ message.text }}</p>
+    {% endfor %}
+
+    {% if content|default %}
+        <div class="pdm-content">
+            {{ content|raw }}
+        </div>
+    {% else %}
+        {{ include('@Contao/personal_data_manager/_email_form.html.twig') }}
+    {% endif %}
+{% endblock %}

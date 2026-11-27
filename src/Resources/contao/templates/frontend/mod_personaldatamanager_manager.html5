@@ -1,3 +1,0 @@
-<div class="pdm-content">
-	<?php echo $this->content; ?>
-</div>
