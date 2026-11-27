@@ -2,218 +2,187 @@
 
 declare(strict_types=1);
 
-/**
- * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
- */
-
 namespace WEM\PersonalDataManagerBundle\Service;
 
-use Contao\BackendUser;
-use Contao\File;
-use Contao\FrontendUser;
-use Contao\Input;
-use Contao\System;
-use Contao\User;
-use Exception;
-use InvalidArgumentException;
+use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
+use Contao\CoreBundle\Routing\ScopeMatcher;
+use Contao\CoreBundle\Security\ContaoCorePermissions;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WEM\PersonalDataManagerBundle\Exception\AccessDeniedException;
 
+/**
+ * Handles the AJAX requests sent by the Personal Data Manager UI, in the back end
+ * as well as in the front end module.
+ */
 class PersonalDataManagerAction
 {
-
-    private TranslatorInterface $translator;
-
-    private PersonalDataManager $manager;
-
-    private User $user;
+    public const string BACKEND_MODULE = 'wem-personal-data-manager';
 
     public function __construct(
-        TranslatorInterface $translator,
-        PersonalDataManager $manager
+        private readonly TranslatorInterface $translator,
+        private readonly PersonalDataManager $manager,
+        private readonly Security $security,
+        private readonly ScopeMatcher $scopeMatcher,
+        private readonly ContaoCsrfTokenManager $csrfTokenManager,
     ) {
-        $this->translator = $translator;
-        $this->manager = $manager;
+    }
+
+    public function supports(Request $request): bool
+    {
+        return $request->isMethod(Request::METHOD_POST)
+            && $request->request->has('TL_WEM_AJAX')
+            && 'be_pdm' === $request->request->get('wem_module');
     }
 
     /**
-     * Process AJAX actions.
-     *
-     * @return void - Ajax response, as String or JSON
+     * Process an AJAX request and return the response (JSON or file download).
      */
-    public function processAjaxRequest(): void
+    public function processAjaxRequest(Request $request): Response
     {
         $returnHttpCode = Response::HTTP_OK;
-        // Catch AJAX Requests
-        if (Input::post('TL_WEM_AJAX') && 'be_pdm' === Input::post('wem_module')) {
-            try {
-                switch (Input::post('action')) {
-                    case 'anonymize_single_personal_data':
-                        $arrResponse = $this->anonymizeSinglePersonalData();
-                    break;
-                    case 'anonymize_personal_data_item':
-                        $arrResponse = $this->anonymizeSingleItem();
-                    break;
-                    case 'anonymize_all_personal_data':
-                        $arrResponse = $this->anonymizeAllPersonalData();
-                    break;
-                    case 'export_single':
-                        $this->exportSingleItem();
-                    break;
-                    case 'export_all':
-                        $this->exportAllPersonalData();
-                    break;
-                    case 'show_personal_data_item':
-                        $arrResponse = $this->showSingleItem();
-                    break;
-                    case 'show_file_single_personal_data':
-                        $arrResponse = $this->showFileSinglePersonalData();
-                    break;
-                    case 'download_file_single_personal_data':
-                        $arrResponse = $this->downloadFileSinglePersonalData();
-                    break;
-                    default:
-                        throw new Exception('Unknown route');
-                }
-            } catch (AccessDeniedException $e) {
-                $returnHttpCode = Response::HTTP_UNAUTHORIZED;
-                $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
-            } catch (Exception $e) {
-                $returnHttpCode = Response::HTTP_BAD_REQUEST;
-                $arrResponse = ['status' => 'error', 'msg' => $e->getMessage(), 'trace' => $e->getTrace()];
-            }
 
-            // Add Request Token to JSON answer and return
-            $arrResponse['rt'] = System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue();
-            $response = new Response(json_encode($arrResponse), $returnHttpCode);
-            $response->send();
-
-            exit;
+        try {
+            $arrResponse = match ($request->request->get('action')) {
+                'anonymize_single_personal_data' => $this->anonymizeSinglePersonalData($request),
+                'anonymize_personal_data_item' => $this->anonymizeSingleItem($request),
+                'anonymize_all_personal_data' => $this->anonymizeAllPersonalData($request),
+                'export_single' => $this->exportSingleItem($request),
+                'export_all' => $this->exportAllPersonalData($request),
+                'show_personal_data_item' => $this->showSingleItem($request),
+                'show_file_single_personal_data' => $this->showFileSinglePersonalData($request),
+                'download_file_single_personal_data' => $this->downloadFileSinglePersonalData($request),
+                default => throw new \InvalidArgumentException('Unknown route'),
+            };
+        } catch (AccessDeniedException $e) {
+            $returnHttpCode = Response::HTTP_UNAUTHORIZED;
+            $arrResponse = ['status' => 'error', 'msg' => $e->getMessage()];
+        } catch (\Exception $e) {
+            $returnHttpCode = Response::HTTP_BAD_REQUEST;
+            $arrResponse = ['status' => 'error', 'msg' => $e->getMessage()];
         }
-    }
 
-    /**
-     * @throws AccessDeniedException
-     * @throws Exception
-     */
-    protected function anonymizeSinglePersonalData(): array
-    {
-
-        if (empty(Input::post('pid'))) {
-            throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.PleaseFillEmail', [], 'contao_default'));
+        if ($arrResponse instanceof Response) {
+            return $arrResponse;
         }
-        $this->check_list(['ptable', 'email', 'field']);
 
-        $this->checkAccess();
+        // Add Request Token to JSON answer and return
+        $arrResponse['rt'] = $this->csrfTokenManager->getDefaultTokenValue();
 
-        $anonymizeValue = $this->manager->anonymizeByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
+        return new JsonResponse($arrResponse, $returnHttpCode);
+    }
+
+    /**
+     * @throws AccessDeniedException
+     * @throws \Exception
+     */
+    protected function anonymizeSinglePersonalData(Request $request): array
+    {
+        $this->checkMandatoryParameters($request, ['pid', 'ptable', 'email', 'field']);
+        $this->checkAccess($request);
 
         return [
             'status' => 'success',
             'msg' => '',
-            'value' => $anonymizeValue,
+            'value' => $this->manager->anonymizeByPidAndPtableAndEmailAndField(
+                $request->request->getInt('pid'),
+                $request->request->getString('ptable'),
+                $request->request->getString('email'),
+                $request->request->getString('field'),
+            ),
         ];
     }
 
     /**
      * @throws AccessDeniedException
-     * @throws Exception
+     * @throws \Exception
      */
-    protected function anonymizeSingleItem(): array
+    protected function anonymizeSingleItem(Request $request): array
     {
-        $this->check_list(['pid', 'ptable', 'email']);
-
-        $this->checkAccess();
-
-        $anonymizeValues = $this->manager->anonymizeByPidAndPtableAndEmail((int) Input::post('pid'), Input::post('ptable'), Input::post('email'));
+        $this->checkMandatoryParameters($request, ['pid', 'ptable', 'email']);
+        $this->checkAccess($request);
 
         return [
             'status' => 'success',
             'msg' => '',
-            'values' => $anonymizeValues,
+            'values' => $this->manager->anonymizeByPidAndPtableAndEmail(
+                $request->request->getInt('pid'),
+                $request->request->getString('ptable'),
+                $request->request->getString('email'),
+            ),
         ];
     }
 
     /**
      * @throws AccessDeniedException
-     * @throws Exception
+     * @throws \Exception
      */
-    protected function anonymizeAllPersonalData(): array
+    protected function anonymizeAllPersonalData(Request $request): array
     {
-        $this->check_list(['email']);
-
-        $this->checkAccess();
-
-        $anonymizeValues = $this->manager->anonymizeByEmail(Input::post('email'));
+        $this->checkMandatoryParameters($request, ['email']);
+        $this->checkAccess($request);
 
         return [
             'status' => 'success',
             'msg' => '',
-            'values' => $anonymizeValues,
+            'values' => $this->manager->anonymizeByEmail($request->request->getString('email')),
         ];
     }
 
     /**
      * @throws AccessDeniedException
+     * @throws \Exception
      */
-    protected function exportSingleItem(): void
+    protected function exportSingleItem(Request $request): Response
     {
-        $this->check_list(['pid', 'ptable', 'email']);
+        $this->checkMandatoryParameters($request, ['pid', 'ptable', 'email']);
+        $this->checkAccess($request);
 
-        $this->checkAccess();
+        $zipPath = $this->manager->exportByPidAndPtableAndEmail(
+            $request->request->getInt('pid'),
+            $request->request->getString('ptable'),
+            $request->request->getString('email'),
+        );
 
-        $zipName = $this->manager->exportByPidAndPtableAndEmail((int) Input::post('pid'), Input::post('ptable'), Input::post('email'));
-        $zipContent = file_get_contents($zipName);
-        unlink($zipName);
-        (new Response($zipContent, Response::HTTP_OK, [
-            'Content-Type' => ' application/zip',
-            'Content-Disposition' => 'attachment',
-            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameSingleItem', [], 'contao_default').'.zip',
-        ]))->send();
-        exit();
+        return $this->createZipResponse($zipPath, $this->trans('WEM.PEDAMA.CSV.filenameSingleItem') . '.zip');
     }
 
     /**
      * @throws AccessDeniedException
-     * @throws Exception
+     * @throws \Exception
      */
-    protected function exportAllPersonalData(): void
+    protected function exportAllPersonalData(Request $request): Response
     {
-        $this->check_list(['email']);
+        $this->checkMandatoryParameters($request, ['email']);
+        $this->checkAccess($request);
 
-        $this->checkAccess();
+        $zipPath = $this->manager->exportByEmail($request->request->getString('email'));
 
-        $zipName = $this->manager->exportByEmail(Input::post('email'));
-        $zipContent = file_get_contents($zipName);
-        unlink($zipName);
-        (new Response($zipContent, Response::HTTP_OK, [
-            'Content-Type' => ' application/zip',
-            'Content-Disposition' => 'attachment',
-            'filename' => $this->translator->trans('WEM.PEDAMA.CSV.filenameAll', [], 'contao_default').'.zip',
-        ]))->send();
-        exit();
+        return $this->createZipResponse($zipPath, $this->trans('WEM.PEDAMA.CSV.filenameAll') . '.zip');
     }
 
     /**
      * @throws AccessDeniedException
+     * @throws \Exception
      */
-    protected function showSingleItem(): array
+    protected function showSingleItem(Request $request): array
     {
-        $this->check_list(['pid', 'ptable', 'email']);
+        $this->checkMandatoryParameters($request, ['pid', 'ptable', 'email']);
+        $this->checkAccess($request);
 
-        $this->checkAccess();
+        $href = $this->manager->getHrefByPidAndPtableAndEmail(
+            $request->request->getInt('pid'),
+            $request->request->getString('ptable'),
+            $request->request->getString('email'),
+        );
 
-        $href = $this->manager->getHrefByPidAndPtableAndEmail((int) Input::post('pid'), Input::post('ptable'), Input::post('email'));
-
-        if (empty($href)) {
-            throw new Exception($this->translator->trans('WEM.PEDAMA.DEFAULT.noUrlProvided', [], 'contao_default'));
+        if ('' === $href) {
+            throw new \Exception($this->trans('WEM.PEDAMA.DEFAULT.noUrlProvided'));
         }
 
         return [
@@ -225,84 +194,106 @@ class PersonalDataManagerAction
 
     /**
      * @throws AccessDeniedException
-     * @throws Exception
+     * @throws \Exception
      */
-    protected function showFileSinglePersonalData(): array
+    protected function showFileSinglePersonalData(Request $request): array
     {
-        $this->check_list(['pid', 'ptable', 'email', 'field']);
+        $this->checkMandatoryParameters($request, ['pid', 'ptable', 'email', 'field']);
+        $this->checkAccess($request);
 
-        $this->checkAccess();
-
-        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
-
-        $content = $objFile instanceof File ? sprintf(
-            'data:%s;base64,%s',
-            $objFile->mime,
-            base64_encode($objFile->getContent())
-        ) : '';
+        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField(
+            $request->request->getInt('pid'),
+            $request->request->getString('ptable'),
+            $request->request->getString('email'),
+            $request->request->getString('field'),
+        );
 
         return [
-            'status' => $objFile instanceof File ? 'success' : 'error',
+            'status' => 'success',
             'msg' => '',
-            'content' => $content,
-            'name' => $objFile instanceof File ? $objFile->name : '',
+            'content' => \sprintf('data:%s;base64,%s', $objFile->mime, base64_encode($objFile->getContent())),
+            'name' => $objFile->name,
         ];
     }
 
     /**
      * @throws AccessDeniedException
-     * @throws Exception
+     * @throws \Exception
      */
-    protected function downloadFileSinglePersonalData(): void
+    protected function downloadFileSinglePersonalData(Request $request): Response
     {
-        $this->check_list(['pid', 'ptable', 'email', 'field']);
+        $this->checkMandatoryParameters($request, ['pid', 'ptable', 'email', 'field']);
+        $this->checkAccess($request);
 
-        $this->checkAccess();
+        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField(
+            $request->request->getInt('pid'),
+            $request->request->getString('ptable'),
+            $request->request->getString('email'),
+            $request->request->getString('field'),
+        );
 
-        $objFile = $this->manager->getFileByPidAndPtableAndEmailAndField((int) Input::post('pid'), Input::post('ptable'), Input::post('email'), Input::post('field'));
-
-        // $content = $objFile ? sprintf(
-        //     'data:%s;base64,%s',
-        //     $objFile->mime,
-        //     base64_encode($objFile->getContent())
-        // ) : '';
-
-        (new Response($objFile->getContent(), Response::HTTP_OK, [
+        $response = new Response($objFile->getContent(), Response::HTTP_OK, [
             'Content-Type' => $objFile->mime,
-            'Content-Disposition' => 'attachment',
+            // Read by the UI script to name the downloaded file
             'filename' => $objFile->name,
-        ]))->send();
-        exit();
+        ]);
+        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $objFile->name, 'file'));
+
+        return $response;
     }
 
     /**
+     * In the back end, users allowed to access the module can manage any personal
+     * data. In the front end, a valid email + token couple is required.
+     *
      * @throws AccessDeniedException
-     * @throws Exception
+     * @throws \Exception
      */
-    protected function checkAccess(): void
+    protected function checkAccess(Request $request): void
     {
-        $this->user = BackendUser::getInstance();
+        if ($this->scopeMatcher->isBackendRequest($request)) {
+            if (!$this->security->isGranted(ContaoCorePermissions::USER_CAN_ACCESS_MODULE, self::BACKEND_MODULE)) {
+                throw new AccessDeniedException($this->trans('WEM.PEDAMA.DEFAULT.accessDenied'));
+            }
 
-        if ($this->user->isAdmin) {
             return;
         }
 
-        $this->user = FrontendUser::getInstance();
+        $token = (string) $this->manager->getTokenInSession();
 
-        if (!$this->manager->isEmailTokenCoupleValid(Input::post('email'), $this->manager->getTokenInSession())) {
+        if ('' === $token || !$this->manager->isEmailTokenCoupleValid($request->request->getString('email'), $token)) {
             $this->manager->clearTokenInSession();
-            throw new AccessDeniedException($this->translator->trans('WEM.PEDAMA.DEFAULT.accessDenied', [], 'contao_default'));
+
+            throw new AccessDeniedException($this->trans('WEM.PEDAMA.DEFAULT.accessDenied'));
         }
 
-        $this->manager->updateTokenExpiration($this->manager->getTokenInSession());
+        $this->manager->updateTokenExpiration($token);
     }
 
-    private function check_list(array $list): void
+    private function checkMandatoryParameters(Request $request, array $parameters): void
     {
-        foreach ($list as $item) {
-            if (empty(Input::post($item))) {
-                throw new InvalidArgumentException($this->translator->trans('WEM.PEDAMA.DEFAULT.' . $item . 'Empty', [], 'contao_default'));
+        foreach ($parameters as $parameter) {
+            if (empty($request->request->get($parameter))) {
+                throw new \InvalidArgumentException($this->trans('WEM.PEDAMA.DEFAULT.' . $parameter . 'Empty'));
             }
         }
+    }
+
+    private function createZipResponse(string $zipPath, string $filename): BinaryFileResponse
+    {
+        $response = new BinaryFileResponse($zipPath, Response::HTTP_OK, [
+            'Content-Type' => 'application/zip',
+            // Read by the UI script to name the downloaded file
+            'filename' => $filename,
+        ]);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename, 'export.zip');
+        $response->deleteFileAfterSend();
+
+        return $response;
+    }
+
+    private function trans(string $id): string
+    {
+        return $this->translator->trans($id, [], 'contao_default');
     }
 }

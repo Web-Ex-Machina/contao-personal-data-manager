@@ -1,76 +1,63 @@
 {
     "name": "webexmachina/contao-personal-data-manager",
     "description": "Personal Data Manager bundle for Contao Open Source CMS",
-    "keywords": ["webexmachina", "bundle", "contao","personal","rgpd","gpdr"],
+    "keywords": ["webexmachina", "bundle", "contao", "personal", "rgpd", "gpdr"],
     "type": "contao-bundle",
     "license": "LGPL-3.0-or-later",
     "homepage": "https://www.webexmachina.fr/",
     "authors": [
-    {
-        "name": "Web ex Machina",
-        "homepage": "https://www.webexmachina.fr",
-        "role": "Developer"
-    }],
-    "support":
-    {
-        "issues": "https://github.com/webexmachina/contao-personal-data-manager/issues",
-        "source": "https://github.com/webexmachina/contao-personal-data-manager"
+        {
+            "name": "Web ex Machina",
+            "homepage": "https://www.webexmachina.fr",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/Web-Ex-Machina/contao-personal-data-manager/issues",
+        "source": "https://github.com/Web-Ex-Machina/contao-personal-data-manager"
     },
-    "require":
-    {
-        "php": "^7.4 || ^8.2",
-        "contao/core-bundle": "^4.13 || ^5.0",
-        "webexmachina/contao-utils": "^2.0",
+    "require": {
+        "php": "^8.4",
+        "ext-json": "*",
         "ext-zip": "*",
-        "ext-json": "*"
+        "contao/core-bundle": "^5.7",
+        "symfony/config": "^7.4",
+        "symfony/dependency-injection": "^7.4",
+        "symfony/event-dispatcher": "^7.4",
+        "symfony/http-foundation": "^7.4",
+        "symfony/http-kernel": "^7.4",
+        "symfony/mailer": "^7.4",
+        "symfony/mime": "^7.4",
+        "symfony/routing": "^7.4",
+        "symfony/security-bundle": "^7.4",
+        "symfony/translation-contracts": "^3.0",
+        "webexmachina/contao-utils": "^2.0"
     },
-    "require-dev":
-    {
-        "phpunit/phpunit": "^9.0",
-        "codeception/codeception": "^4",
-        "codeception/module-phpbrowser": "^1.0.0",
-        "codeception/module-asserts": "^1.0.0",
-        "codeception/module-webdriver": "^2.0",
-        "contao/test-case": "~4",
-        "rector/rector": "^1.0",
-        "contao/manager-plugin": "^2.0"
+    "require-dev": {
+        "contao/manager-plugin": "^2.0",
+        "contao/easy-coding-standard": "@stable",
+        "rector/rector": "~2.3.0",
+        "phpstan/phpstan": "@stable",
+        "contao/contao-rector": "dev-main"
     },
     "conflict": {
         "contao/manager-plugin": "<2.0 || >=3.0"
     },
-    "autoload":
-    {
-        "psr-4":
-        {
+    "autoload": {
+        "psr-4": {
             "WEM\\PersonalDataManagerBundle\\": "src/"
-        },
-        "classmap": [
-            "src/Resources/contao/"
-        ],
-        "exclude-from-classmap": [
-            "src/Resources/contao/config/",
-            "src/Resources/contao/dca/",
-            "src/Resources/contao/languages/",
-            "src/Resources/contao/templates/"
-        ]
+        }
     },
-    "extra":
-    {
+    "extra": {
         "contao-manager-plugin": "WEM\\PersonalDataManagerBundle\\ContaoManager\\Plugin"
     },
     "config": {
         "allow-plugins": {
-            "contao-components/installer": true,
-            "contao/manager-plugin": true,
-            "composer/package-versions-deprecated": true,
+            "contao-components/installer": false,
+            "contao/manager-plugin": false,
             "contao-community-alliance/composer-plugin": true,
-            "php-http/discovery": true
-        }
-    },
-    "repositories": {
-        "webexmachina/contao-utils": {
-            "type": "path",
-            "url": "/home/stephane/PhpstormProjects/contao-utils"
+            "php-http/discovery": false,
+            "dealerdirect/phpcodesniffer-composer-installer": false
         }
     }
 }

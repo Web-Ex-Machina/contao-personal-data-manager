@@ -1,0 +1,10 @@
+{% trans_default_domain 'contao_default' %}
+
+{# Turbo is disabled, so the personal data UI script is executed on a full page load #}
+<form method="post" action="{{ action }}" class="pdm-form" data-turbo="false">
+    <input type="hidden" name="FORM_SUBMIT" value="wem-personal-data-manager">
+    <input type="hidden" name="REQUEST_TOKEN" value="{{ request_token }}">
+    <label for="pdm-email">{{ 'WEM.PEDAMA.EMAILFORM.mailLabel'|trans }}</label>
+    <input type="email" id="pdm-email" name="email" value="{{ email }}" class="tl_text" required>
+    <button type="submit" class="tl_submit">{{ 'WEM.PEDAMA.EMAILFORM.submit'|trans }}</button>
+</form>

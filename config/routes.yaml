@@ -1,0 +1,3 @@
+wem.personal_data_manager.controller:
+  resource: ../src/Controller
+  type: attribute

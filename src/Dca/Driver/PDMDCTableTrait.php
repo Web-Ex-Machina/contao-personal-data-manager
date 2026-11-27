@@ -2,21 +2,15 @@
 
 declare(strict_types=1);
 
-/**
- * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2022 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
- */
-
 namespace WEM\PersonalDataManagerBundle\Dca\Driver;
 
 use Contao\Model;
 use Contao\System;
 
+/**
+ * To be used in a custom DC_Table driver, so that grouping in back end listings
+ * displays the personal data values.
+ */
 trait PDMDCTableTrait
 {
     /**
@@ -24,29 +18,30 @@ trait PDMDCTableTrait
      *
      * @param string $field
      * @param int    $mode
-     *
-     * @return string
      */
     protected function formatCurrentValue($field, $value, $mode)
     {
-        // dump($field, $value, $mode, end($this->current));
-
-        $personalDataManager = System::getContainer()->get('wem.personal_data_manager.service.personal_data_manager');
-
         $modelClassName = Model::getClassFromTable($this->table);
         $model = new $modelClassName();
 
-        if ($model->isFieldInPersonalDataFieldsNames($field)) {
-            $obj = $model::findOneById(end($this->current));
+        if (!$model->isFieldInPersonalDataFieldsNames($field)) {
+            return parent::formatCurrentValue($field, $value, $mode);
+        }
 
-            return $personalDataManager->getUnecryptedValueByPidAndPtableAndEmailAndField(
-                (int) $obj->getPersonalDataPidFieldValue(),
+        $obj = $model::findById(end($this->current));
+
+        if (null === $obj) {
+            return parent::formatCurrentValue($field, $value, $mode);
+        }
+
+        return System::getContainer()
+            ->get('wem.personal_data_manager.service.personal_data_manager')
+            ->getUnecryptedValueByPidAndPtableAndEmailAndField(
+                $obj->getPersonalDataPidFieldValue(),
                 $model->getPersonalDataPtable(),
                 $obj->getPersonalDataEmailFieldValue(),
                 $field
-            );
-        }
-
-        return parent::formatCurrentValue($field, $value, $mode);
+            )
+        ;
     }
 }

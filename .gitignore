@@ -2,3 +2,6 @@
 sftp-config.json
 *.sublime-*
 vendor
+.idea
+*.lock
+var

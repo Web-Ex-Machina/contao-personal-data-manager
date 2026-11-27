@@ -2,56 +2,68 @@
 
 declare(strict_types=1);
 
-/**
- * Personal Data Manager for Contao Open Source CMS
- * Copyright (c) 2015-2024 Web ex Machina
- *
- * @category ContaoBundle
- * @package  Web-Ex-Machina/contao-smartgear
- * @author   Web ex Machina <contact@webexmachina.fr>
- * @link     https://github.com/Web-Ex-Machina/personal-data-manager/
- */
-
 namespace WEM\PersonalDataManagerBundle\DependencyInjection;
 
-use Contao\Config;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-/**
- * Adds the bundle services to the container.
- *
- * @author Web ex Machina <https://www.webexmachina.fr>
- */
-class WEMPersonalDataManagerExtension extends Extension
+class WEMPersonalDataManagerExtension extends Extension implements PrependExtensionInterface
 {
     /**
-     * {@inheritdoc}
-     *
-     * @throws \Exception
+     * Legacy encryption key, stored in the localconfig by previous versions.
      */
-    public function load(array $mergedConfig, ContainerBuilder $container): void
+    public const string LEGACY_ENCRYPTION_KEY = 'wem_pdm_encryption_key';
+
+    public function load(array $configs, ContainerBuilder $container): void
     {
-        $loader = new YamlFileLoader(
-            $container,
-            new FileLocator(__DIR__.'/../Resources/config')
-        );
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
+        $loader->load('services.yaml');
+    }
 
-        $loader->load('services.yml');
-        $loader->load('controllers.yml');
-        $loader->load('routing.yml');
-
-        if (!$container->hasParameter('wem_contao_encryption.encryption_key') || null === $container->getParameter('wem_contao_encryption.encryption_key')) {
-            $projectDir = $container->getParameter('kernel.project_dir');
-            if (file_exists($projectDir.'/system/config/localconfig.php')) {
-                include $projectDir.'/system/config/localconfig.php';
-            }
-
-            if (null !== Config::get('wem_pdm_encryption_key')) {
-                $container->setParameter('wem_contao_encryption.encryption_key', Config::get('wem_pdm_encryption_key'));
+    /**
+     * Personal data already stored have been encrypted with the key defined in the
+     * localconfig: forward it to the encryption utility unless a key has been
+     * explicitly configured for it.
+     */
+    public function prepend(ContainerBuilder $container): void
+    {
+        foreach ($container->getExtensionConfig('wem_utils') as $config) {
+            if (!empty($config['encryption_key'])) {
+                return;
             }
         }
+
+        $encryptionKey = $this->getLegacyEncryptionKey((string) $container->getParameter('kernel.project_dir'));
+
+        if (null !== $encryptionKey) {
+            $container->prependExtensionConfig('wem_utils', ['encryption_key' => $encryptionKey]);
+        }
+    }
+
+    private function getLegacyEncryptionKey(string $projectDir): string|null
+    {
+        $localConfig = $projectDir . '/system/config/localconfig.php';
+
+        if (!file_exists($localConfig)) {
+            return null;
+        }
+
+        $backup = $GLOBALS['TL_CONFIG'] ?? null;
+
+        try {
+            include $localConfig;
+            $encryptionKey = $GLOBALS['TL_CONFIG'][self::LEGACY_ENCRYPTION_KEY] ?? null;
+        } finally {
+            if (null === $backup) {
+                unset($GLOBALS['TL_CONFIG']);
+            } else {
+                $GLOBALS['TL_CONFIG'] = $backup;
+            }
+        }
+
+        return \is_string($encryptionKey) && '' !== $encryptionKey ? $encryptionKey : null;
     }
 }

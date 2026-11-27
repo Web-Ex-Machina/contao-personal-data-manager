@@ -1,0 +1,7 @@
+.group-wem_pdm{
+	background: url(../../../system/themes/flexible/icons/person.svg) 3px 2px no-repeat;
+}
+
+html[data-color-scheme=dark] .group-wem_pdm{
+	background-image: url(../../../system/themes/flexible/icons/person--dark.svg);
+}
