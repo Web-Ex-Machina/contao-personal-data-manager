@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Dca\Driver;
 
 use Contao\Model;
@@ -24,13 +31,13 @@ trait PDMDCTableTrait
         $modelClassName = Model::getClassFromTable($this->table);
         $model = new $modelClassName();
 
-        if (!$model->isFieldInPersonalDataFieldsNames($field)) {
+        if (! $model->isFieldInPersonalDataFieldsNames($field)) {
             return parent::formatCurrentValue($field, $value, $mode);
         }
 
         $obj = $model::findById(end($this->current));
 
-        if (null === $obj) {
+        if ($obj === null) {
             return parent::formatCurrentValue($field, $value, $mode);
         }
 

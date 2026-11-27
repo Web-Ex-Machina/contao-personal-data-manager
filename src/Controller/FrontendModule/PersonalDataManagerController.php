@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Controller\FrontendModule;
 
 use Contao\Config;
@@ -62,11 +69,11 @@ class PersonalDataManagerController extends AbstractFrontendModuleController
         $email = (string) $this->manager->getEmailInSession();
         $token = $request->query->getString(self::TOKEN_PARAMETER);
 
-        if (self::FORM_ID === $request->request->get('FORM_SUBMIT')) {
+        if ($request->request->get('FORM_SUBMIT') === self::FORM_ID) {
             $email = trim($request->request->getString('email'));
             $messages[] = $this->sendAccessLink($email);
-        } elseif ('' !== $token) {
-            if ('' !== $email && $this->manager->isEmailTokenCoupleValid($email, $token)) {
+        } elseif ($token !== '') {
+            if ($email !== '' && $this->manager->isEmailTokenCoupleValid($email, $token)) {
                 $this->manager->putTokenInSession($token);
                 $this->manager->updateTokenExpiration($token);
 
@@ -76,7 +83,10 @@ class PersonalDataManagerController extends AbstractFrontendModuleController
 
                 $template->set('content', $this->ui->setUrl($request->getRequestUri())->listForEmail($email));
             } else {
-                $messages[] = ['type' => 'error', 'text' => $this->trans('WEM.PEDAMA.MODFE.emailTokenCoupleNotValid')];
+                $messages[] = [
+                    'type' => 'error',
+                    'text' => $this->trans('WEM.PEDAMA.MODFE.emailTokenCoupleNotValid'),
+                ];
             }
         }
 
@@ -96,39 +106,55 @@ class PersonalDataManagerController extends AbstractFrontendModuleController
     {
         $page = $this->getPageModel();
 
-        if (!$page instanceof PageModel || !Validator::isEmail($email)) {
-            return ['type' => 'error', 'text' => $this->trans('WEM.PEDAMA.MODFE.emailNotSent')];
+        if (! $page instanceof PageModel || ! Validator::isEmail($email)) {
+            return [
+                'type' => 'error',
+                'text' => $this->trans('WEM.PEDAMA.MODFE.emailNotSent'),
+            ];
         }
 
         $this->manager->putEmailInSession($email);
         $this->manager->clearTokenInSession();
+
         $accessToken = $this->manager->insertForEmail($email);
 
         $url = $this->contentUrlGenerator->generate(
             $page,
-            [self::TOKEN_PARAMETER => $accessToken->token],
+            [
+                self::TOKEN_PARAMETER => $accessToken->token,
+            ],
             UrlGeneratorInterface::ABSOLUTE_URL,
         );
 
         try {
-            $message = (new Email())
+            $message = new Email()
                 ->to($email)
                 ->subject($this->trans('WEM.PEDAMA.EMAIL.subject'))
-                ->html($this->renderView('@Contao/personal_data_manager/email.html.twig', ['url' => $url]))
+                ->html($this->renderView('@Contao/personal_data_manager/email.html.twig', [
+                    'url' => $url,
+                ]))
             ;
 
-            if (null !== $sender = $this->getSender($page)) {
+            if (($sender = $this->getSender($page)) instanceof \Symfony\Component\Mime\Address) {
                 $message->from($sender);
             }
 
             $this->mailer->send($message);
-        } catch (\Throwable $e) {
-            $this->logger?->error('Unable to send the personal data access link: ' . $e->getMessage(), ['exception' => $e]);
+        } catch (\Throwable $throwable) {
+            $this->logger?->error('Unable to send the personal data access link: ' . $throwable->getMessage(), [
+                'exception' => $throwable,
+            ]);
 
-            return ['type' => 'error', 'text' => $this->trans('WEM.PEDAMA.MODFE.emailNotSent')];
+            return [
+                'type' => 'error',
+                'text' => $this->trans('WEM.PEDAMA.MODFE.emailNotSent'),
+            ];
         }
 
-        return ['type' => 'confirm', 'text' => $this->trans('WEM.PEDAMA.MODFE.emailSent')];
+        return [
+            'type' => 'confirm',
+            'text' => $this->trans('WEM.PEDAMA.MODFE.emailSent'),
+        ];
     }
 
     private function getSender(PageModel $page): Address|null
@@ -137,7 +163,7 @@ class PersonalDataManagerController extends AbstractFrontendModuleController
 
         $adminEmail = $page->adminEmail ?: Config::get('adminEmail');
 
-        if (!$adminEmail) {
+        if (! $adminEmail) {
             return null;
         }
 

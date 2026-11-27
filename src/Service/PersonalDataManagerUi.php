@@ -1,3 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
@@ -36,12 +47,12 @@ class PersonalDataManagerUi
             System::loadLanguageFile($ptable);
             foreach ($arrPids as $pid => $singleItemData) {
                 // if originalModel has been deleted, do not manage the remaining PDM data about it
-                if (null === $singleItemData['originalModel']) {
+                if ($singleItemData['originalModel'] === null) {
                     continue;
                 }
 
                 $renderedItem = $this->renderSingleItem((int) $pid, $ptable, $email, $singleItemData['personalDatas'], $singleItemData['originalModel']);
-                if (!empty($renderedItem)) {
+                if (! empty($renderedItem)) {
                     $renderedItems[] = $renderedItem;
                 }
             }
@@ -80,8 +91,8 @@ class PersonalDataManagerUi
     public function buildListButtons(string $email, int $nbRows): array
     {
         $buttons = [];
-        $buttons['anonymize'] = 0 === $nbRows ? '' : $this->renderListButtonAnonymize($email);
-        $buttons['export'] = 0 === $nbRows ? '' : $this->renderListButtonExport($email);
+        $buttons['anonymize'] = $nbRows === 0 ? '' : $this->renderListButtonAnonymize($email);
+        $buttons['export'] = $nbRows === 0 ? '' : $this->renderListButtonExport($email);
 
         if (isset($GLOBALS['WEM_HOOKS']['buildListButtons']) && \is_array($GLOBALS['WEM_HOOKS']['buildListButtons'])) {
             foreach ($GLOBALS['WEM_HOOKS']['buildListButtons'] as $callback) {
@@ -141,7 +152,7 @@ class PersonalDataManagerUi
         $tpl = new FrontendTemplate('wem_personal_data_manager_item_title');
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
-        $tpl->data = $ptable.'('.$pid.')';
+        $tpl->data = $ptable . '(' . $pid . ')';
 
         return $tpl->parse();
     }
@@ -260,6 +271,7 @@ class PersonalDataManagerUi
         $tpl = new FrontendTemplate('wem_personal_data_manager_item_personal_data');
         $tpl->pid = $pid;
         $tpl->ptable = $ptable;
+
         $items = [];
 
         foreach ($personalDatas as $personalData) {
@@ -375,11 +387,11 @@ class PersonalDataManagerUi
         $sorted = [];
         if ($personalDatas instanceof Collection) {
             while ($personalDatas->next()) {
-                if (!\array_key_exists($personalDatas->ptable, $sorted)) {
+                if (! \array_key_exists($personalDatas->ptable, $sorted)) {
                     $sorted[$personalDatas->ptable] = [];
                 }
 
-                if (!\array_key_exists($personalDatas->pid, $sorted[$personalDatas->ptable])) {
+                if (! \array_key_exists($personalDatas->pid, $sorted[$personalDatas->ptable])) {
                     $sorted[$personalDatas->ptable][$personalDatas->pid] = [
                         'originalModel' => $this->getOriginalObject((int) $personalDatas->pid, $personalDatas->ptable),
                         'personalDatas' => [],
@@ -422,7 +434,7 @@ class PersonalDataManagerUi
                 }
             }
 
-            if (0 === \count($data[$ptable])) {
+            if (\count($data[$ptable]) === 0) {
                 unset($data[$ptable]);
             }
         }
@@ -676,7 +688,7 @@ class PersonalDataManagerUi
         System::loadLanguageFile($ptable);
         $label = $GLOBALS['TL_LANG'][$ptable][$field] ?? null;
 
-        if (null === $label) {
+        if ($label === null) {
             return $field;
         }
 
@@ -690,6 +702,6 @@ class PersonalDataManagerUi
     {
         $mime = strtolower((string) $objFile->mime);
 
-        return str_starts_with($mime, 'image/') || 'application/pdf' === $mime;
+        return str_starts_with($mime, 'image/') || $mime === 'application/pdf';
     }
 }

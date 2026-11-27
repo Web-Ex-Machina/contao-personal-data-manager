@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Controller\Backend;
 
 use Contao\CoreBundle\Controller\Backend\AbstractBackendController;
@@ -18,7 +25,9 @@ use WEM\PersonalDataManagerBundle\Service\PersonalDataManagerUi;
 #[Route(
     '%contao.backend.route_prefix%/wem-personal-data-manager',
     name: self::ROUTE,
-    defaults: ['_scope' => 'backend'],
+    defaults: [
+        '_scope' => 'backend',
+    ],
     methods: ['GET', 'POST'],
 )]
 #[AsController]
@@ -55,7 +64,7 @@ class PersonalDataManagerController extends AbstractBackendController
             'action' => $url,
             'email' => $email,
             'request_token' => $this->csrfTokenManager->getDefaultTokenValue(),
-            'content' => '' === $email ? '' : $this->ui->setUrl($url)->listForEmail($email),
+            'content' => $email === '' ? '' : $this->ui->setUrl($url)->listForEmail($email),
         ]);
     }
 }

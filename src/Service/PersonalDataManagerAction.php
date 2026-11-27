@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
@@ -37,7 +44,7 @@ class PersonalDataManagerAction
     {
         return $request->isMethod(Request::METHOD_POST)
             && $request->request->has('TL_WEM_AJAX')
-            && 'be_pdm' === $request->request->get('wem_module');
+            && $request->request->get('wem_module') === 'be_pdm';
     }
 
     /**
@@ -61,10 +68,16 @@ class PersonalDataManagerAction
             };
         } catch (AccessDeniedException $e) {
             $returnHttpCode = Response::HTTP_UNAUTHORIZED;
-            $arrResponse = ['status' => 'error', 'msg' => $e->getMessage()];
+            $arrResponse = [
+                'status' => 'error',
+                'msg' => $e->getMessage(),
+            ];
         } catch (\Exception $e) {
             $returnHttpCode = Response::HTTP_BAD_REQUEST;
-            $arrResponse = ['status' => 'error', 'msg' => $e->getMessage()];
+            $arrResponse = [
+                'status' => 'error',
+                'msg' => $e->getMessage(),
+            ];
         }
 
         if ($arrResponse instanceof Response) {
@@ -181,7 +194,7 @@ class PersonalDataManagerAction
             $request->request->getString('email'),
         );
 
-        if ('' === $href) {
+        if ($href === '') {
             throw new \Exception($this->trans('WEM.PEDAMA.DEFAULT.noUrlProvided'));
         }
 
@@ -252,7 +265,7 @@ class PersonalDataManagerAction
     protected function checkAccess(Request $request): void
     {
         if ($this->scopeMatcher->isBackendRequest($request)) {
-            if (!$this->security->isGranted(ContaoCorePermissions::USER_CAN_ACCESS_MODULE, self::BACKEND_MODULE)) {
+            if (! $this->security->isGranted(ContaoCorePermissions::USER_CAN_ACCESS_MODULE, self::BACKEND_MODULE)) {
                 throw new AccessDeniedException($this->trans('WEM.PEDAMA.DEFAULT.accessDenied'));
             }
 
@@ -261,7 +274,7 @@ class PersonalDataManagerAction
 
         $token = (string) $this->manager->getTokenInSession();
 
-        if ('' === $token || !$this->manager->isEmailTokenCoupleValid($request->request->getString('email'), $token)) {
+        if ($token === '' || ! $this->manager->isEmailTokenCoupleValid($request->request->getString('email'), $token)) {
             $this->manager->clearTokenInSession();
 
             throw new AccessDeniedException($this->trans('WEM.PEDAMA.DEFAULT.accessDenied'));

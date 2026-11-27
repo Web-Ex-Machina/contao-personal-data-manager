@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\EventListener;
 
 use Contao\CoreBundle\Event\MenuEvent;
@@ -28,19 +35,19 @@ class BackendMenuListener
     {
         $tree = $event->getTree();
 
-        if ('mainMenu' !== $tree->getName()) {
+        if ($tree->getName() !== 'mainMenu') {
             return;
         }
 
         $node = $tree->getChild('wem_pdm')?->getChild(PersonalDataManagerAction::BACKEND_MODULE);
 
-        if (null === $node) {
+        if (! $node instanceof \Knp\Menu\ItemInterface) {
             return;
         }
 
         $node
             ->setUri($this->router->generate(PersonalDataManagerController::ROUTE))
-            ->setCurrent(PersonalDataManagerController::ROUTE === $this->requestStack->getCurrentRequest()?->attributes->get('_route'))
+            ->setCurrent($this->requestStack->getCurrentRequest()?->attributes->get('_route') === PersonalDataManagerController::ROUTE)
         ;
     }
 }

@@ -8,3 +8,12 @@ parameters:
   ignoreErrors:
     # Contao models expose their columns through magic properties
     - identifier: property.notFound
+    # Models managed by the bundle are resolved at runtime (Model::getClassFromTable())
+    # and get their methods from the PersonalDataTrait
+    - identifier: method.notFound
+      message: '#^Call to an undefined method Contao\\Model::#'
+    # Contao collections are not generic: iterating them yields Contao\Model
+    - identifier: argument.type
+      message: '#, Contao\\Model given\.$#'
+    # The traits are meant to be used by the consumers' models and DC_Table drivers
+    - identifier: trait.unused

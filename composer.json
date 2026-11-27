@@ -36,7 +36,7 @@
     "require-dev": {
         "contao/manager-plugin": "^2.0",
         "contao/easy-coding-standard": "@stable",
-        "rector/rector": "~2.3.0",
+        "rector/rector": "@stable",
         "phpstan/phpstan": "@stable",
         "contao/contao-rector": "dev-main"
     },

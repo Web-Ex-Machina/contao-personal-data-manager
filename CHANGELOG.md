@@ -1,6 +1,24 @@
 Personal Data Manager bundle for Contao Open Source CMS
 ======================
 
+v2.0.0 - Unreleased
+- BREAKING : PHP 8.4 & Contao 5.7 minimum
+- BREAKING : Contao 5 bundle structure (`config/`, `contao/`, `public/`), services are autowired (legacy service ids kept as aliases)
+- BREAKING : The back end module is a route controller (`AbstractBackendController`), the front end module a fragment controller (`AbstractFrontendModuleController`), both rendered with Twig templates
+- BREAKING : `mod_personaldatamanager*` and `be_wem_personal_data_manager` templates replaced by `frontend_module/wem_personal_data_manager`, `backend/wem_personal_data_manager` and `personal_data_manager/_email_form` Twig templates
+- BREAKING : The access email is a translated Twig template (`personal_data_manager/email`) sent with the Symfony Mailer
+- BREAKING : `PersonalDataManagerAction::processAjaxRequest()` returns a `Response`, `PersonalDataManager::export*()` return the path of a temporary zip archive
+- BREAKING : `PersonalDataManagerUiFormatter` & `Classes\FileUtil` removed, `tl_settings.wem_pdm_encryption_key` field removed (see README for the encryption key)
+- BREAKING : Back end actions require the access to the module instead of the admin role
+- Fix : `PersonalDataTrait::find()` endlessly re-running queries returning collections
+- Fix : `PersonalDataManager::validateObject()` checking a wrong trait name
+- Fix : Access tokens are generated with a cryptographically secure generator
+- Fix : Export archives are not written in the web root anymore
+- Fix : Error responses do not contain stack traces anymore
+- Fix : `Load` & `Save` field callbacks are not shared services anymore
+- Feat : Indexes on `tl_wem_personal_data` & `tl_wem_personal_data_access_token`
+- Feat : ECS, Rector & PHPStan configurations
+
 v1.3.1 - 2025-12-17
 - Fix : `tl_wem_personal_data.value` forced as `string`
 

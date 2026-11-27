@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Model\Traits;
 
 use Contao\Database\Result;
@@ -62,7 +69,7 @@ trait PersonalDataTrait
      */
     public function findAndApplyPersonalData(): void
     {
-        if (!$this->shouldManagePersonalData()) {
+        if (! $this->shouldManagePersonalData()) {
             return;
         }
 
@@ -79,7 +86,7 @@ trait PersonalDataTrait
      */
     public function anonymize(): void
     {
-        if (!$this->shouldManagePersonalData()) {
+        if (! $this->shouldManagePersonalData()) {
             return;
         }
 
@@ -159,7 +166,7 @@ trait PersonalDataTrait
     {
         $obj = parent::findByPk($varValue, $arrOptions);
 
-        if ($obj instanceof Model && !$obj instanceof self) {
+        if ($obj instanceof Model && ! $obj instanceof self) {
             $obj->detach(false);
 
             return static::findByPk($varValue, $arrOptions);
@@ -177,7 +184,7 @@ trait PersonalDataTrait
     {
         $obj = parent::findByIdOrAlias($varId, $arrOptions);
 
-        if ($obj instanceof Model && !$obj instanceof self) {
+        if ($obj instanceof Model && ! $obj instanceof self) {
             $obj->detach(false);
 
             return static::findByIdOrAlias($varId, $arrOptions);
@@ -216,7 +223,7 @@ trait PersonalDataTrait
     /**
      * Create a Collection object.
      */
-    protected static function createCollection(array $arrModels, $strTable)
+    protected static function createCollection(array $arrModels, $strTable): \Contao\Model\Collection
     {
         return self::applyPersonalDataToCollection(parent::createCollection($arrModels, $strTable));
     }
@@ -224,7 +231,7 @@ trait PersonalDataTrait
     /**
      * Create a new collection from a database result.
      */
-    protected static function createCollectionFromDbResult(Result $objResult, $strTable)
+    protected static function createCollectionFromDbResult(Result $objResult, $strTable): \Contao\Model\Collection
     {
         return self::applyPersonalDataToCollection(parent::createCollectionFromDbResult($objResult, $strTable));
     }
@@ -237,13 +244,13 @@ trait PersonalDataTrait
     {
         $arrSet = parent::preSave($arrSet);
 
-        if (!$this->shouldManagePersonalData()) {
+        if (! $this->shouldManagePersonalData()) {
             return $arrSet;
         }
 
         foreach ($this->getPersonalDataFieldsNames() as $personalDataFieldName) {
             // Field not modified: do not apply the default behaviour, let it be
-            if (!\array_key_exists($personalDataFieldName, $this->arrModified)) {
+            if (! \array_key_exists($personalDataFieldName, $this->arrModified)) {
                 continue;
             }
 
@@ -287,7 +294,7 @@ trait PersonalDataTrait
             return self::detachForeignModels($obj) ? static::find($arrOptions) : $obj;
         }
 
-        if ($obj instanceof Model && !$obj instanceof self) {
+        if ($obj instanceof Model && ! $obj instanceof self) {
             $obj->detach(false);
 
             return static::find($arrOptions);
@@ -312,7 +319,7 @@ trait PersonalDataTrait
         $detached = false;
 
         foreach ($collection->getModels() as $model) {
-            if (!$model instanceof self) {
+            if (! $model instanceof self) {
                 $model->detach(false);
                 $detached = true;
             }

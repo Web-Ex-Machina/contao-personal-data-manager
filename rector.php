@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-use Contao\Rector\Set\ContaoLevelSetList;
-use Rector\CodeQuality\Rector\If_\CombineIfRector;
+use Contao\Rector\Set\ContaoSetList;
 use Rector\Config\RectorConfig;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
@@ -14,7 +13,6 @@ return RectorConfig::configure()
         __DIR__ . '/contao',
     ])
     ->withSkip([
-        CombineIfRector::class,
         __DIR__ . '/contao/templates',
     ])
     ->withSets([
@@ -23,5 +21,12 @@ return RectorConfig::configure()
         SetList::CODE_QUALITY,
         SetList::DEAD_CODE,
         SetList::TYPE_DECLARATION,
-        ContaoLevelSetList::UP_TO_CONTAO_57,
-    ]);
+        // ContaoLevelSetList relies on Symfony sets removed from Rector: use the
+        // Contao sets, the Symfony ones are resolved from the installed version
+        ContaoSetList::CONTAO_50,
+        ContaoSetList::CONTAO_51,
+        ContaoSetList::CONTAO_53,
+        ContaoSetList::ANNOTATIONS_TO_ATTRIBUTES,
+        ContaoSetList::FQCN,
+    ])
+    ->withComposerBased(symfony: true);

@@ -24,7 +24,6 @@ return ECSConfig::configure()
         __DIR__ . '/contao/templates',
     ])
     ->withPreparedSets(
-        symplify: true,
         psr12: true,
         common: true,
     );

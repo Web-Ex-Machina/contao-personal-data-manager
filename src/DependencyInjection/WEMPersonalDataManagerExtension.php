@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
@@ -31,15 +38,17 @@ class WEMPersonalDataManagerExtension extends Extension implements PrependExtens
     public function prepend(ContainerBuilder $container): void
     {
         foreach ($container->getExtensionConfig('wem_utils') as $config) {
-            if (!empty($config['encryption_key'])) {
+            if (! empty($config['encryption_key'])) {
                 return;
             }
         }
 
         $encryptionKey = $this->getLegacyEncryptionKey((string) $container->getParameter('kernel.project_dir'));
 
-        if (null !== $encryptionKey) {
-            $container->prependExtensionConfig('wem_utils', ['encryption_key' => $encryptionKey]);
+        if ($encryptionKey !== null) {
+            $container->prependExtensionConfig('wem_utils', [
+                'encryption_key' => $encryptionKey,
+            ]);
         }
     }
 
@@ -47,7 +56,7 @@ class WEMPersonalDataManagerExtension extends Extension implements PrependExtens
     {
         $localConfig = $projectDir . '/system/config/localconfig.php';
 
-        if (!file_exists($localConfig)) {
+        if (! file_exists($localConfig)) {
             return null;
         }
 
@@ -57,13 +66,13 @@ class WEMPersonalDataManagerExtension extends Extension implements PrependExtens
             include $localConfig;
             $encryptionKey = $GLOBALS['TL_CONFIG'][self::LEGACY_ENCRYPTION_KEY] ?? null;
         } finally {
-            if (null === $backup) {
+            if ($backup === null) {
                 unset($GLOBALS['TL_CONFIG']);
             } else {
                 $GLOBALS['TL_CONFIG'] = $backup;
             }
         }
 
-        return \is_string($encryptionKey) && '' !== $encryptionKey ? $encryptionKey : null;
+        return \is_string($encryptionKey) && $encryptionKey !== '' ? $encryptionKey : null;
     }
 }

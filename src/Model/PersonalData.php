@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Model;
 
 use Contao\Model\Collection;
@@ -36,7 +43,9 @@ class PersonalData extends Model
      */
     public static function findByPtable(string $ptable): Collection|null
     {
-        return static::findItems(['ptable' => $ptable]);
+        return static::findItems([
+            'ptable' => $ptable,
+        ]);
     }
 
     /**
@@ -44,7 +53,10 @@ class PersonalData extends Model
      */
     public static function findByPidAndPtable(int $pid, string $ptable): Collection|null
     {
-        return static::findItems(['pid' => $pid, 'ptable' => $ptable]);
+        return static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+        ]);
     }
 
     /**
@@ -52,7 +64,11 @@ class PersonalData extends Model
      */
     public static function findOneByPidAndPtableAndField(int $pid, string $ptable, string $field): self|null
     {
-        return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'field' => $field], 1)?->current();
+        return self::findOne(static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+            'field' => $field,
+        ], 1));
     }
 
     /**
@@ -60,7 +76,11 @@ class PersonalData extends Model
      */
     public static function findByPidAndPtableAndEmail(int $pid, string $ptable, string $email): Collection|null
     {
-        return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email]);
+        return static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+            'email' => $email,
+        ]);
     }
 
     /**
@@ -68,7 +88,11 @@ class PersonalData extends Model
      */
     public static function findOneByPidAndPtableAndEmail(int $pid, string $ptable, string $email): self|null
     {
-        return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email], 1)?->current();
+        return self::findOne(static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+            'email' => $email,
+        ], 1));
     }
 
     /**
@@ -76,7 +100,12 @@ class PersonalData extends Model
      */
     public static function findOneByPidAndPtableAndEmailAndField(int $pid, string $ptable, string $email, string $field): self|null
     {
-        return static::findItems(['pid' => $pid, 'ptable' => $ptable, 'email' => $email, 'field' => $field], 1)?->current();
+        return self::findOne(static::findItems([
+            'pid' => $pid,
+            'ptable' => $ptable,
+            'email' => $email,
+            'field' => $field,
+        ], 1));
     }
 
     /**
@@ -84,7 +113,9 @@ class PersonalData extends Model
      */
     public static function findByEmail(string $email, int $limit = 0, int $offset = 0, array $options = []): Collection|null
     {
-        return static::findItems(['email' => $email], $limit, $offset, $options);
+        return static::findItems([
+            'email' => $email,
+        ], $limit, $offset, $options);
     }
 
     /**
@@ -136,7 +167,7 @@ class PersonalData extends Model
     {
         $item = self::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
 
-        if (!$item instanceof self) {
+        if (! $item instanceof self) {
             return [];
         }
 
@@ -159,5 +190,12 @@ class PersonalData extends Model
         }
 
         return $ids;
+    }
+
+    private static function findOne(Collection|null $items): self|null
+    {
+        $item = $items?->current();
+
+        return $item instanceof self ? $item : null;
     }
 }

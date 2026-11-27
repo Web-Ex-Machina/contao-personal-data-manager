@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Dca\Field\Callback;
 
 use Contao\DataContainer;
@@ -40,7 +47,7 @@ class Load
      */
     public function invokeBackend(mixed $value, DataContainer $dc): mixed
     {
-        if (!$dc->id || null === $record = $dc->getCurrentRecord()) {
+        if (! $dc->id || null === $record = $dc->getCurrentRecord()) {
             return $value;
         }
 
@@ -61,11 +68,11 @@ class Load
      */
     public function invokeFrontend(mixed $value, FrontendUser $user, Module $module): mixed
     {
-        if ('' === $this->frontendField) {
+        if ($this->frontendField === '') {
             throw new \Exception('No frontend field configured');
         }
 
-        if ('' === $this->table) {
+        if ($this->table === '') {
             throw new \Exception('No table configured');
         }
 

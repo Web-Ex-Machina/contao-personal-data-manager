@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Service;
 
 use Contao\File;
@@ -28,7 +35,7 @@ class PersonalDataManager
         private readonly PersonalDataManagerCsvFormatter $csvFormatter,
         private readonly Encryption $encryption,
         private readonly RequestStack $requestStack,
-        #[Autowire('%kernel.project_dir%')]
+        #[Autowire(param: 'kernel.project_dir')]
         private readonly string $projectDir,
     ) {
     }
@@ -229,7 +236,7 @@ class PersonalDataManager
             $pdm = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $pdm);
         }
 
-        if (!$pdm instanceof PersonalDataModel) {
+        if (! $pdm instanceof PersonalDataModel) {
             return null;
         }
 
@@ -245,7 +252,7 @@ class PersonalDataManager
     {
         $personalData = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
 
-        if (!$personalData instanceof PersonalDataModel) {
+        if (! $personalData instanceof PersonalDataModel) {
             return null;
         }
 
@@ -314,7 +321,7 @@ class PersonalDataManager
         $pdm->field = $field;
 
         // If the data is anonymized and the value did not change, keep it anonymized
-        if (!$pdm->anonymized || (string) $value !== (string) $pdm->value) {
+        if (! $pdm->anonymized || (string) $value !== (string) $pdm->value) {
             if (\is_array($value)) {
                 $pdm->altered = 'serialized';
                 $value = serialize($value);
@@ -345,7 +352,7 @@ class PersonalDataManager
             $objFile = $this->getFileByPidAndPtableAndEmailAndField((int) $personalData->pid, $personalData->ptable, $personalData->email, $personalData->field);
         }
 
-        $anonymizedValue = (new $originalModel())->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
+        $anonymizedValue = new $originalModel()->getPersonalDataFieldsAnonymizedValueForField($personalData->field);
         $value = $this->getCleanValue($personalData);
 
         $personalData->value = (string) $anonymizedValue;
@@ -385,11 +392,11 @@ class PersonalDataManager
     {
         $pdm = PersonalDataModel::findOneByPidAndPtableAndEmailAndField($pid, $ptable, $email, $field);
 
-        if (!$pdm instanceof PersonalDataModel) {
+        if (! $pdm instanceof PersonalDataModel) {
             throw new \Exception('Unable to find personal data');
         }
 
-        if (!$this->isPersonalDataLinkedToFile($pdm)) {
+        if (! $this->isPersonalDataLinkedToFile($pdm)) {
             throw new \Exception('Personal data not linked to a file');
         }
 
@@ -408,7 +415,7 @@ class PersonalDataManager
             $objFileModel = System::importStatic($callback[0])->{$callback[1]}($pid, $ptable, $email, $field, $pdm, $value, $objFileModel);
         }
 
-        if (!$objFileModel instanceof FilesModel) {
+        if (! $objFileModel instanceof FilesModel) {
             throw new \Exception('Unable to find the file');
         }
 
@@ -460,7 +467,7 @@ class PersonalDataManager
     {
         $obj = PersonalDataAccessTokenModel::findOneBy('token', $token);
 
-        if (!$obj instanceof PersonalDataAccessTokenModel || !$obj->isValid()) {
+        if (! $obj instanceof PersonalDataAccessTokenModel || ! $obj->isValid()) {
             throw new \Exception('The token is invalid');
         }
 
@@ -497,11 +504,11 @@ class PersonalDataManager
      */
     public function validateObject(mixed $object): void
     {
-        if (!$object instanceof Model) {
+        if (! $object instanceof Model) {
             throw new \InvalidArgumentException('The object is not a Contao Model.');
         }
 
-        if (!\in_array(PersonalDataTrait::class, class_uses($object), true)) {
+        if (! \in_array(PersonalDataTrait::class, class_uses($object), true)) {
             throw new \InvalidArgumentException('The object does not use the "PersonalDataTrait".');
         }
     }
@@ -517,8 +524,10 @@ class PersonalDataManager
 
         $value = $this->encryption->decrypt_b64($data->value);
 
-        if ('serialized' === $data->altered) {
-            return unserialize($value, ['allowed_classes' => false]);
+        if ($data->altered === 'serialized') {
+            return unserialize($value, [
+                'allowed_classes' => false,
+            ]);
         }
 
         return $value;
@@ -531,7 +540,7 @@ class PersonalDataManager
      */
     private function anonymizeCollection(Collection|null $pdms): array|null
     {
-        if (!$pdms instanceof Collection) {
+        if (! $pdms instanceof Collection) {
             return null;
         }
 
@@ -554,13 +563,13 @@ class PersonalDataManager
     {
         $zipName = tempnam(sys_get_temp_dir(), 'wem_pdm_');
 
-        if (false === $zipName) {
+        if ($zipName === false) {
             throw new \Exception('Unable to create zip archive');
         }
 
         $zip = new \ZipArchive();
 
-        if (true !== $zip->open($zipName, \ZipArchive::OVERWRITE)) {
+        if ($zip->open($zipName, \ZipArchive::OVERWRITE) !== true) {
             throw new \Exception('Unable to create zip archive');
         }
 
@@ -582,7 +591,7 @@ class PersonalDataManager
     private function addAllLinkedFilesToZipArchive(\ZipArchive $zip, Collection $pdms): void
     {
         foreach ($pdms as $pdm) {
-            if (!$this->isPersonalDataLinkedToFile($pdm)) {
+            if (! $this->isPersonalDataLinkedToFile($pdm)) {
                 continue;
             }
 

@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * Personal Data Manager for Contao Open Source CMS
+ * @author     Web Ex Machina
+ * @see        https://github.com/Web-Ex-Machina/contao-personal-data-manager
+ * @license    https://www.gnu.org/licenses/lgpl+gpl-3.0.txt
+ */
+
 namespace WEM\PersonalDataManagerBundle\Dca\Config\Callback;
 
 use Contao\DataContainer;
@@ -23,7 +30,7 @@ class Show
      */
     public function __invoke(array $modalData, array $data, DataContainer $dc): array
     {
-        if (!$dc->id) {
+        if (! $dc->id) {
             return $modalData;
         }
 
@@ -33,7 +40,7 @@ class Show
         foreach ($modalData as $table => $rows) {
             foreach ($rows as $index => $row) {
                 foreach (array_keys($row) as $label) {
-                    if (!preg_match('/(.*)<small>(.*)<\/small>/', (string) $label, $matches)) {
+                    if (! preg_match('/(.*)<small>(.*)<\/small>/', (string) $label, $matches)) {
                         continue;
                     }
 
